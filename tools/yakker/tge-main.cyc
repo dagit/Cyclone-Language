@@ -37,7 +37,7 @@ int main(int argc, const char ?`H?argv) {
       backend = 0;
     }
   }else {
-    fprintf(stderr,"No backend specified. Defaulting to cyclone backend.\n");
+    fprintf(stderr,"Defaulting to cyclone backend.\n");
     backend = 0;
   }
   if (argi < argc){

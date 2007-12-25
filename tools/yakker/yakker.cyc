@@ -167,6 +167,9 @@ static const char ?add_namespace = NULL;
 "         -earley-gen-cyc <regexp>   Generate a cyclone-encoded DFA of the regexp.\n"\
 "         -earley-gen-haxe <regexp>   Generate a haxe-encoded DFA of the regexp.\n"\
 "         -earley-gen-fsm <regexp>   Generate an FSM-encoded DFA of the regexp.\n"\
+"         -earley-gen-grm-fsm    Generate an FSM-encoded DFA of the grammar.\n"\
+"         -earley-gen-grm-cyc    Generate an cyclone-encoded DFA of the grammar.\n"\
+"         -earley-gen-grm-dot    Generate an dot-encoded DFA of the grammar.\n"\
 "         -help                  print this message\n"
 
 static void die() {
@@ -181,6 +184,15 @@ void mkTemp(char @pattern) {
     exit(1);
   }
 }
+
+enum earley_grm_gen {
+  EARLEY_GEN_GRM_NONE = 0,
+  EARLEY_GEN_GRM_FSM,  
+  EARLEY_GEN_GRM_CYC,  
+  EARLEY_GEN_GRM_DOT  
+};
+
+typedef enum earley_grm_gen earley_grm_gen_t;
 
 int main(int argc, const char ?`H?argv) {
   list_t<const char ?@> files = NULL;
@@ -211,6 +223,8 @@ int main(int argc, const char ?`H?argv) {
   int mode = FILE_MODE;
   const char ?escape_chars = NULL;
   const char ?earley_regexp = NULL;
+  
+  earley_grm_gen_t earley_grmp = EARLEY_GEN_GRM_NONE;
 
   // 0 (default) = is to parse entire stdin, non-weighted
   // 1 = parse line-by-line, non-weighted
@@ -323,6 +337,9 @@ int main(int argc, const char ?`H?argv) {
       earley_regexp = argv[i+1];
       i += 1;
     }
+    else if (strcmp("-earley-gen-grm-fsm",argv[i]) == 0) earley_grmp = EARLEY_GEN_GRM_FSM;
+    else if (strcmp("-earley-gen-grm-cyc",argv[i]) == 0) earley_grmp = EARLEY_GEN_GRM_CYC;
+    else if (strcmp("-earley-gen-grm-dot",argv[i]) == 0) earley_grmp = EARLEY_GEN_GRM_DOT;
     else if (strcmp("-gen-header",argv[i]) == 0) generate_header = 1;
     else if (strcmp("-gen-crawl-header",argv[i]) == 0) crawl_header = 1;
     else if (strcmp("-help",argv[i]) == 0) die();
@@ -830,37 +847,37 @@ int main(int argc, const char ?`H?argv) {
       remove(f1); remove(f2); remove(f3);
 
       let filename = aprintf("/dev/stdout");
-      switch (earley_mode){
+      switch (earley_mode) {
       case 5:
-				// TODO: assume regexp is a symbol for now
-				Earley::dfa2dot(*p_dfa,*p_symb_info,filename);
-				break;
+        // TODO: assume regexp is a symbol for now
+        Earley::dfa2dot(*p_dfa,*p_symb_info,filename);
+        break;
       case 6:
-				FILE *f = fopen(filename,"w");
-				if (f) {
-					fprintf(f,
-							"#include \"semiring.h\"\n\n"
-                                            "namespace CycDFA;\n\n"
-							"typedef unsigned int act_t;\n"
-							"typedef unsigned int st_t;\n");
-					Earley::act2symb_cyclone(f,*p_symb_info);
-					dfa_cyclone(f,*p_dfa);
-					fclose(f);
-				}
-				else fprintf(stderr, "Failed to open file %s.\n",filename);
-				break;
+        FILE *f = fopen(filename,"w");
+        if (f) {
+          fprintf(f,
+              "#include \"semiring.h\"\n\n"
+              "namespace CycDFA;\n\n"
+              "typedef unsigned int act_t;\n"
+              "typedef unsigned int st_t;\n");
+          Earley::act2symb_cyclone(f,*p_symb_info);
+          dfa_cyclone(f,*p_dfa);
+          fclose(f);
+        }
+        else fprintf(stderr, "Failed to open file %s.\n",filename);
+        break;
       case 7:
-				FILE *f = fopen(filename,"w");
-				if (f) {
-					Earley::act2symb_haxe(f,*p_symb_info);
-					dfa_haxe(f,*p_dfa);
-					fclose(f);
-				}
-				else fprintf(stderr, "Failed to open file %s.\n",filename);
-				break;
-      default:
-				fprintf(stderr,"Invalid DFA format.\n");
-			}
+        FILE *f = fopen(filename,"w");
+        if (f) {
+          Earley::act2symb_haxe(f,*p_symb_info);
+          dfa_haxe(f,*p_dfa);
+          fclose(f);
+        }
+        else fprintf(stderr, "Failed to open file %s.\n",filename);
+        break;
+        default:
+        fprintf(stderr,"Invalid DFA format.\n");
+      }
       break;
     case 2:
     default:
@@ -1000,114 +1017,6 @@ int main(int argc, const char ?`H?argv) {
 	  if (valid) printf("Parse tree saved.\n");
 	  fflush(stdout);
 
-// 	} else if (!strcmp(cmd, "repeat-parse")){
-
-// 	  if (!p_dfa || !p_dfa_final){
-// 	    fprintf(stderr, "Need to compile DFA first.\n");
-// 	    continue;
-// 	  }
-
-// 	  // Read file name
-// 	  scanf("%s",arg);
-
-// 	  // Check for options
-// 	  let show_progress = 0;
-// 	  if (!strcmp(arg,"--show-prog")){
-// 	    show_progress = 1;
-// 	    scanf("%s",arg);
-// 	  }
-
-// 	  // Read the file
-// 	  printf("Earley parsing %s one message at a time ... \n",arg); 
-// 	  FILE *fp = fopen(arg,"r");
-// 	  if (!fp){
-// 	    fprintf(stderr,"Bad file name.\n");
-// 	    continue;
-// 	  }
-// 	  let b = Buffer::create(101);
-// 	  let is_valid = 1;
-// 	  while ( (c = fgetc(fp)) != EOF){
-// 	    if (c == '\r'){
-// 	      do{
-// 		Buffer::add_char(b,'\r');
-// 		c = fgetc(fp);
-// 	      } while (c == '\r');
-// 	      if (c == '\n'){
-// 		Buffer::add_char(b,c);
-// 		let msg = Buffer::contents(b);
-// 		Buffer::clear(b);
-
-// 		// Parse the message
-// 		let $(msg_valid,_) = 
-// 		  Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,msg, show_progress);
-// 		is_valid = is_valid && msg_valid;
-// 		continue;
-// 	      }
-// 	    }
-// 	    Buffer::add_char(b,c);
-// 	  }
-
-// 	  printf("done -- is valid string :%d.\n",is_valid);
-// 	  fflush(stdout);
-// 	  fclose(fp);
-// 	  printf("File read complete.\n"); 
-// 	} else if (!strcmp(cmd, "parse-tg")){
-	  
-// 	  char input_dfa_n[200]@zeroterm={for i<199:0};
-
-// 	  if (!p_dfa || !p_dfa_final){
-// 	    fprintf(stderr, "Need to compile DFA first.\n");
-// 	    continue;
-// 	  }
-
-	  
-// 	  // Read the input dfa name, and input file name.
-// 	  scanf("%s %s", input_dfa_n,arg);
-
-// 	  ////////////////////////////////////////
-// 	  // LOAD input DFA.
-// 	  let r = Earley::fsm2dfa(filename);
-// 	  if (!r){
-// 	    fprintf(stderr,"Failed to reconstruct input DFA.\n");
-// 	    continue;
-// 	  }
-// 	  let $(input_dfa,input_dfa_final,input_symb_info) = *r;
-
-// 	  ////////////////////////////////////////
-
-// 	  // Check for options
-// 	  let show_progress = 0;
-// 	  if (!strcmp(arg,"--show-prog")){
-// 	    show_progress = 1;
-// 	    scanf("%s",arg);
-// 	  }
-
-// 	  // Convert existing parse tree into pattern
-// 	  let format_pat = p_my_server_session(Earley::last_derivation_tree, buffer);
-
-// 	  // Read the input file
-// 	  printf("Earley TG parsing %s ... \n",arg); 
-// 	  FILE *fp = fopen(arg,"r");
-// 	  if (!fp){
-// 	    fprintf(stderr,"Bad file name.\n");
-// 	    continue;
-// 	  }
-// 	  let b = Buffer::create(101);
-// 	  while ( (c = fgetc(fp)) != EOF)
-// 	    Buffer::add_char(b,c);
-// 	  fclose(fp);
-// 	  printf("File read complete.\n"); 
-
-// 	  // Parse the input file based on the pattern
-// 	  earley_parse_with_pat(input, format_pat, 
-// 				input_dfa, input_symb_info);
-
-// 	  let $(valid,valid_prefix) = 
-// 	    Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), show_progress);
-// 	  printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
-// 	  if (valid) printf("Parse tree saved.\n");
-// 	  fflush(stdout);
-
   	} else if (!strcmp(cmd,"amb?")){
 
 	  let is_amb = Earley::isAmb_parse_tree(Earley::last_derivation_tree);
@@ -1138,6 +1047,81 @@ int main(int argc, const char ?`H?argv) {
       }
       break;
     }
+    return 0;
+  }
+  
+    if (earley_grmp != EARLEY_GEN_GRM_NONE){
+    switch (earley_grmp) {
+    case EARLEY_GEN_GRM_NONE:
+      break; // do nothing.
+    case EARLEY_GEN_GRM_FSM:
+      /* Convert grammar to weighted NFA */
+      char f1[]@zeroterm = "f1-XXXXXX";
+      char f2[]@zeroterm = "f2-XXXXXX";
+      mkTemp(f1);
+      mkTemp(f2);
+      Earley::grammar_fsm(f1,f2,ds);
+  
+      /* Run FSM */
+      let cmd = aprintf("fsmcompile -i %s %s | "
+          "fsmrmepsilon | "
+          "fsmdeterminize | "
+          "fsmprint -i %s",
+          f2,f1,f2);
+      if (system(cmd) != 0) {
+        fprintf(stderr,"Error: fsm failed\n");
+        remove(f1); remove(f2);
+        exit(1);
+      }
+      break;
+    case EARLEY_GEN_GRM_DOT:
+      dfa_t *p_dfa = NULL;
+      Earley::symb_info_t *p_symb_info = NULL;
+      Set::set_t<st_t> *p_dfa_final = NULL;
+  
+      /* Convert grammar to weighted NFA */
+      char f1[]@zeroterm = "f1-XXXXXX";
+      char f2[]@zeroterm = "f2-XXXXXX";
+      char f3[]@zeroterm = "f3-XXXXXX";
+      mkTemp(f1);
+      mkTemp(f2);
+      mkTemp(f3);
+  
+      debugprint(1,"starting grammar_fsm(%s,%s)...",f1,f2);
+      Earley::grammar_fsm(f1,f2,ds);
+      debugprint(1,"done\n");
+  
+      /* Run FSM */
+      debugprint(1,"starting fsm > %s ...",f3);
+      let cmd = aprintf("fsmcompile -i %s %s | "
+          "fsmrmepsilon | "
+          "fsmdeterminize | "
+          "fsmprint -i %s > %s",
+          f2,f1,f2,f3);
+      if (system(cmd) != 0) {
+        fprintf(stderr,"Error: fsm failed\n");
+        remove(f1); remove(f2); remove(f3);
+        exit(1);
+      }
+      debugprint(1,"done\n");
+  
+      let r = Earley::fsm2dfa(f3);
+      if (!r) {
+        fprintf(stderr,"Failed to reconstruct DFA.\n");
+        remove(f1); remove(f2); remove(f3);
+        exit(1);
+      }
+  
+      remove(f1); remove(f2); remove(f3);
+      let $(dfa,_,symb_info) = *r;
+      let filename = aprintf("/dev/stdout");
+      Earley::dfa2dot(dfa,symb_info,filename);
+      break;
+    default:
+      fprintf(stderr,"Error: grammar DFA output format not supported.\n");
+      return 1;
+    }
+    
     return 0;
   }
   

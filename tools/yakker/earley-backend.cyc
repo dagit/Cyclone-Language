@@ -175,6 +175,7 @@ struct elink {
   earley_node_t      pred;
   Semiring::weight_t p_weight; // predecessor weight
   earley_node_opt_t  retn;
+  act_t              cause_act; // action responsible for link.
 };
 typedef struct elink @`H elink_t;
 
@@ -248,7 +249,7 @@ get_bounds(Hashtable::table_t<earley_node_t, list_t<elink_t>,`H> links,
 
     // Search all predecessor paths
     for (let xs = *maybe_links; xs; xs = xs->tl) {
-      let &elink(pred_link,_,retn_link) = xs->hd;
+      let &elink(pred_link,_,retn_link,_) = xs->hd;
 
       if (retn_link) {
         let &$(x,i,j) = (_@)retn_link;
@@ -295,7 +296,8 @@ push_closure(rstate_t rs,
     // instead of an earley item for
     // efficiency sake (to save allocations).
     earley_node_opt_t back,
-    earley_node_opt_t up
+    earley_node_opt_t up,
+    act_t resp_act // action responsible for transition.
     , weight_t forward, weight_t inner //PROB
 ) {
 
@@ -303,7 +305,7 @@ push_closure(rstate_t rs,
   let node = new $(s,backptr,i);
   add_weights(rs,node,forward,inner); //PROB
   if (back != NULL) {
-    point_to(rs->links,node,new elink(back,inner,up));
+    point_to(rs->links,node,new elink(back,inner,up, resp_act));
   }
 
   let es = Axarray::get(rs->estates,i);
@@ -311,7 +313,7 @@ push_closure(rstate_t rs,
     // XXX: is it okay to return if the weight has changed???
     return;
   }
-//  fprintf(stderr,"estates[%d] += (%d,%d)\n",i,ei->f0,ei->f1);fflush(stderr);
+  fprintf(stderr,"estates[%d] += (%d,%d)\n",i,ei->f0,ei->f1);fflush(stderr);
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS. We don't use the weight here. */
@@ -336,7 +338,7 @@ push_closure(rstate_t rs,
           let &$(node_forward,node_inner) = Hashtable::lookup(rs->weights,node); //PROB
           let w_m = mult(inner, final_w);
           push_closure(rs,input,i,new $(starget,backptr),
-              node, causal_node
+              node, causal_node, symb_act
               ,mult( w_m, node_forward), //PROB
               mult( w_m, node_inner) //PROB
           );
@@ -349,7 +351,7 @@ push_closure(rstate_t rs,
           let &$(node_forward,node_inner) = Hashtable::lookup(rs->weights,node); //PROB
           let w_m = mult(inner, final_w);
           push_closure(rs,input,i,new $(ttarget,i),
-              node, causal_node
+              node, causal_node, symb_act
               ,mult( w_m, node_forward), //PROB
               mult( w_m, node_inner) //PROB
           );
@@ -365,7 +367,7 @@ push_closure(rstate_t rs,
     }
 #endif
     
-    push_closure(rs,input,i,new $(t,i),NULL,NULL
+    push_closure(rs,input,i,new $(t,i),NULL,NULL, /* bogus action: */ 0
         ,forward,Semiring::one_weight //PROB
     );
   } /* End, Close under CALLS. */
@@ -380,14 +382,14 @@ push_closure(rstate_t rs,
       remove_repeat_count(rs,s);
       let t = DFA_TRANS(rs->dfa,s,repeat_final_action());
       /* Call push_closure again as if we started in this
-   state. ie. t replaces s. So, we reuse back and up. */
-      push_closure(rs,input,i,new $(t,backptr),back,up
+   state. ie. t replaces s. So, we reuse back, up and resp_act. */
+      push_closure(rs,input,i,new $(t,backptr),back,up, resp_act
        ,forward,inner //PROB
        );
       return;
     }
     // If non zero, continue as in call
-    push_closure(rs,input,i,new $(t,i),NULL,NULL
+    push_closure(rs,input,i,new $(t,i),NULL,NULL, /* bogus action: */ 0
      ,forward,Semiring::one_weight //PROB
                  );
   }
@@ -427,8 +429,8 @@ push_closure(rstate_t rs,
     set_repeat_count(rs,t_new,num);
 
     /* 3. Call push_closure again as if we started in this
-       state. ie. t_new replaces s. So, we reuse back and up. */
-    push_closure(rs,input,i,new $(t_new,backptr),back,up
+       state. ie. t_new replaces s. So, we reuse back, up and resp_act. */
+    push_closure(rs,input,i,new $(t_new,backptr),back,up,resp_act
                  ,forward,inner //PROB
                  );
   }
@@ -468,8 +470,8 @@ push_closure(rstate_t rs,
           let &$(backnode_forward,backnode_inner) = 
             Hashtable::lookup(rs->weights,backnode); //PROB
           let w_m = mult(inner, final_w);
-          push_closure(rs,input,i,new $(ttarget,tbackptr),
-          backnode, node
+          push_closure(rs,input,i,new $(ttarget,tbackptr), 
+          backnode, node, symb_act
           ,mult( w_m, backnode_forward), //PROB
           mult( w_m, backnode_inner) //PROB
           );
@@ -484,7 +486,8 @@ using EarleyParsetree;
 shared_parse_tree_t
 mk_parse_forest(rstate_t rs,
      string_t input,
-     earley_node_t en);
+     earley_node_t en,
+     act_t resp_act);
 
 // List::List_t<parse_forest_t> prefix_all(parse_tree_t,List::List_t<parse_forest_t>);
 // imperative update of fs.
@@ -505,11 +508,11 @@ mk_parse_branches(rstate_t rs,
 
     // Compute all derivations.
     for (let xs = *maybe_links; xs; xs = xs->tl) {
-      let &elink(pred_link,w,retn_link) = xs->hd;
+      let &elink(pred_link,w,retn_link,resp_act) = xs->hd;
 
       let pred_derivations = mk_parse_branches(rs, input, pred_link);
       if (retn_link) {
-        let child_tree = mk_parse_forest(rs, input, retn_link);
+        let child_tree = mk_parse_forest(rs, input, retn_link, resp_act);
         // prefix all forests of pred_derivations with child_tree.
         prefix_all_imp(child_tree, pred_derivations);
       }
@@ -540,21 +543,28 @@ mk_parse_branches(rstate_t rs,
 shared_parse_tree_t
 mk_parse_forest(rstate_t rs,
      string_t input,
-     earley_node_t en) {
+     earley_node_t en,
+     act_t resp_act) {
   
   let &$(x,i,j) = en;
-  const char? name = "TOP";
-  let completed = DFA_FINAL_ATTRS(rs->dfa,x);
-  if (!completed){
-    fprintf(stderr,"State %d is not a final state.\n",x);
-    exit(1);
-  }
 
-  if (numelts(completed) > 0) {
-    // pick any attribute (we choose the first)
-    // TODO: use *all* attributes.
-    let attr = completed[0];
-    name = DFA_ACT2SYMB(rs->dfa,attr);
+  // Sanity check
+  if (debug){
+    if (!DFA_IN_FINAL(rs->dfa,resp_act,x)){
+      fprintf(stderr,"Action %s is not an attribute of state %d.\n",DFA_ACT2SYMB(rs->dfa,resp_act),x);
+    }
+  }
+  
+  string_t name = DFA_ACT2SYMB(rs->dfa,resp_act);
+
+  // Handle case of top-level call, for which there will be no responsible action.
+  let completed = DFA_FINAL_ATTRS(rs->dfa,x);
+  // Sanity check
+  if (!completed){
+    throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
+  }
+  if (numelts(completed) == 0) {
+    name = "TOP";
   }
 
   shared_parse_tree_t tree;
@@ -589,28 +599,30 @@ parse_tree_t
 mk_parse_tree(rstate_t rs,
      string_t input,
      string_t<`H> top_level_name,
-     earley_node_t en) {
+     earley_node_t en,
+     act_t resp_act) {
   // map: early_node_t -> parse_tree_t
   let trees = Hashtable::create(11,earley_node_cmp,earley_node_hash);
   
   let &$(x,i,j) = en;
-//  string_t<`H> name;
-  let name;
-  let completed = DFA_FINAL_ATTRS(rs->dfa,x);
-  if (!completed){
-    throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
+  
+  // Sanity check
+  if (debug){
+    if (!DFA_IN_FINAL(rs->dfa,resp_act,x)){
+      fprintf(stderr,"Action %s is not an attribute of state %d.\n",DFA_ACT2SYMB(rs->dfa,resp_act),x);
+    }
   }
 
+  string_t name = DFA_ACT2SYMB(rs->dfa,resp_act);
+  // Handle case of top-level call, for which there will be no responsible action.
+  let completed = DFA_FINAL_ATTRS(rs->dfa,x);
+  if (!completed){ // Sanity check
+    throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
+  }
   if (numelts(completed) == 0) {
     if (top_level_name == NULL)
       throw new Core::Failure(aprintf("Final DFA state encountered unexpectedly in (%d,%d,%d).",x,i,j));
     name = top_level_name;
-  }
-  else {
-    // pick any attribute (we choose the first)
-    // TODO: use *all* attributes.
-    let attr = completed[0];
-    name = DFA_ACT2SYMB(rs->dfa,attr);
   }
 
   // reconstruct trees of children (i.e. RHS).
@@ -626,14 +638,15 @@ mk_parse_tree(rstate_t rs,
       if (debug)
         fprintf(stderr,"Earley graph is ambiguous for symbol %s at substring [%d,%d). Choosing first derivation.\n",name,i,j);
 #endif
+      //links=links->tl;
     }
-    let &elink(pred_link, w, retn_link) = links->hd;
+    let &elink(pred_link, w, retn_link, resp_act) = links->hd;
 
     if (retn_link) {
       let retn_tree_opt = Hashtable::lookup_opt(trees,retn_link);
       let retn_tree;
       if (!retn_tree_opt){
-        retn_tree = mk_parse_tree(rs, input, NULL, retn_link);
+        retn_tree = mk_parse_tree(rs, input, NULL, retn_link, resp_act);
         Hashtable::insert(trees,retn_link,retn_tree);
       } else
         retn_tree = *retn_tree_opt;
@@ -649,8 +662,42 @@ mk_parse_tree(rstate_t rs,
   return new parse_tree(name,i,j,w_forward, List::to_array( children_trees ));
 }
 
+/////////////////////////////////////////
+// Print the earley graph in dot format
+///////////////////////////////////////////
 
+static void dot_pred_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts) {
+  let &$(si,sj,sk) = s;
+  for (; ts; ts = ts->tl) {
+    let &$(ti,tj,tk) = ts->hd->pred;
+    printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
+    printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
+  }
+}
 
+static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts) {
+  let &$(si,sj,sk) = s;
+  for (; ts; ts = ts->tl) {
+    let r = ts->hd->retn;
+    if (r != NULL){
+      let &$(ti,tj,tk) = r;
+      printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
+      printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
+    }
+  }
+}
+
+static void rstate_dot(rstate_t rs) {
+  printf("digraph g {\n");
+  printf("edge [style=dotted]\n");
+  Hashtable::iter(dot_pred_iter,rs->links);
+  printf("edge [style=bold]\n");
+  Hashtable::iter(dot_retn_iter,rs->links);
+//  Hashtable::iter(dot_iter,rs->call);
+  printf("}\n");
+}
+
+/////////////////////////////////////////////////
 
 $(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int) 
 parse(DFA::edfa_t dfa, const char? input) {
@@ -676,7 +723,7 @@ parse(DFA::edfa_t dfa, const char? input) {
       input,
       0,
       earley_item_0,
-      NULL,NULL
+      NULL,NULL, /* bogus action: */ 0
       ,Semiring::one_weight,Semiring::one_weight //PROB
   );
   
@@ -699,7 +746,7 @@ parse(DFA::edfa_t dfa, const char? input) {
         let causal_node = new $(t,i,i);
         let w_m = final_w;
         push_closure(rs,input,i,new $(ttarget,i),
-            causal_node, causal_node
+            causal_node, causal_node, symb_act
             ,w_m, w_m //PROB
         );
       } 
@@ -718,6 +765,7 @@ parse(DFA::edfa_t dfa, const char? input) {
   let live = 1;
   for (i = 0; live && i < input_len; i++) {
     live = 0; // reset for this round.
+    fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     for (let si_list = Set::to_list(Axarray::get(estates,i));
         si_list != NULL;
         si_list = si_list->tl) {
@@ -730,7 +778,7 @@ parse(DFA::edfa_t dfa, const char? input) {
 
         let enode = new $(state,parent,i);
         let &$(forward,inner) = Hashtable::lookup(rs->weights,enode);
-        push_closure(rs,input,i+1,new $(k,parent),enode,NULL
+        push_closure(rs,input,i+1,new $(k,parent),enode,NULL, input[i]
             ,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
         );
       }
@@ -742,6 +790,7 @@ parse(DFA::edfa_t dfa, const char? input) {
     exit(1);
   } else {
     fprintf(stderr, "No parse errors detected. Searching for final states.\n");
+    rstate_dot(rs);
   }
   /* See if we ended up in a final state */
   let partial_parses = 0;
@@ -758,7 +807,7 @@ parse(DFA::edfa_t dfa, const char? input) {
         if (do_reconstruct) {
           let en = new $(state,parent /*== 0*/,input_len);
           try{
-            let derivation_tree = mk_parse_tree(rs,input,"TOP LEVEL",en);
+            let derivation_tree = mk_parse_tree(rs,input,"TOP LEVEL",en, /* bogus action: */ 0);
             let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
             trees = new List::List(new $(derivation_tree,w_forward),trees);
           } catch {

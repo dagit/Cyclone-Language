@@ -319,10 +319,12 @@ void gen0(rule_t r, grammar_t grm) {
           printf("let %s = ", r->v);
         } else {
           printf("let __GEN__left = children[0]->left;\n"
-                 "let __GEN__right = children[0]->right;\n");
+                  "let __GEN__right = children[0]->right;\n");
         }
-      break;
+        break;
       default:
+        printf("let __GEN__left = i;\n"
+               "let __GEN__right = j;\n");
         break;
       }
     }
@@ -352,12 +354,14 @@ void gen0(rule_t r, grammar_t grm) {
     //     } else 
 
     // Check whether its a "real" symbol, or a flattened one.
-    if (Flatten::is_flattened_symb(x)) {
+    // Note that flattened symbols with return types are treated as "real" symbols.
+    if ( Flatten::is_flattened_symb(x) && !Set::member(semvalue_symbs, new x) ) {
       let r_opt = lookup_symbol(grm, x);
       if (!r_opt)
         internal_err("Missing definition of symbol %s.\n", x);
       else {
         // inline code for r
+        printf("/* inlining %s */\n",x);
         printf("{\nlet &EarleyParsetree::parse_tree(name,i,j,w,children) = children[0];\n");
         gen0(r_opt, grm);
         printf("}\n");
@@ -535,6 +539,8 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs
 
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,a) = x->hd;
+    if ( !a.rettype && Flatten::is_flattened_symb(n) )
+      continue; 
     if (a.rettype) {
       printf("%s ",a.rettype);
     } else
@@ -599,12 +605,13 @@ unsigned int eof_val
     printf("namespace %s {\n\n",cyc_namespace);
   }
 
-  /* Print forward definitions of pseudo-parsing functions */
+  /* Print forward definitions of pseudo-parsing functions 
+   * and build semvalue_symbs table. */
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,a) = x->hd;
     
-    if (Flatten::is_flattened_symb(n) )
-      continue;
+    if ( !a.rettype && Flatten::is_flattened_symb(n) )
+      continue; 
     
     if (a.rettype) {
       printf("%s ",a.rettype);
@@ -642,7 +649,7 @@ unsigned int eof_val
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,a) = x->hd;
     
-    if (Flatten::is_flattened_symb(n) )
+    if ( !a.rettype && Flatten::is_flattened_symb(n) )
       continue;
     
     if (a.rettype)

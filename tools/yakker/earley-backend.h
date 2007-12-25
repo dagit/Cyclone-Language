@@ -24,7 +24,7 @@ extern DFA::edfa_t init_dfa();
 #undef USE_FSM_DFA
 
 #define USE_EXT_DFA
-namespace EarleyExtBackend {
+namespace EarleyExtFsmBackend {
 #include "earley-backend-priv.h"
 }
 #undef USE_EXT_DFA

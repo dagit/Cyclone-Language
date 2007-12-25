@@ -61,11 +61,11 @@ ps_list ast2string0(ps_list ps, rule_pat_t p){
     // SymbPats are deprecated
     throw new Pat_exception;
   case &LitPat(x):
-    return new List(new x), ps);
+    return new List(new x, ps);
   case &CharPat(x):
-    const char ? s = calloc(2,sizeof(char));
+    char ? s = calloc(2,sizeof(char));
     s[0] = x;
-    return new List(new s, ps);
+    return new List(new (string_t)s, ps);
   case &SeqPat(p1,p2):
     let ps1 = pat2string0(ps,p1);
     let ps_sp = new List(new " ",ps1);
@@ -197,7 +197,7 @@ static const char ?unescape_lit(const char ?`H s){
   let n = strlen(s); // use strlen instead of numelts, as the latter can include padding.
 
   // at most, we'll need n+1 chars for the unescaped string.
-  char ?@notnull s_un = malloc((n + 1)* sizeof(char)); 
+  char ?@notnull s_un = calloc(n + 1, sizeof(char)); 
   int i,j;
   for (i = 0, j = 0; i < n; i++, j++){
     if (s[i] == escape_char) {

@@ -16,3 +16,6 @@ start = "a "{printf("a ");} expr.
 ; LETTERA = "A".
 ; expr = expr "+" expr | expr "*" expr | number | "{" number$number "}" @repeat(number)LETTERA.
 ; start = "a " expr.
+{
+grammar_t parse_string(char ?s) {return NULL;}
+}

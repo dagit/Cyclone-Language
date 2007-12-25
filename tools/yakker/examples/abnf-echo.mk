@@ -8,6 +8,8 @@ abnf-lookahead.cyc: examples/abnf-echo.bnf
 	./yakker -no-main -gen rulelist $< > $@
 
 # Targets for stand-alone abnf-echo program.
+abnf-echo: abnf-echo.o $(LIB_YAKKER)
+	$(CYCLONE) -o $@ $^  -lssl -lcrypto
 
 abnf-echo.cyc: examples/abnf-echo.bnf
 	./yakker -gen rulelist $< > $@
@@ -16,11 +18,14 @@ abnf-echo.cyc: examples/abnf-echo.bnf
 ## Earley version
 ################################
 
-AE_CR_FILES = abnf-flat-dfa aecrawl
-AE_CR_OBJS:=$(foreach yfile,$(AE_CR_FILES),$(yfile).o)
+AE_FILES = abnf-flat-dfa aecrawl
+AE_OBJS:=$(foreach yfile,$(AE_FILES),$(yfile).o)
 
 abnf-flat-dfa.cyc: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-cyc rulelist $< > $@
+
+abnf-flat-dfa.txt: examples/abnf-echo.bnf yakker
+	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
 
 # Targets for abnf-echo lib.
 
@@ -28,6 +33,9 @@ abnf-earley.cyc: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -gen-crawl rulelist $< > $@
 
 # Targets for stand-alone abnf-echo program.
+
+abnf-echo-earley: $(AE_OBJS) $(LIB_YAKKER)
+	$(CYCLONE) -o $@ $(AE_OBJS) -lssl -lm $(LIB_YAKKER)
 
 aecrawl.cyc: examples/abnf-echo.bnf yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl rulelist $< > $@

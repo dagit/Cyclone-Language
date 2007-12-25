@@ -77,7 +77,7 @@ EBE_CYC_FILES = earley-backend-c
 EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
 EBE_DFA_FILES = earley-backend-i
 EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
-EBE_EXT_FILES = earley-backend-e ext-dfa
+EBE_EXT_FILES = earley-backend-e ext-dfa pm_bnf funtable
 EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
 
 #######################################
@@ -137,21 +137,8 @@ earley-backend-e.o: earley-backend.cyc
 	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_EXT_DFA $< 
 
 include examples/abnf-echo.mk
-
-abnf-echo: abnf-echo.o $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $^  -lssl -lcrypto
-
-#abnf-echo: abnf-echo.o bnf.o cs.o pr.o util.o ykbuf.o ssl.o
-#	$(CYCLONE) -o $@ $^  -lssl -lcrypto
-
-abnf-echo-earley: $(AE_CR_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $(AE_CR_OBJS) -lssl -lm $(LIB_YAKKER)
-
-abnf-echo-dfa.txt: examples/abnf-echo.bnf yakker
-	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
-
+include examples/calc.mk
 # Broken: need to be fixed:
-#include examples/calc.mk
 #include examples/indexer.mk
 
 #####################################

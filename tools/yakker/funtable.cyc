@@ -33,8 +33,9 @@ void insert(table_t ft, const char ?`H name, parse_fun f){
 }
 
 parse_fun lookup(table_t ft, const char ?`H name){
-  int foo(int x){return x+1;}
-  let y = foo(2);
+// The following (useless) code trips a cyclone bug.
+  //  int foo(int x){return x+1;}
+  //  let y = foo(2);
   return (Hashtable::lookup(ft, new name))<>;
 }
 

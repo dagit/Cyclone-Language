@@ -1085,8 +1085,11 @@ void grammar_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm) {
 
   FILE *f = fopen(fsm_file,"w");
   if (f) { 
-    // N.B. MUST ensure that start state is printed first.
     let start_s = nfa_fresh_state();
+    // N.B. MUST ensure that start state is printed first.
+    // Print transition to dummy state. weight doesn't matter b/c
+    // determinization will eliminate this transition.
+    etrans_fsm(f,start_s,NOTRANSITION,Semiring::zero_weight);
 
     for (let ds = grm; ds; ds = ds->tl){
       let &$(n,r,_) = ds->hd;

@@ -1,6 +1,7 @@
 #include <string.h>
 #include <hashtable.h>
 
+#include "pm_bnf.h"
 #include "semiring.h"
 #include "earley.h"
 #include "dfa.h"

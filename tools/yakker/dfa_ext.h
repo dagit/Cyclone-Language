@@ -3,6 +3,7 @@
 
 #include <core.h>
 #include "fa.h"
+#include "pm_bnf.h"
 
 namespace ExtDFA{
 
