@@ -371,10 +371,11 @@ parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs,
   parse_with_pat0(ykb,parse_funs,p,args);
 }
 
-void
+int
 crawl_with_pat0(rule_pat_t p, EarleyParsetree::parse_tree_t ? children, 
     string_t ykinput,
     strptr_array<`r1,`r2> args) {
+  int num_scanned = 0;
   
   let pats = List::list(p);
   while (pats) {
@@ -389,6 +390,7 @@ crawl_with_pat0(rule_pat_t p, EarleyParsetree::parse_tree_t ? children,
       args++;
       children++;
       pats = pats->tl;
+      num_scanned++;
       break;
     case &LitPat(_):
     case &CharPat(_):
@@ -402,13 +404,15 @@ crawl_with_pat0(rule_pat_t p, EarleyParsetree::parse_tree_t ? children,
     }
 
   }
+  
+  return num_scanned;
 }
 
-void
+int
 crawl_with_pat(rule_pat_t p, EarleyParsetree::parse_tree_t pt, string_t ykinput,
     strptr_array<`r1,`r2> args){
   let &EarleyParsetree::parse_tree(name,i,j,w,children) = pt;
-  crawl_with_pat0(p,children,ykinput,args);
+  return crawl_with_pat0(p,children,ykinput,args);
 }
 
 //   switch (p) {

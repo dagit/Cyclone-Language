@@ -84,7 +84,7 @@ EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o)
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf ssl
+LIB_YAKKER_FILES = ykbuf ssl tge-scanf
 LIB_YAKKER_OBJS := $(EBE_OBJS) $(EBE_CYC_OBJS) $(EBE_DFA_OBJS) $(EBE_EXT_OBJS) \
                    $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 

@@ -1,0 +1,68 @@
+#include <core.h>
+#include <stdio.h>
+#include "earley-parsetree.h"
+#include "earley-backend.h"
+#include "dfa.h"
+#include "pm_bnf.h"
+
+#include "tge-scanf.h"
+
+static struct EarleyFsmBackend::DFA::grammar_edfa *grammar = NULL;
+
+static EarleyFsmBackend::DFA::grammar_edfa_t 
+get_grammar(){
+  if (!grammar){
+    // fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
+    let gr_edfa = FsmDFA::fsm2grm_edfa("grammar_dfa.txt");
+    grammar = gr_edfa;
+    return gr_edfa;
+  } else 
+    return grammar;
+}
+
+
+//int internal_scanf (EarleyCycBackend::DFA:edfa_t dfa_rep,
+//                    ykbuf_t@ ykb_source, ykbuf_t@ ykb_fmt, const char?`H @ ?args){
+int internal_scanf (EarleyCycBackend::DFA::edfa_t dfa_rep, fmt_crawl_fun fmt_crawl,
+    string_t input, string_t format_string, string_t<`H> @ ?args){
+
+  let $(trees, valid, valid_prefix) = EarleyCycBackend::parse(dfa_rep,format_string); 
+  if (!valid) { 
+    return 0;
+  }
+  
+//  if (trees->tl) {
+//    fprintf(stderr,"Ambiguous parse. Choosing first derivation.\n");
+//  }
+
+  // "tree" encodes top-level regexp, but we want to crawl starting from symbol
+  // with regexp.
+  let child_tree = trees->hd->f0->children[0];
+  let rule_pat = fmt_crawl(child_tree, format_string);
+
+//  fprintf(stderr,"Parsed pattern %s.\n",pat2string(rule_pat));
+
+  let gr_edfa = get_grammar(); 
+  let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
+
+//  ExtDFA::dfa_dot(ext_edfa);
+  
+//  fprintf(stderr,"Parsing input.\n");
+  
+  let $(input_trees, input_valid, input_valid_prefix) = EarleyExtFsmBackend::parse(ext_edfa,input);
+  if (!input_valid) {
+    return 0;
+  }
+  
+//  fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", input_valid,
+//      input_valid_prefix);
+//  if (input_trees->tl) {
+//    fprintf(stderr,"Ambiguous parse. Choosing first derivation.\n");
+//  }
+//  if (do_print_input) {
+//    EarleyParsetree::print_tree(input_trees->hd->f0,input_print_depth);
+//    printf("\n");
+//  }
+
+  return crawl_with_pat(rule_pat, input_trees->hd->f0, input, args);
+}

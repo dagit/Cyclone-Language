@@ -63,7 +63,8 @@ typedef const char?`H @`r1 ?`r2 strptr_array<`r1,`r2>;
 extern void
 parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs, rule_pat_t p, strptr_array<`r1,`r2> args);
 
-extern void
+// Returns the number of arguments scanned.
+extern int
 crawl_with_pat(rule_pat_t p, EarleyParsetree::parse_tree_t pt, string_t ykinput,
     strptr_array<`r1,`r2> args);
 #endif

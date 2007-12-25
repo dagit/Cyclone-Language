@@ -52,6 +52,18 @@ calc-tg-run.cyc: gen/calc-tg.bnf yakker tge-main.cyc
 	echo '#define TGFUN p_start' >> $@
 	echo '#include "tge-main.cyc"' >> $@
 
+calc-scanf.cyc: gen/calc-tg.bnf yakker
+	./yakker $(YAKFLAGS) -gen-crawl start \
+                             -flatten-full \
+                             -no-minus-elim \
+                             -no-globals \
+                             $< > $@
+	echo '#include "tge-scanf.h"' >> $@
+	echo 'int start_scanf(string_t input, const char ?fmt, ...const char?`H @ args){' >> $@
+	echo '  let dfa_rep = EarleyCycBackend::init_dfa();' >> $@
+	echo '  return internal_scanf(dfa_rep, p_start<>,input,fmt,args);' >> $@
+	echo '}' >> $@
+
 gen/calc-tg.bnf: examples/calc.bnf yakker
 	./yakker -escape "\\%()" -flatten-full -bindgrammar -termgrammar_bnf $< > $@
 
