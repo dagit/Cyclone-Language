@@ -175,7 +175,7 @@ struct elink {
   earley_node_t      pred;
   Semiring::weight_t p_weight; // predecessor weight
   earley_node_opt_t  retn;
-  act_t              cause_act; // action responsible for link.
+  act_t              resp_act; // action responsible for link.
 };
 typedef struct elink @`H elink_t;
 
@@ -666,23 +666,25 @@ mk_parse_tree(rstate_t rs,
 // Print the earley graph in dot format
 ///////////////////////////////////////////
 
-static void dot_pred_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts) {
+static void dot_pred_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts, rstate_t rs) {
   let &$(si,sj,sk) = s;
   for (; ts; ts = ts->tl) {
     let &$(ti,tj,tk) = ts->hd->pred;
     printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
-    printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
+    printf("\"(%d,%d,%d)\"",ti,tj,tk);
+    printf(" [ label = \"%s\" ];\n",DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
   }
 }
 
-static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts) {
+static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts, rstate_t rs) {
   let &$(si,sj,sk) = s;
   for (; ts; ts = ts->tl) {
     let r = ts->hd->retn;
     if (r != NULL){
       let &$(ti,tj,tk) = r;
       printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
-      printf("\"(%d,%d,%d)\";\n",ti,tj,tk);
+      printf("\"(%d,%d,%d)\"",ti,tj,tk);
+      printf(" [ label = \"%s\" ];\n",DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
     }
   }
 }
@@ -690,9 +692,9 @@ static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts)
 static void rstate_dot(rstate_t rs) {
   printf("digraph g {\n");
   printf("edge [style=dotted]\n");
-  Hashtable::iter(dot_pred_iter,rs->links);
+  Hashtable::iter_c(dot_pred_iter,rs->links,rs);
   printf("edge [style=bold]\n");
-  Hashtable::iter(dot_retn_iter,rs->links);
+  Hashtable::iter_c(dot_retn_iter,rs->links,rs);
 //  Hashtable::iter(dot_iter,rs->call);
   printf("}\n");
 }
