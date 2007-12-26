@@ -26,6 +26,31 @@ DFA::edfa_t init_dfa() {
 }
 }
 
+namespace CycDFA {
+act_t symb2act(string_t<`H> symb){
+  for (int i=0; i<numelts(symbol_table); i++)
+    if (strcmp(symbol_table[i].f0, symb) == 0) return symbol_table[i].f1;
+  throw new Core::Not_found;
+}
+// Get the start state for the specified symbol-action.
+st_t grm_get_symb_start(EarleyCycBackend::DFA::grammar_edfa_t dfa, act_t symb_act){
+  return Axarray::get(dfa->symb_start_states,symb_act - MIN_ACTION);
+}
+
+EarleyCycBackend::DFA::grammar_edfa_t cyc2grm_edfa(){
+  let start_states = Axarray::create(100, (st_t)0);
+  act_t a = MIN_ACTION;
+  for(st_t t = transitions(1,a).f0; 
+      t != 0; 
+      t = transitions(1,++a).f0)
+  {
+    Axarray::set(start_states,a - MIN_ACTION, t);
+  }
+  return new EarleyCycBackend::DFA::grammar_edfa(start_states);
+}
+
+}
+
 #elif defined(USE_FSM_DFA)
 
 namespace FsmDFA {
@@ -125,6 +150,10 @@ namespace EarleyFsmBackend;
 #elif defined(USE_EXT_DFA)
 
 namespace EarleyExtFsmBackend;
+
+#elif defined(USE_EXT_CYC_DFA)
+
+namespace EarleyExtCycBackend;
 
 #else
 #error "No DFA implementation specified."

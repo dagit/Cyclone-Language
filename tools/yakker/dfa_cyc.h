@@ -11,6 +11,12 @@ extern $(st_t,Semiring::weight_t) transitions(st_t,act_t);
 extern act_t ?attributes(st_t);
 extern $(int,Semiring::weight_t) is_final(st_t);
 extern string_t act2symb(act_t a);
+extern const unsigned int num_dfa_states;
+extern $(const char ?, act_t) ?@notnull symbol_table;
+
+// implemented in earley-backend.cyc
+extern act_t symb2act(string_t<`H> symb);
+extern st_t grm_get_symb_start(EarleyCycBackend::DFA::grammar_edfa_t dfa, act_t symb_act);
 }
 
 static int array_find(act_t ?arr,act_t a){
@@ -36,10 +42,10 @@ static int array_find(act_t ?arr,act_t a){
 #define DFA_GET_START(dfa) 1
 #define DFA_ACT2SYMB(dfa,a) CycDFA::act2symb(a)
 
-// TODO: Need to implement
-#define GRM_DFA_GET_SYMB_ACTION(dfa,symb) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_ACTION unimplemented.\n");exit(1);0;})
-#define GRM_DFA_GET_SYMB_START(dfa,a) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_START unimplemented.\n");exit(1);0;})
-#define GRM_DFA_GET_NUM_STATES(dfa) ({fprintf(stderr,"Failure: GRM_DFA_GET_NUM_STATES unimplemented.\n");exit(1);0;})
-#define GRM_DFA_GET_DFA(dfa,start) ({fprintf(stderr,"Failure: GRM_DFA_GET_DFA unimplemented.\n");exit(1);0;})
+// Throws Not_found if symbol is not valid.
+#define GRM_DFA_GET_SYMB_ACTION(dfa,symb) CycDFA::symb2act(symb)
+#define GRM_DFA_GET_SYMB_START(dfa,a) CycDFA::grm_get_symb_start(dfa,a)
+#define GRM_DFA_GET_NUM_STATES(dfa) (CycDFA::num_dfa_states)
+#define GRM_DFA_GET_DFA(dfa,start) 0
 
 #endif /*DFA_CYC_H_*/

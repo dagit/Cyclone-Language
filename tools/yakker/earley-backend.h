@@ -29,5 +29,10 @@ namespace EarleyExtFsmBackend {
 }
 #undef USE_EXT_DFA
 
+#define USE_EXT_CYC_DFA
+namespace EarleyExtCycBackend {
+#include "earley-backend-priv.h"
+}
+#undef USE_EXT_CYC_DFA
 
 #endif /*EARLEYBACKEND_H_*/

@@ -234,17 +234,25 @@ const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
 void act2symb_cyclone(FILE @f, symb_info_t si) {
     fprintf(f,"const char ?act2symb(act_t a) {\n");
     fprintf(f,"  switch (a) {\n");
-  for (let a = repeat_action()+1; a < si->symb_action_counter; a++) {
+  for (let a = MIN_ACTION; a < si->symb_action_counter; a++) {
     fprintf(f,"  case %d: return \"%s\";\n",a,act2symb(a,si->action_symb_table));
   }
     fprintf(f,"  default: return \"?unknown?\";\n");
     fprintf(f,"  }\n");
     fprintf(f,"}\n");
 }
+void symbol_table_cyclone(FILE @f, symb_info_t si) {
+  fprintf(f,"$(const char ?, act_t) symbol_table[] = {");
+  fprintf(f,"\n  $(\"%s\", %d)",act2symb(MIN_ACTION,si->action_symb_table), MIN_ACTION);
+  for (let a = MIN_ACTION+1; a < si->symb_action_counter; a++) {
+    fprintf(f,",\n  $(\"%s\", %d)",act2symb(a,si->action_symb_table),a);
+  }
+  fprintf(f,"};\n");
+}
 void act2symb_haxe(FILE @f, symb_info_t si) {
     fprintf(f,"static public function act2symb(a:Int) {\n");
     fprintf(f,"  switch (a) {\n");
-  for (let a = repeat_action()+1; a < si->symb_action_counter; a++) {
+  for (let a = MIN_ACTION; a < si->symb_action_counter; a++) {
     fprintf(f,"  case %d: return \"%s\";\n",a,act2symb(a,si->action_symb_table));
   }
     fprintf(f,"  default: return \"?unknown?\";\n");

@@ -928,6 +928,9 @@ void print_final(st_t s,Semiring::weight_t @w,FILE@ f){
 /* Print the dfa as a cyclone datastructure. */
 void dfa_cyclone(FILE @f, dfa_t dfa) {
   let len = dfa->number_of_states;
+  
+  printf("const unsigned int num_dfa_states = %d;\n",len);
+  
   /* print final attributes */
   for (let i = 1; i < len; i++) {
     if (!Set::member(dfa->final_states,i)) continue;

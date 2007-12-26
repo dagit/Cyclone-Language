@@ -77,15 +77,17 @@ EBE_CYC_FILES = earley-backend-c
 EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
 EBE_DFA_FILES = earley-backend-i
 EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
-EBE_EXT_FILES = earley-backend-e ext-dfa pm_bnf funtable
+EBE_EXT_FILES = earley-backend-e ext-dfa 
 EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
+EBE_EXT_CYC_FILES = earley-backend-ec ext-cyc-dfa
+EBE_EXT_CYC_OBJS := $(foreach file,$(EBE_EXT_CYC_FILES),$(file).o) 
 
 #######################################
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf ssl tge-scanf
-LIB_YAKKER_OBJS := $(EBE_OBJS) $(EBE_CYC_OBJS) $(EBE_DFA_OBJS) $(EBE_EXT_OBJS) \
+LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable
+LIB_YAKKER_OBJS := $(EBE_OBJS) $(EBE_CYC_OBJS) $(EBE_DFA_OBJS) $(EBE_EXT_OBJS) $(EBE_EXT_CYC_OBJS) \
                    $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
 ###############################################################################
@@ -135,6 +137,9 @@ earley-backend-i.o: earley-backend.cyc
 
 earley-backend-e.o: earley-backend.cyc
 	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_EXT_DFA $< 
+
+earley-backend-ec.o: earley-backend.cyc
+	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_EXT_CYC_DFA $< 
 
 include examples/abnf-echo.mk
 include examples/calc.mk

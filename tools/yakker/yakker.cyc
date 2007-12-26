@@ -861,6 +861,7 @@ int main(int argc, const char ?`H?argv) {
               "typedef unsigned int act_t;\n"
               "typedef unsigned int st_t;\n");
           Earley::act2symb_cyclone(f,*p_symb_info);
+          Earley::symbol_table_cyclone(f,*p_symb_info);
           dfa_cyclone(f,*p_dfa);
           fclose(f);
         }
@@ -964,6 +965,7 @@ int main(int argc, const char ?`H?argv) {
                       "typedef unsigned int act_t;\n"
                       "typedef unsigned int st_t;\n");
               Earley::act2symb_cyclone(f,*p_symb_info);
+              Earley::symbol_table_cyclone(f,*p_symb_info);
               dfa_cyclone(f,*p_dfa);
               fclose(f); 
             }
@@ -1116,6 +1118,55 @@ int main(int argc, const char ?`H?argv) {
       let $(dfa,_,symb_info) = *r;
       let filename = aprintf("/dev/stdout");
       Earley::dfa2dot(dfa,symb_info,filename);
+      break;
+    case EARLEY_GEN_GRM_CYC:
+      dfa_t *p_dfa = NULL;
+      Earley::symb_info_t *p_symb_info = NULL;
+      Set::set_t<st_t> *p_dfa_final = NULL;
+  
+      /* Convert grammar to weighted NFA */
+      char f1[]@zeroterm = "f1-XXXXXX";
+      char f2[]@zeroterm = "f2-XXXXXX";
+      char f3[]@zeroterm = "f3-XXXXXX";
+      mkTemp(f1);
+      mkTemp(f2);
+      mkTemp(f3);
+  
+      debugprint(1,"starting grammar_fsm(%s,%s)...",f1,f2);
+      Earley::grammar_fsm(f1,f2,ds);
+      debugprint(1,"done\n");
+  
+      /* Run FSM */
+      debugprint(1,"starting fsm > %s ...",f3);
+      let cmd = aprintf("fsmcompile -i %s %s | "
+          "fsmrmepsilon | "
+          "fsmdeterminize | "
+          "fsmprint -i %s > %s",
+          f2,f1,f2,f3);
+      if (system(cmd) != 0) {
+        fprintf(stderr,"Error: fsm failed\n");
+        remove(f1); remove(f2); remove(f3);
+        exit(1);
+      }
+      debugprint(1,"done\n");
+  
+      let r = Earley::fsm2dfa(f3);
+      if (!r) {
+        fprintf(stderr,"Failed to reconstruct DFA.\n");
+        remove(f1); remove(f2); remove(f3);
+        exit(1);
+      }
+  
+      remove(f1); remove(f2); remove(f3);
+      let $(dfa,_,symb_info) = *r;
+      fprintf(stdout,
+            "#include \"semiring.h\"\n\n"
+            "namespace CycDFA;\n\n"
+            "typedef unsigned int act_t;\n"
+            "typedef unsigned int st_t;\n");
+      Earley::act2symb_cyclone(stdout,symb_info);
+      Earley::symbol_table_cyclone(stdout,symb_info);
+      dfa_cyclone(stdout,dfa);
       break;
     default:
       fprintf(stderr,"Error: grammar DFA output format not supported.\n");

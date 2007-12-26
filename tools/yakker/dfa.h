@@ -29,8 +29,16 @@
 namespace EarleyCycBackend{
 namespace DFA {
   typedef int edfa_t;
-  typedef int grammar_edfa_t;
+  struct grammar_edfa {
+    Axarray::xarray_t<st_t> symb_start_states;
+  };
+
+  typedef struct grammar_edfa @grammar_edfa_t;
 }
+}
+
+namespace CycDFA {
+extern EarleyCycBackend::DFA::grammar_edfa_t cyc2grm_edfa();
 }
 
 namespace EarleyFsmBackend{
@@ -60,25 +68,30 @@ namespace FsmDFA {
 extern EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename);
 }
 
-namespace EarleyExtFsmBackend {
-namespace DFA {
-  struct edfa {
-    EarleyFsmBackend::DFA::edfa_t d;
-    st_t final; // final state of the DFA.
-    Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;
-  };
+#define EEB_DECLS(EXT_DFA_NAMESPACE, EB_NAMESPACE, EB_EXT_NAMESPACE)\
+namespace EB_EXT_NAMESPACE {\
+namespace DFA {\
+  struct edfa {\
+    EB_NAMESPACE::DFA::edfa_t d;\
+    st_t final; /* final state of the DFA.*/\
+    Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;\
+  };\
+\
+  typedef struct edfa@ edfa_t;\
+}\
+}\
+\
+namespace EXT_DFA_NAMESPACE{\
+/* build an extensible DFA from a grammar DFA.*/\
+extern EB_EXT_NAMESPACE::DFA::edfa_t \
+pat2dfa(rule_pat_t p, EB_NAMESPACE::DFA::grammar_edfa_t grm_dfa);\
+/* Print an extensible DFA to stderr. */\
+extern void dfa_dot(EB_EXT_NAMESPACE::DFA::edfa_t ed);\
+}\
+/* END EEB_DECLS*/  
 
-  typedef struct edfa@ edfa_t;
-}
-}
-
-namespace ExtDFA{
-// build an extensible DFA from a grammar DFA.
-extern EarleyExtFsmBackend::DFA::edfa_t 
-pat2dfa(rule_pat_t p, EarleyFsmBackend::DFA::grammar_edfa_t grm_dfa);
-// Print an extensible DFA to stderr.
-extern void dfa_dot(EarleyExtFsmBackend::DFA::edfa_t ed);
-}
+EEB_DECLS(ExtDFA,   EarleyFsmBackend, EarleyExtFsmBackend)
+EEB_DECLS(ExtCycDFA,EarleyCycBackend, EarleyExtCycBackend)
 
 #endif /*DFA_H_*/
 

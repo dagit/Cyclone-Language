@@ -5,11 +5,10 @@
 
 // Implementation of FSM-based DFA
 namespace FsmDFA {
-using EarleyFsmBackend;
-
 extern att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s);
 extern const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table);
 
+using EarleyFsmBackend;
 extern act_t grm_get_symb_action(DFA::grammar_edfa_t dfa, string_t<`H> symb);
 extern st_t grm_get_symb_start(DFA::grammar_edfa_t dfa, act_t symb_act);
 extern unsigned int grm_get_num_states(DFA::grammar_edfa_t dfa);

@@ -71,6 +71,8 @@ namespace Earley {
   extern void print_RT(datatype ParseTree @pt, int depth);
 
   extern void act2symb_cyclone(FILE @f, symb_info_t si);
+  extern void symbol_table_cyclone(FILE @f, symb_info_t si);
+
   extern void act2symb_haxe(FILE @f, symb_info_t si);
 
   extern int isAmb_parse_tree(datatype ParseTree @pt);
