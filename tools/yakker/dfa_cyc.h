@@ -13,6 +13,7 @@ extern $(int,Semiring::weight_t) is_final(st_t);
 extern string_t act2symb(act_t a);
 extern const unsigned int num_dfa_states;
 extern $(const char ?, act_t) ?@notnull symbol_table;
+extern $(act_t, act_t, st_t, st_t) get_repeat_info(st_t state);
 
 // implemented in earley-backend.cyc
 extern act_t symb2act(string_t<`H> symb);
@@ -30,10 +31,8 @@ static int array_find(act_t ?arr,act_t a){
 #define DFA_TRANS(dfa,s,a) ({let $(t,w) = CycDFA::transitions(s,a); t;})
 #define DFA_TRANS_W(dfa,s,a) (CycDFA::transitions(s,a))
 
-// TODO: Need to implement
-#define DFA_GET_REPEAT_ACT(dfa,s) ({fprintf(stderr,"Failure: DFA_GET_REPEAT_ACT unimplemented.\n");exit(1);0;})
-#define DFA_GET_REPEATEE_ACT(dfa,s) ({fprintf(stderr,"Failure: DFA_GET_REPEATEE_ACT unimplemented.\n");exit(1);0;})
-#define DFA_R_EXTEND(dfa,nt,nt_start,nt_final) ({fprintf(stderr,"Failure: DFA_GET_REPEATEE_ACT unimplemented.\n");exit(1);nt_final;})
+#define DFA_GET_REPEAT_INFO(dfa,s) CycDFA::get_repeat_info(s)
+#define DFA_R_EXTEND(dfa,nt,nt_start,nt_final) ({fprintf(stderr,"Failure: DFA_R_EXTEND unimplemented.\n");exit(1);nt_final;})
 
 #define DFA_IN_FINAL(dfa,nt,s) (array_find(CycDFA::attributes(s),nt) != -1)
 #define DFA_IS_FINAL(dfa,s) (CycDFA::is_final(s).f0)

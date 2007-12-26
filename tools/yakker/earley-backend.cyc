@@ -426,16 +426,15 @@ push_closure(rstate_t rs,
   /* Close under REPEATS. Only works if target has *one* non-call target. */  
   let t = DFA_TRANS(rs->dfa,s,repeat_action());
   if (t != 0) {
-    /* 1. Retrieve the number from the Earley parse trail.*/
+    /* 0. Get the parameters of the repeat: repeater, repeatee, repeatee start state, and 
+     *    follow state of the repeat. */
+    let $(rpter_act,rptee_act, rptee_start, repeat_follow) = DFA_GET_REPEAT_INFO(rs->dfa,t);
+    
+    /* 1. Retrieve the number from the Earley graph.*/
 
-    // Find the non-term to which repeat is bound.
-    // Note: after determinizing, possibly many calls from single
-    // state, but shouldn't be any terminals (is this true?). So, we
-    // will need to perform repeat for *all* nonterminals that appear.
-    let repeater_nt = DFA_GET_REPEAT_ACT(rs->dfa,t);
-    // get the bounds (inclusive) of parsed non-terminal nt from the
-    // Earley parse history.
-    let bounds_opt = get_bounds(rs->links, rs->dfa, node,repeater_nt);
+    // get the bounds (inclusive) of parsed repeater non-terminal (with action rpter_act) 
+    // from the Earley graph.
+    let bounds_opt = get_bounds(rs->links, rs->dfa, node,rpter_act);
     if (!bounds_opt){
       fprintf(stderr,"Error: bounds could not be found for non terminal.\n");
       return;
@@ -444,17 +443,7 @@ push_closure(rstate_t rs,
     let num = atoi(substring(input,j,k-j+1));
 
     /* 2. Build new DFA using retrieved number. */
-
-    // Find the action of the repeated symbol.
-    let s_repeatee = DFA_TRANS(rs->dfa,t,repeater_nt);
-    let repeatee_nt = DFA_GET_REPEATEE_ACT(rs->dfa, s_repeatee);
-
-    // Find the start state of the repeated DFA.
-    let nt_start = DFA_TRANS(rs->dfa,t,callout_action());
-    let nt_final = DFA_TRANS(rs->dfa,s_repeatee,repeatee_nt);
-
-    let t_new = DFA_R_EXTEND(rs->dfa,
-                           repeatee_nt,nt_start,nt_final);
+    let t_new = DFA_R_EXTEND(rs->dfa, rptee_act,rptee_start,repeat_follow);
     set_repeat_count(rs,t_new,num);
 
     /* 3. Call push_closure again as if we started in this

@@ -72,9 +72,10 @@ extern EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename);
 namespace EB_EXT_NAMESPACE {\
 namespace DFA {\
   struct edfa {\
+    Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;\
+    unsigned int number_of_states;\
     EB_NAMESPACE::DFA::edfa_t d;\
     st_t final; /* final state of the DFA.*/\
-    Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;\
   };\
 \
   typedef struct edfa@ edfa_t;\

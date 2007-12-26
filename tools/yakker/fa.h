@@ -57,7 +57,7 @@ st_t target(dfa_t dfa,st_t s,act_t a);
 // Returns: target state and transition weight, if yes; $(0,zero_weight) if no.
 $(st_t,Semiring::weight_t) target_w_weight(dfa_t dfa,st_t s,act_t a);
 
-extern act_t* first_action_after(dfa_t dfa,st_t s,act_t a);
+extern act_t* first_action_excl(dfa_t dfa,st_t s,act_t a);
 extern Set::set_t<st_t> dfa_final_states(dfa_t dfa);
 extern void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs);
 extern dfa_t nfa2dfa(st_t start_state, Set::set_t<st_t,`H> final_states);
@@ -98,6 +98,11 @@ extern void dfa_cyclone(FILE@,dfa_t);
 extern void dfa_haxe(FILE@,dfa_t);
 
 extern dfa_t dfa_minimize(dfa_t dfa);
+
+// Get the informatation necessary for constructing a repeat DFA.
+// Argument call_a is the action which transitions to the start state of the repeated DFA.
+extern $(act_t, act_t, st_t, st_t) dfa_get_repeat_info(dfa_t dfa, st_t rpt_s, act_t call_a);
+
 // Construct a repeat dfa: a series of n states each transitioning to
 // the given target state "target_s" on the "target" action. Each
 // state transitions to the next on action "next".

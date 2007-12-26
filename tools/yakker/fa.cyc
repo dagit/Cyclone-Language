@@ -674,9 +674,10 @@ List::list_t<$(act_t,st_t)@> dfa_get_trans_map(dfa_t dfa,st_t s) {
   return txs;
 }
 
-// Return pointer to first action not equal to a, for which there's a transition to a non-empty state.
+// Return pointer to first action not equal to a ("excl" = excluding), 
+// for which there's a transition to a non-empty state.
 // Return NULL if there is none.
-act_t* first_action_after(dfa_t dfa,st_t s,act_t a) {
+act_t* first_action_excl(dfa_t dfa,st_t s,act_t a) {
   let t = Axarray::get(dfa->states,s);
   if (!t) return NULL; /* target is the dead state */
 
@@ -929,7 +930,7 @@ void print_final(st_t s,Semiring::weight_t @w,FILE@ f){
 void dfa_cyclone(FILE @f, dfa_t dfa) {
   let len = dfa->number_of_states;
   
-  printf("const unsigned int num_dfa_states = %d;\n",len);
+  fprintf(f,"const unsigned int num_dfa_states = %d;\n",len);
   
   /* print final attributes */
   for (let i = 1; i < len; i++) {
@@ -2440,6 +2441,25 @@ dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt)
   return dfa;
 }
 
+$(act_t, act_t, st_t, st_t) dfa_get_repeat_info(dfa_t dfa, st_t s_rpt, act_t call_a) {
+    // Find the non-term to which repeat is bound.
+    // TODO: after determinizing, possibly many calls from single
+    // state, but shouldn't be any terminals (is this true?). So, we
+    // will need to perform repeat for *all* nonterminals that appear.
+    let rpter_act = *(first_action_excl(dfa, s_rpt, call_a));
+    
+    // Find the action of the repeated symbol.
+    let s_repeatee = target(dfa, s_rpt, rpter_act);
+    let rptee_act = * (first_action_excl(dfa, s_repeatee, 0));
+
+    // Find the start state of the repeated DFA.
+    let rptee_start = target(dfa,s_rpt,call_a);
+
+    // Get the follow state.
+    let repeat_follow = target(dfa, s_repeatee, rptee_act);
+    
+    return $(rpter_act, rptee_act, rptee_start, repeat_follow);
+}
 
 // Construct a repeat dfa: ...
 // The new  state is connected to the specified final state "f".
@@ -2458,7 +2478,7 @@ st_t construct_repeat_dfa(dfa_t dfa, act_t next,
   // everything b/w target_act and final_act.
   let pre_final_span = new span(NOTRANSITION,final_act,zero_weight);
   let final_span = new span(f,final_act+1,Semiring::one_weight);
-  // everything b/w target_act and next.
+  // everything b/w final_act and next.
   let pre_next_span = new span(NOTRANSITION,next,zero_weight);
   let next_span = new span(d,next+1,Semiring::from_inv_prob(2));
 

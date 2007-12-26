@@ -249,6 +249,29 @@ void symbol_table_cyclone(FILE @f, symb_info_t si) {
   }
   fprintf(f,"};\n");
 }
+void print_repeat_info($(dfa_t,FILE @) @env, st_t state){
+  let $(rpter_act, rptee_act, rptee_start, repeat_follow) = 
+    dfa_get_repeat_info(env->f0, state,callout_action());
+  fprintf(env->f1, "  case %d: return $(%d,%d,%d,%d);\n", 
+      state, rpter_act, rptee_act, rptee_start, repeat_follow);
+}
+void repeat_table_cyclone(FILE @f, dfa_t dfa){
+  let len = dfa_get_num_states(dfa);
+
+  /* Build set of repeat states. */
+  Set::set_t repeats = Set::empty(st_cmp);
+  for (let i = 1; i < len; i++) {
+    let t = target(dfa,i,repeat_action());
+    if (t) 
+      repeats = Set::insert(repeats, t);
+  }
+  
+  /* Print repeat table. */
+  let env = $(dfa,f);
+  fprintf(f,"$(act_t, act_t, st_t, st_t) get_repeat_info(st_t state){\n  switch (state) {\n");
+  Set::iter_c(print_repeat_info, &env, repeats);
+  fprintf(f,"  default: throw new Core::Not_found;\n  }\n}\n");
+}
 void act2symb_haxe(FILE @f, symb_info_t si) {
     fprintf(f,"static public function act2symb(a:Int) {\n");
     fprintf(f,"  switch (a) {\n");
@@ -1432,7 +1455,7 @@ push_closure(rstate_t rs,
       fprintf(stderr,"Looking for non-CALL transition.\n");
     fflush(stderr);
 
-    let nt_opt = first_action_after(rs->dfa,t,callout_action());
+    let nt_opt = first_action_excl(rs->dfa,t,callout_action());
     if (!nt_opt){
       fprintf(stderr,"Error: repeat state does not transition on non-call.\n");
       return;
@@ -1457,7 +1480,7 @@ push_closure(rstate_t rs,
 
     // Find the action of the repeated symbol.
     let s_repeatee = target(rs->dfa,t,repeater_nt);
-    let nt_opt = first_action_after(rs->dfa,s_repeatee,0);
+    let nt_opt = first_action_excl(rs->dfa,s_repeatee,0);
     if (!nt_opt){
       fprintf(stderr,"Error: repeatee state does not transition.\n");
       return;

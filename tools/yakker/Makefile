@@ -46,7 +46,6 @@ YAKKER_FILES = analyze axarray cs bnf extract semiring fa nfa_lazy nfa_eager \
   util namespaces earley \
   yakker
   
-FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
 
 # OBJS:=$(foreach yfile,$(YAKKER_FILES),build/$(yfile).o)
 OBJS:=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
@@ -55,6 +54,8 @@ OBJS:=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
 OBJS_PA=$(foreach yfile,$(YAKKER_FILES),$(yfile)_a.o)
 PROG_PA=$(PROG)_a
 
+FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
+ 
 DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
 
 define ARCHIVE
@@ -71,25 +72,29 @@ EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
   string_dfa_engine2_1 corerules corerules_grm \
   util namespaces earley earley-parsetree
 
-EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
 
 EBE_CYC_FILES = earley-backend-c
-EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
 EBE_DFA_FILES = earley-backend-i
-EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
 EBE_EXT_FILES = earley-backend-e ext-dfa 
-EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
 EBE_EXT_CYC_FILES = earley-backend-ec ext-cyc-dfa
+
+
+EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
+EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
+EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
+EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
 EBE_EXT_CYC_OBJS := $(foreach file,$(EBE_EXT_CYC_FILES),$(file).o) 
 
 #######################################
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable
-LIB_YAKKER_OBJS := $(EBE_OBJS) $(EBE_CYC_OBJS) $(EBE_DFA_OBJS) $(EBE_EXT_OBJS) $(EBE_EXT_CYC_OBJS) \
-                   $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
+LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable \
+    $(EBE_FILES) $(EBE_CYC_FILES) $(EBE_DFA_FILES) $(EBE_EXT_FILES) $(EBE_EXT_CYC_FILES)
+LIB_YAKKER_OBJS := $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
+LY_ONLY_FILES:=$(filter-out $(YAKKER_FILES), $(LIB_YAKKER_FILES))
+DEPENDS += $(foreach file,$(LY_ONLY_FILES),build/$(file).d)
 ###############################################################################
 # Targets
 ###############################################################################

@@ -72,6 +72,7 @@ namespace Earley {
 
   extern void act2symb_cyclone(FILE @f, symb_info_t si);
   extern void symbol_table_cyclone(FILE @f, symb_info_t si);
+  extern void repeat_table_cyclone(FILE @f, dfa_t dfa);
 
   extern void act2symb_haxe(FILE @f, symb_info_t si);
 

@@ -10,12 +10,15 @@
 
 namespace EXT_DFA_NAMESPACE;
 
+using EB_EXT_NAMESPACE;
+
 //////////////////////////////////
 // Internally-visible functions //
 //////////////////////////////////
 
+// Simplest strucuture needed for extending a DFA. 
+// DFA::edfa_t extends this structure with some more states used for executing DFA.
 struct ext_edfa {
-  EB_NAMESPACE::DFA::grammar_edfa_t grm_dfa;
   // Extensions to the transition function
   Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;
   unsigned int number_of_states;
@@ -26,11 +29,6 @@ typedef struct ext_edfa @ext_edfa_t;
 // Extension functions
 extern ext_edfa_t create_ext_edfa(EB_NAMESPACE::DFA::grammar_edfa_t gd);
 
-// Get the symbol-action for the specified symbol.
-extern act_t get_symb_action(ext_edfa_t ed, string_t<`H> symb);
-// Get the start state for the specified symbol-action.
-extern st_t get_symb_start(ext_edfa_t ed, act_t symb_act);
-
 extern void add_trans(ext_edfa_t ed, st_t s, act_t a, st_t f,
     Semiring::weight_t w);
 extern st_t fresh_state(ext_edfa_t ed);
@@ -39,7 +37,7 @@ extern st_t fresh_state(ext_edfa_t ed);
 // Convenience functions for extending the dfa in various ways.
 ////////
 
-extern st_t mk_call(ext_edfa_t ed, string_t<`H> symb, st_t final);
+extern st_t mk_call(ext_edfa_t ed, EB_NAMESPACE::DFA::grammar_edfa_t gd, string_t<`H> symb, st_t final);
 extern st_t mk_lit(ext_edfa_t ed, string_t lit, st_t final);
 extern st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final);
 
@@ -54,8 +52,7 @@ static int st_act_hash($(st_t,act_t) @sa) {
 }
 
 static ext_edfa_t create_ext_edfa(EB_NAMESPACE::DFA::grammar_edfa_t gd) {
-  return new ext_edfa(gd,
-      Hashtable::create(50,st_act_cmp,st_act_hash),
+  return new ext_edfa(Hashtable::create(50,st_act_cmp,st_act_hash),
       GRM_DFA_GET_NUM_STATES(gd));
 }
 
@@ -67,22 +64,13 @@ static st_t fresh_state(ext_edfa_t ed) {
   return ed->number_of_states++;
 }
 
-// Get the start state for the specified symbol-action.
-static st_t get_symb_start(ext_edfa_t ed, act_t symb_act) {
-  return GRM_DFA_GET_SYMB_START(ed->grm_dfa,symb_act);
-}
-
-static act_t get_symb_action(ext_edfa_t ed, string_t<`H> symb) {
-  return GRM_DFA_GET_SYMB_ACTION(ed->grm_dfa,symb);
-}
-
 #define CASE_INSENSITIVE 1
 
-static st_t mk_call(ext_edfa_t ed, string_t<`H> symb, st_t final) {
+static st_t mk_call(ext_edfa_t ed, EB_NAMESPACE::DFA::grammar_edfa_t gd, string_t<`H> symb, st_t final) {
   // get symbol action
-  let s_a = get_symb_action(ed, symb);
+  let s_a = GRM_DFA_GET_SYMB_ACTION(gd, symb);
   // get symbol start state
-  let start = get_symb_start(ed, s_a);
+  let start = GRM_DFA_GET_SYMB_START(gd, s_a);
   let s = fresh_state(ed);
   add_trans(ed, s, Earley::callout_action(), start, Semiring::zero_weight);
   add_trans(ed, s,s_a,final,Semiring::one_weight);
@@ -119,12 +107,9 @@ static st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final) {
   return s;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Externally-visible functions
 /////////////////////////////////
-
-using EB_EXT_NAMESPACE;
 
 st_t trans(DFA::edfa_t ed, st_t s, act_t a){
   let t = DFA_TRANS(ed->d,s,a);
@@ -172,6 +157,24 @@ string_t act_2_symb(DFA::edfa_t ed, act_t a){
   return DFA_ACT2SYMB(ed->d, a);
 }
 
+$(act_t, act_t, st_t, st_t) get_repeat_info(DFA::edfa_t ed, st_t state){
+  return DFA_GET_REPEAT_INFO(ed->d, state);
+}
+
+// Construct a repeat dfa: ...
+// The new  state is connected to the specified final state "f".
+st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next, 
+                          act_t target_act, st_t target_s, 
+                          act_t final_act, st_t final){
+  let s = fresh_state( (ext_edfa_t)ed );
+  // Transitions don't sum to one b/c we've really compacted many states into one.
+  add_trans( (ext_edfa_t)ed, s, target_act, target_s, Semiring::from_inv_prob(2));
+  add_trans( (ext_edfa_t)ed, s, final_act,  final,    Semiring::one_weight );
+  add_trans( (ext_edfa_t)ed, s, next,       s,        
+       Semiring::from_inv_prob(2));
+  return s;
+}
+
 static void dot_trans_iter($(st_t,act_t) @`H src, 
     $(st_t,Semiring::weight_t) @`H tgt,
     DFA::edfa_t ed){
@@ -189,7 +192,7 @@ void dfa_dot(DFA::edfa_t ed) {
   printf("}\n");
 }
 
-static st_t pat2dfa0(rule_pat_t p, ext_edfa_t ed, st_t final) {
+static st_t pat2dfa0(rule_pat_t p, ext_edfa_t ed, EB_NAMESPACE::DFA::grammar_edfa_t gd, st_t final) {
   switch (p) {
   case &SymbPat(x):
     fallthru(x);
@@ -197,21 +200,21 @@ static st_t pat2dfa0(rule_pat_t p, ext_edfa_t ed, st_t final) {
     // TODO: mk_call will need to somehow ensure that if this is executed, the data is bound.
     // This will need t o be done in a crawl because of ambiguity issues (e.g. you can start a 
     // path which doesn't complete, so don't want to bind until you know that path completed).
-    return mk_call(ed, x, final);
+    return mk_call(ed, gd, x, final);
   case &LitPat(x):
     return mk_lit(ed, x, final);
   case &CharPat(c):
     return mk_char(ed, c, final);
   case &SeqPat(p1, p2):
-    let s2 = pat2dfa0(p2, ed, final);
-    return pat2dfa0(p1, ed, s2);
+    let s2 = pat2dfa0(p2, ed, gd, final);
+    return pat2dfa0(p1, ed, gd, s2);
   }
 }
 
 DFA::edfa_t pat2dfa(rule_pat_t p, EB_NAMESPACE::DFA::grammar_edfa_t grm_dfa) {
   let ed = create_ext_edfa(grm_dfa);
   let final_state = fresh_state(ed);
-  let start_state = pat2dfa0(p, ed, final_state);
-  return new DFA::edfa(GRM_DFA_GET_DFA(grm_dfa,start_state), final_state, ed->trans_exts);
+  let start_state = pat2dfa0(p, ed, grm_dfa, final_state);
+  return new DFA::edfa(ed->trans_exts, ed->number_of_states, GRM_DFA_GET_DFA(grm_dfa,start_state), final_state);
 }
 
