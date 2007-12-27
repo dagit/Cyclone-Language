@@ -70,9 +70,9 @@ namespace Earley {
   /* Print right-most parse tree to depth of "depth". Use -1 to print entire tree. */
   extern void print_RT(datatype ParseTree @pt, int depth);
 
-  extern void act2symb_cyclone(FILE @f, symb_info_t si);
-  extern void symbol_table_cyclone(FILE @f, symb_info_t si);
-  extern void repeat_table_cyclone(FILE @f, dfa_t dfa);
+  // is_grm argument indicates whether to treat the dfa as encoding a grammar and, hence, print
+  // grammar-related decls.
+  extern void dfa2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info, string_t dfa_namespace, int is_grm);
 
   extern void act2symb_haxe(FILE @f, symb_info_t si);
 

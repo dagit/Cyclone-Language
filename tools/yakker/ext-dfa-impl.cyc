@@ -218,3 +218,9 @@ DFA::edfa_t pat2dfa(rule_pat_t p, EB_NAMESPACE::DFA::grammar_edfa_t grm_dfa) {
   return new DFA::edfa(ed->trans_exts, ed->number_of_states, GRM_DFA_GET_DFA(grm_dfa,start_state), final_state);
 }
 
+DEFINE_MK_ANY_EB(EB_EXT_NAMESPACE)
+//EarleyAnyBackend::DFA::edfa_t mk_any_eb(EB_EXT_NAMESPACE::DFA::edfa_t impl_dfa){
+//  return new EarleyAnyBackend::DFA::edfa(impl_dfa,
+//      trans, trans_w, in_final, is_final, final_weight, final_attrs, get_start, act_2_symb,
+//      get_repeat_info, construct_repeat_dfa);
+//}

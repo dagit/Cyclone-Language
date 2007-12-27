@@ -2,6 +2,11 @@
 #include <buffer.h>
 #include "earley-parsetree.h"
 #include "earley-backend.h"
+#include "dfa.h"
+
+#if !defined(CYC_DFA_NS)
+#error "Missing parameter to parse-main.cyc"
+#endif
 
 int main(int argc, const char ?`H?argv) {
   fprintf(stderr,"ABNF parsing stdin ... \n");
@@ -45,8 +50,8 @@ int main(int argc, const char ?`H?argv) {
 
   let $(trees, valid, valid_prefix) = 
   (backend == 0) ? ({
-    let dfa_rep = EarleyCycBackend::init_dfa();
-    EarleyCycBackend::parse(dfa_rep,input);
+    let dfa_obj = &CYC_DFA_NS::dfa_obj;
+    EarleyAnyBackend::parse(dfa_obj,format_string);
   }) : ({
     let dfa_rep = EarleyFsmBackend::init_dfa();
     EarleyFsmBackend::parse(dfa_rep,input);

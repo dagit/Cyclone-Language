@@ -9,7 +9,7 @@
 
 typedef rule_pat_t (@`H fmt_crawl_fun)<`r>(EarleyParsetree::parse_tree_t, string_t<`r> fmt_str);
 
-int internal_scanf (EarleyCycBackend::DFA::edfa_t dfa_rep, fmt_crawl_fun fmt_crawl,
+int internal_scanf (EarleyAnyBackend::DFA::edfa_t dfa_rep, fmt_crawl_fun fmt_crawl,
     string_t input, string_t format_string, string_t<`H> @ ?args);
 
 #endif /*TGESCANF_H_*/

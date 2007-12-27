@@ -38,13 +38,13 @@ static int array_find(act_t ?arr,act_t a){
 #define DFA_IS_FINAL(dfa,s) (CycDFA::is_final(s).f0)
 #define DFA_FINAL_WEIGHT(dfa,f) (CycDFA::is_final(f).f1)
 #define DFA_FINAL_ATTRS(dfa,f) CycDFA::attributes(f)
-#define DFA_GET_START(dfa) 1
+#define DFA_GET_START(dfa) dfa
 #define DFA_ACT2SYMB(dfa,a) CycDFA::act2symb(a)
 
 // Throws Not_found if symbol is not valid.
 #define GRM_DFA_GET_SYMB_ACTION(dfa,symb) CycDFA::symb2act(symb)
 #define GRM_DFA_GET_SYMB_START(dfa,a) CycDFA::grm_get_symb_start(dfa,a)
 #define GRM_DFA_GET_NUM_STATES(dfa) (CycDFA::num_dfa_states)
-#define GRM_DFA_GET_DFA(dfa,start) 0
+#define GRM_DFA_GET_DFA(dfa,start) start
 
 #endif /*DFA_CYC_H_*/

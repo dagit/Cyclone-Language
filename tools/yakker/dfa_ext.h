@@ -52,7 +52,7 @@ extern st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next,
 #define DFA_GET_START(dfa) (EXT_DFA_NAMESPACE::get_start(dfa))
 #define DFA_ACT2SYMB(dfa,a) (EXT_DFA_NAMESPACE::act_2_symb(dfa,a))
 
-// TODO: Need to implement
+// An extensible DFA does not implement these.
 #define GRM_DFA_GET_SYMB_ACTION(dfa,symb) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_ACTION unimplemented.\n");exit(1);0;})
 #define GRM_DFA_GET_SYMB_START(dfa,a) ({fprintf(stderr,"Failure: GRM_DFA_GET_SYMB_START unimplemented.\n");exit(1);0;})
 #define GRM_DFA_GET_NUM_STATES(dfa) ({fprintf(stderr,"Failure: GRM_DFA_GET_NUM_STATES unimplemented.\n");exit(1);0;})

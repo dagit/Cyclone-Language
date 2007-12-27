@@ -9,30 +9,26 @@
 
 // Note that each namespace will have a subnamespace called DFA.
 
-#define USE_COMPILED_DFA
-namespace EarleyCycBackend{
-#include "earley-backend-priv.h"
-extern DFA::edfa_t init_dfa();
-}
-#undef USE_COMPILED_DFA
+//namespace EarleyCycBackend{
+//#include "earley-backend-priv.h"
+//extern DFA::edfa_t init_dfa();
+//}
 
-#define USE_FSM_DFA
 namespace EarleyFsmBackend{
 #include "earley-backend-priv.h"
 extern DFA::edfa_t init_dfa();
 }
-#undef USE_FSM_DFA
 
-#define USE_EXT_DFA
 namespace EarleyExtFsmBackend {
 #include "earley-backend-priv.h"
 }
-#undef USE_EXT_DFA
 
-#define USE_EXT_CYC_DFA
-namespace EarleyExtCycBackend {
+//namespace EarleyExtCycBackend {
+//#include "earley-backend-priv.h"
+//}
+
+namespace EarleyAnyBackend {
 #include "earley-backend-priv.h"
 }
-#undef USE_EXT_CYC_DFA
 
 #endif /*EARLEYBACKEND_H_*/

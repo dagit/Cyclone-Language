@@ -70,27 +70,32 @@ endef
 EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
      lex pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces earley earley-parsetree
+  util namespaces earley earley-parsetree fsm-dfa
 
 
-EBE_CYC_FILES = earley-backend-c
+#EBE_CYC_FILES = earley-backend-c
 EBE_DFA_FILES = earley-backend-i
 EBE_EXT_FILES = earley-backend-e ext-dfa 
-EBE_EXT_CYC_FILES = earley-backend-ec ext-cyc-dfa
-
+#EBE_EXT_CYC_FILES = earley-backend-ec ext-cyc-dfa
+EBE_EXT_ANY_FILES = ext-any-dfa
+EBE_ANY_FILES = earley-backend-any
 
 EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
-EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
+#EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
 EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
 EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
-EBE_EXT_CYC_OBJS := $(foreach file,$(EBE_EXT_CYC_FILES),$(file).o) 
+#EBE_EXT_CYC_OBJS := $(foreach file,$(EBE_EXT_CYC_FILES),$(file).o) 
+EBE_ANY_OBJS := $(foreach file,$(EBE_ANY_FILES),$(file).o) 
 
 #######################################
 ## libyakker-related variables
 #######################################
 
 LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable \
-    $(EBE_FILES) $(EBE_CYC_FILES) $(EBE_DFA_FILES) $(EBE_EXT_FILES) $(EBE_EXT_CYC_FILES)
+    $(EBE_FILES) $(EBE_DFA_FILES) $(EBE_EXT_FILES) \
+    $(EBE_ANY_FILES) $(EBE_EXT_ANY_FILES) 
+    # $(EBE_CYC_FILES) $(EBE_EXT_CYC_FILES)
+
 LIB_YAKKER_OBJS := $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
 LY_ONLY_FILES:=$(filter-out $(YAKKER_FILES), $(LIB_YAKKER_FILES))
@@ -145,6 +150,9 @@ earley-backend-e.o: earley-backend.cyc
 
 earley-backend-ec.o: earley-backend.cyc
 	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_EXT_CYC_DFA $< 
+
+earley-backend-any.o: earley-backend.cyc
+	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_ANY_DFA $< 
 
 include examples/abnf-echo.mk
 include examples/calc.mk

@@ -25,14 +25,17 @@ CALC_TG_OBJS:=$(foreach yfile,$(CALC_TG_FILES),$(yfile).o)
 calc-tg-earley: $(CALC_TG_OBJS) $(LIB_YAKKER)
 	$(CYCLONE) -o $@ $(CALC_TG_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
 
-CALC_TG_RUN_FILES = calc-tg-dfa calc-tg-run parse_tab
+CALC_TG_RUN_FILES = calc-tg-dfa calc-grm-dfa calc-tg-run parse_tab
 CALC_TG_RUN_OBJS:=$(foreach yfile,$(CALC_TG_RUN_FILES),$(yfile).o)
 
 calc-tg-run: $(CALC_TG_RUN_OBJS) $(LIB_YAKKER)
 	$(CYCLONE) -o $@ $(CALC_TG_RUN_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
 
 calc-tg-dfa.cyc: gen/calc-tg.bnf yakker
-	./yakker -flatten-full -no-minus-elim -earley-gen-cyc start $< > $@
+	./yakker -flatten-full -no-minus-elim -cyc-namespace CalcTGCycDFA -earley-gen-cyc start $< > $@
+
+calc-grm-dfa.cyc: examples/calc.bnf yakker
+	./yakker -flatten-full -cyc-namespace CalcCycDFA -earley-gen-grm-cyc examples/calc.bnf > $@
 
 calc-tg-crawl.cyc: gen/calc-tg.bnf yakker crawl-main.cyc
 	./yakker $(YAKFLAGS) -gen-crawl start \
@@ -50,6 +53,8 @@ calc-tg-run.cyc: gen/calc-tg.bnf yakker tge-main.cyc
                              -no-globals \
                              $< > $@
 	echo '#define TGFUN p_start' >> $@
+	echo '#define CYC_TG_DFA_NS CalcTGCycDFA' >> $@
+	echo '#define CYC_GRM_DFA_NS CalcCycDFA' >> $@
 	echo '#include "tge-main.cyc"' >> $@
 
 calc-scanf.cyc: gen/calc-tg.bnf yakker

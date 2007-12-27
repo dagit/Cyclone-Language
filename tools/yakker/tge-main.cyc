@@ -4,9 +4,18 @@
 #include "earley-backend.h"
 #include "dfa.h"
 
-/* REQUIRED: 
- * To use this file, need to define TGFUN.
- * */
+#if !defined(TGFUN) || !defined(CYC_TG_DFA_NS) || !defined(CYC_GRM_DFA_NS)
+#error "Missing parameters to tge-main.cyc"
+#endif
+
+// TODO: generate a header file for the DFA and include it here 
+// rather than doing the decl by hand
+namespace CYC_TG_DFA_NS{
+  extern struct EarleyAnyBackend::DFA::edfa dfa_obj;
+}
+namespace CYC_GRM_DFA_NS{
+  extern struct EarleyAnyBackend::DFA::grammar_edfa grm_dfa_obj;
+}
 
 #define USAGE \
 "Usage:%s [OPTIONS] <input-file>\n"\
@@ -27,6 +36,7 @@ int main(int argc, const char ?`H?argv) {
   int print_depth = 0;
   int do_print = 0;
   int backend = -1;
+  int grm_backend = -1;
   string_t input_file = NULL;
   string_t format_string = NULL;
   int num_args = 0;
@@ -35,6 +45,8 @@ int main(int argc, const char ?`H?argv) {
     if (     ! strcmp(argv[argi], "-help")) die(argv[0]);
     else if (! strcmp(argv[argi], "-cyc")) backend = 0;
     else if (! strcmp(argv[argi], "-fsm")) backend = 1;
+    else if (! strcmp(argv[argi], "-grm-cyc")) grm_backend = 0;
+    else if (! strcmp(argv[argi], "-grm-fsm")) grm_backend = 1;
     else if (! strcmp(argv[argi], "-fmt")) {
       if (argi+1 >= argc) die(argv[0]);
       format_string = argv[argi+1];
@@ -75,6 +87,11 @@ int main(int argc, const char ?`H?argv) {
     backend = 0;
   }
   
+  if (grm_backend == -1) {     
+    fprintf(stderr,"No grammar backend specified. Defaulting to cyclone backend.\n");
+    grm_backend = 0;
+  }
+  
   // TODO: allow these to be specified independently on command line.
   int do_print_input = do_print;
   int input_print_depth = print_depth;
@@ -88,13 +105,10 @@ int main(int argc, const char ?`H?argv) {
     format_string = Buffer::contents(b);
   }
 
-  fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
-  let gr_edfa = FsmDFA::fsm2grm_edfa("grammar_dfa.txt");
-
   let $(trees, valid, valid_prefix) = 
   (backend == 0) ? ({
-    let dfa_rep = EarleyCycBackend::init_dfa();
-    EarleyCycBackend::parse(dfa_rep,format_string);
+    let dfa_obj = &CYC_TG_DFA_NS::dfa_obj;
+    EarleyAnyBackend::parse(dfa_obj,format_string);
   }) : ({
     let dfa_rep = EarleyFsmBackend::init_dfa();
     EarleyFsmBackend::parse(dfa_rep,format_string);
@@ -124,9 +138,6 @@ int main(int argc, const char ?`H?argv) {
   let rule_pat = TGFUN(child_tree, format_string);
   fprintf(stderr,"Parsed pattern %s.\n",pat2string(rule_pat));
 
-  let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
-  ExtDFA::dfa_dot(ext_edfa);
-  
   // slurp in all of input.
   FILE *f = fopen(input_file,"r");
   if (!f) {
@@ -141,7 +152,38 @@ int main(int argc, const char ?`H?argv) {
   let input = Buffer::contents(b);
   fprintf(stderr,"Parsing input.\n");
   
-  let $(input_trees, input_valid, input_valid_prefix) = EarleyExtFsmBackend::parse(ext_edfa,input);
+  //  let $(input_trees, input_valid, input_valid_prefix) = 
+  //    (grm_backend == 0) ? ({
+  //      let gr_edfa = &CYC_GRM_DFA_NS::grm_dfa_obj;
+  //      let ext_edfa = ExtAnyDFA::pat2dfa(rule_pat, gr_edfa);
+  //      ExtAnyDFA::dfa_dot(ext_edfa);
+  //      let edfa_obj = ExtAnyDFA::mk_any_eb(ext_edfa);
+  //      EarleyAnyBackend::parse(edfa_obj,input);
+  //    }) : ({
+  //      fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
+  //      let gr_edfa = FsmDFA::fsm2grm_edfa("grammar_dfa.txt");
+  //      let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
+  //      ExtDFA::dfa_dot(ext_edfa);
+  //      EarleyExtFsmBackend::parse(ext_edfa,input);
+  //    });
+    
+  let edfa_obj =
+  (grm_backend == 0) ? ({
+    let gr_edfa = &CYC_GRM_DFA_NS::grm_dfa_obj;
+    let ext_edfa = ExtAnyDFA::pat2dfa(rule_pat, gr_edfa);
+    ExtAnyDFA::dfa_dot(ext_edfa);
+    ExtAnyDFA::mk_any_eb(ext_edfa);
+  }) : ({
+    fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
+    let gr_edfa = FsmDFA::fsm2grm_edfa("grammar_dfa.txt");
+    let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
+    ExtDFA::dfa_dot(ext_edfa);
+    ExtDFA::mk_any_eb(ext_edfa);
+  });
+
+  let $(input_trees, input_valid, input_valid_prefix) = 
+    EarleyAnyBackend::parse(edfa_obj,input);
+  
   if (!input_trees) {
     fprintf(stderr,"Parse failed. Valid prefix: %d\n", input_valid_prefix);
     return 1;
@@ -164,4 +206,6 @@ int main(int argc, const char ?`H?argv) {
   printf("Scanned args:\n");
   for (int j=0; j < num_args; j++)
     printf("> %s\n",*scan_args[j]);
+  
+  return 0;
 }

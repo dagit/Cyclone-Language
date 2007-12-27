@@ -23,10 +23,10 @@ get_grammar(){
 
 //int internal_scanf (EarleyCycBackend::DFA:edfa_t dfa_rep,
 //                    ykbuf_t@ ykb_source, ykbuf_t@ ykb_fmt, const char?`H @ ?args){
-int internal_scanf (EarleyCycBackend::DFA::edfa_t dfa_rep, fmt_crawl_fun fmt_crawl,
+int internal_scanf (EarleyAnyBackend::DFA::edfa_t dfa_rep, fmt_crawl_fun fmt_crawl,
     string_t input, string_t format_string, string_t<`H> @ ?args){
 
-  let $(trees, valid, valid_prefix) = EarleyCycBackend::parse(dfa_rep,format_string); 
+  let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(dfa_rep,format_string); 
   if (!valid) { 
     return 0;
   }

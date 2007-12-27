@@ -930,7 +930,10 @@ void print_final(st_t s,Semiring::weight_t @w,FILE@ f){
 void dfa_cyclone(FILE @f, dfa_t dfa) {
   let len = dfa->number_of_states;
   
-  fprintf(f,"const unsigned int num_dfa_states = %d;\n",len);
+  fprintf(f,
+      "const unsigned int num_dfa_states = %d;\n"
+      "unsigned int get_num_states(CycDFA::grammar_edfa_t self){return %d;}\n"
+      ,len,len);
   
   /* print final attributes */
   for (let i = 1; i < len; i++) {
@@ -947,7 +950,7 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
     }
     fprintf(f,"};\n");
   }
-  fprintf(f,"act_t ?attributes(st_t state) {\nswitch (state) {\n");
+  fprintf(f,"act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {\nswitch (state) {\n");
   for (let i = 1; i < len; i++) {
     if (!Set::member(dfa->final_states,i)) continue;
     fprintf(f,"case %d: return __attr%d;\n",i,i);
@@ -956,7 +959,7 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
   
   /* print transitions */
   let first = 1;
-  fprintf(f,"$(st_t,Semiring::weight_t) transitions(st_t state,act_t act) {\nswitch (state) {\n");
+  fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) {\nswitch (state) {\n");
   for (let i = 1; i < len; i++) {
     let transitions = Axarray::get(dfa->states,i);
     if (!transitions) continue;
@@ -984,11 +987,36 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
     fprintf(f,"default: return $(0,Semiring::one_weight);}};\n");
   }
   fprintf(f,"default: return $(0,Semiring::one_weight);\n}\n}\n");
+
+  /* Print trans. */
+  fprintf(f,"st_t trans(CycDFA::edfa_t self, st_t state,act_t act) {\n"
+            "  return trans_w(self,state,act).f0;"
+            "}\n");
   
-  /* Print final states. */
-  fprintf(f,"$(int,Semiring::weight_t) is_final(st_t state) {\nswitch (state) {\n");
+  /* Print in_final. */
+  fprintf(f, 
+      "int in_final(CycDFA::edfa_t self, act_t a, st_t s){\n"
+      "  let arr = final_attrs(self, s);\n"
+      "  let n = numelts(arr);\n"
+      "  for (int i=0; i<n; i++){\n"
+      "    if (arr[i] == a) return 1;\n"
+      "  }\n"
+      "  return 0;\n"
+      "}\n");
+  
+  /* Print final states info. */
+  fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {\nswitch (state) {\n");
   Hashtable::iter_c(print_final,dfa->final_weights,f);
   fprintf(f,"default: return $(0,Semiring::zero_weight);\n}\n}\n");
+  
+  /* Print is_final and final_weight. */
+  fprintf(f,"int is_final(CycDFA::edfa_t self, st_t state) {\n"
+            "  return final_info(state).f0;"
+            "}\n"
+            "Semiring::weight_t final_weight(CycDFA::edfa_t self, st_t state) {\n"
+            "  return final_info(state).f1;"
+            "}\n"
+            "st_t get_start(CycDFA::edfa_t self){return self;}\n");
 }
 
 /* Print the dfa as a haxe datastructure. */

@@ -2,10 +2,17 @@
 #include <buffer.h>
 #include "earley-parsetree.h"
 #include "earley-backend.h"
+#include "dfa.h"
 
-/* REQUIRED: 
- * To use this file, need to define CRAWLFUN.
- * */
+#if !defined(CRAWLFUN) || !defined(CYC_DFA_NS)
+#error "Missing parameters to crawl-main.cyc"
+#endif
+
+// TODO: generate a header file for the DFA and include it here 
+// rather than doing the decl by hand
+namespace CYC_DFA_NS{
+  extern struct EarleyAnyBackend::DFA::edfa dfa_obj;
+}
 
 int main(int argc, const char ?`H?argv) {
   fprintf(stderr,"ABNF parsing stdin ... \n");
@@ -49,8 +56,8 @@ int main(int argc, const char ?`H?argv) {
 
   let $(trees, valid, valid_prefix) = 
   (backend == 0) ? ({
-    let dfa_rep = EarleyCycBackend::init_dfa();
-    EarleyCycBackend::parse(dfa_rep,input);
+    let dfa_obj = &CYC_DFA_NS::dfa_obj;
+    EarleyAnyBackend::parse(dfa_obj,format_string);
   }) : ({
     let dfa_rep = EarleyFsmBackend::init_dfa();
     EarleyFsmBackend::parse(dfa_rep,input);

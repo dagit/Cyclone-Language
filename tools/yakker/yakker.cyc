@@ -855,16 +855,7 @@ int main(int argc, const char ?`H?argv) {
       case 6:
         FILE *f = fopen(filename,"w");
         if (f) {
-          fprintf(f,
-              "#include <core.h>\n\n"
-              "#include \"semiring.h\"\n\n"
-              "namespace CycDFA;\n\n"
-              "typedef unsigned int act_t;\n"
-              "typedef unsigned int st_t;\n");
-          Earley::act2symb_cyclone(f,*p_symb_info);
-          Earley::symbol_table_cyclone(f,*p_symb_info);
-          dfa_cyclone(f,*p_dfa);
-          Earley::repeat_table_cyclone(f,*p_dfa);
+          Earley::dfa2cyclone(f,*p_dfa,*p_symb_info,cyc_namespace,0);
           fclose(f);
         }
         else fprintf(stderr, "Failed to open file %s.\n",filename);
@@ -961,16 +952,7 @@ int main(int argc, const char ?`H?argv) {
           else if (!strcmp(arg,"cyclone")) {
             FILE *f = fopen(filename,"w");
             if (f) { 
-              fprintf(f,
-                  "#include <core.h>\n\n"
-                  "#include \"semiring.h\"\n\n"
-                      "namespace DFACyc;\n\n"
-                      "typedef unsigned int act_t;\n"
-                      "typedef unsigned int st_t;\n");
-              Earley::act2symb_cyclone(f,*p_symb_info);
-              Earley::symbol_table_cyclone(f,*p_symb_info);
-              dfa_cyclone(f,*p_dfa);
-              Earley::repeat_table_cyclone(f,*p_dfa);
+              Earley::dfa2cyclone(f,*p_dfa,*p_symb_info,cyc_namespace,0);
               fclose(f); 
             }
             else fprintf(stderr, "Failed to open file %s.\n",filename);
@@ -1163,16 +1145,7 @@ int main(int argc, const char ?`H?argv) {
   
       remove(f1); remove(f2); remove(f3);
       let $(dfa,_,symb_info) = *r;
-      fprintf(stdout,
-          "#include <core.h>\n\n"
-          "#include \"semiring.h\"\n\n"
-          "namespace CycDFA;\n\n"
-            "typedef unsigned int act_t;\n"
-            "typedef unsigned int st_t;\n");
-      Earley::act2symb_cyclone(stdout,symb_info);
-      Earley::symbol_table_cyclone(stdout,symb_info);
-      dfa_cyclone(stdout,dfa);
-      Earley::repeat_table_cyclone(stdout,dfa);
+      Earley::dfa2cyclone(stdout,dfa,symb_info,cyc_namespace,1);
       break;
     default:
       fprintf(stderr,"Error: grammar DFA output format not supported.\n");
