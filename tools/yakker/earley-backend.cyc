@@ -11,6 +11,7 @@
 #include "earley.h"
 #include "earley-parsetree.h"
 #include "semiring.h"
+#include "earley-backend.h"
 
 using List;
 using Semiring;
@@ -18,31 +19,8 @@ using Semiring;
 #include "dfa.h"
 #include "dfa-impl.h"
 
-#ifdef USE_COMPILED_DFA
-
-namespace EarleyCycBackend;
-
-#elif defined(USE_FSM_DFA)
-
-namespace EarleyFsmBackend;
-
-#elif defined(USE_EXT_DFA)
-
-namespace EarleyExtFsmBackend;
-
-#elif defined(USE_EXT_CYC_DFA)
-
-namespace EarleyExtCycBackend;
-
-#elif defined(USE_ANY_DFA)
 
 namespace EarleyAnyBackend;
-
-#else
-#error "No DFA implementation specified."
-#endif
-
-#include "earley-backend-priv.h"
 
 #define DFA_IS_DFA_FINAL(dfa,s) \
   ({let as = DFA_FINAL_ATTRS(dfa,s); as && numelts(as) == 0;})

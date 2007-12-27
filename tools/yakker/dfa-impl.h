@@ -1,34 +1,8 @@
-#ifdef USE_COMPILED_DFA
-#include "dfa_cyc.h"
+#ifndef DFA_IMPL_H_
+#define DFA_IMPL_H_
 
-#elif defined(USE_FSM_DFA)
-#include "dfa_fsm.h"
-
-#elif defined(USE_EXT_DFA)
-#ifndef DFA_EXT_H_
-#define DFA_EXT_H_
-
-#define EXT_DFA_NAMESPACE ExtDFA
-#define EB_NAMESPACE EarleyFsmBackend
-#define EB_EXT_NAMESPACE EarleyExtFsmBackend
-#include "dfa_ext.h"
-
-#endif /*DFA_EXT_H_*/
-
-#elif defined(USE_EXT_CYC_DFA)
-#ifndef DFA_EXT_CYC_H_
-#define DFA_EXT_CYC_H_
-
-#define EXT_DFA_NAMESPACE ExtCycDFA
-#define EB_NAMESPACE EarleyCycBackend
-#define EB_EXT_NAMESPACE EarleyExtCycBackend
-#include "dfa_ext.h"
-
-#endif /*DFA_EXT_CYC_H_*/
-
-#elif defined(USE_ANY_DFA)
-#ifndef DFA_ANY_H_
-#define DFA_ANY_H_
+// these macros are just used to clean up the code that uses them.
+// could be phased out.
 
 #define DFA_TRANS(dfa,s,a) ({let &{.impl=impl,.trans=trans,...} = dfa; trans(impl,s,a);})
 #define DFA_TRANS_W(dfa,s,a) ({let &{.impl=impl,.trans_w=trans_w,...} = dfa; trans_w(impl,s,a);})
@@ -49,8 +23,4 @@
 #define GRM_DFA_GET_NUM_STATES(dfa) ({let &{.impl=impl,.get_num_states=gns,...} = dfa;  gns(impl);})
 #define GRM_DFA_GET_DFA(dfa,start) ({let &{.impl=impl,.get_dfa=gd,...} = dfa;  gd(impl,start);})
 
-#endif /*DFA_ANY_H_*/
-
-#else
-#error "No DFA implementation specified."
-#endif
+#endif /*DFA_IMPL_H_*/

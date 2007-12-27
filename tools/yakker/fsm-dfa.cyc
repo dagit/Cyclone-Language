@@ -11,71 +11,34 @@
 #include "earley.h"
 #include "earley-parsetree.h"
 #include "semiring.h"
+#include "dfa.h"
 
 using List;
 using Semiring;
 
-#include "dfa.h"
-//#include "dfa_fsm.h"
+namespace FsmDFA;
 
-/*
-namespace EarleyCycBackend{
-DFA::edfa_t init_dfa() {
-  return 1; // the default start state.
-}
-}
-
-namespace CycDFA {
-
-act_t symb2act(string_t<`H> symb){
-  for (int i=0; i<numelts(symbol_table); i++)
-    if (strcmp(symbol_table[i].f0, symb) == 0) return symbol_table[i].f1;
-  throw new Core::Not_found;
-}
-
-// Get the start state for the specified symbol-action.
-st_t grm_get_symb_start(grammar_edfa_t dfa, act_t symb_act){
-  return Axarray::get(dfa,symb_act - MIN_ACTION);
-}
-
-EarleyAnyBackend::DFA::grammar_edfa_t cyc2grm_edfa(){
-  let start_states = Axarray::create(100, (st_t)0);
-  act_t a = MIN_ACTION;
-  for(st_t t = transitions(1,a).f0; 
-      t != 0; 
-      t = transitions(1,++a).f0)
-  {
-    Axarray::set(start_states,a - MIN_ACTION, t);
-  }
-  return new EarleyCycBackend::DFA::grammar_edfa(start_states);
-}
-
-}
-*/
-
-namespace FsmDFA {
-
-st_t trans(EarleyFsmBackend::DFA::edfa_t dfa, st_t s, act_t a){
+static st_t trans(EarleyFsmBackend::DFA::edfa_t dfa, st_t s, act_t a){
   return target(dfa->d,s,a);
 }
 
-$(st_t,Semiring::weight_t) trans_w(EarleyFsmBackend::DFA::edfa_t dfa, st_t s, act_t a){
+static $(st_t,Semiring::weight_t) trans_w(EarleyFsmBackend::DFA::edfa_t dfa, st_t s, act_t a){
   return target_w_weight(dfa->d,s,a);
 }
 
-int in_final(EarleyFsmBackend::DFA::edfa_t dfa, act_t a, st_t s){
+static int in_final(EarleyFsmBackend::DFA::edfa_t dfa, act_t a, st_t s){
   return Set::member(dfa_final_attrs(dfa->d,s),a);
 }
 
-int is_final(EarleyFsmBackend::DFA::edfa_t dfa, st_t s){
+static int is_final(EarleyFsmBackend::DFA::edfa_t dfa, st_t s){
   return dfa_is_final(dfa->d,s);
 }
 
-Semiring::weight_t final_weight(EarleyFsmBackend::DFA::edfa_t dfa, st_t s){
+static Semiring::weight_t final_weight(EarleyFsmBackend::DFA::edfa_t dfa, st_t s){
   return dfa_final_weight(dfa->d,s);
 }
 
-att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s) {
+static att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s) {
   try {
     let fs_set = dfa_final_attrs(dfa,s);
     if (Set::is_empty(fs_set))
@@ -88,27 +51,27 @@ att_t ?`H wrap_final_attrs(dfa_t dfa,st_t s) {
   }
 }
 
-act_t ?final_attrs(EarleyFsmBackend::DFA::edfa_t dfa, st_t s){
+static act_t ?final_attrs(EarleyFsmBackend::DFA::edfa_t dfa, st_t s){
   return wrap_final_attrs(dfa->d,s);
 }
 
-st_t get_start(EarleyFsmBackend::DFA::edfa_t dfa){return dfa->start;}
+static st_t get_start(EarleyFsmBackend::DFA::edfa_t dfa){return dfa->start;}
 
-const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
+static const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
   let sopt = Hashtable::lookup_opt(as_table,act);
   if (sopt == NULL || *sopt == NULL) return "?unknown?";
   else return **sopt;
 }
 
-string_t act_2_symb(EarleyFsmBackend::DFA::edfa_t dfa, act_t a){
+static string_t act_2_symb(EarleyFsmBackend::DFA::edfa_t dfa, act_t a){
   return act2symb(a,dfa->action_symb_table);
 }
 
-$(act_t, act_t, st_t, st_t) get_repeat_info(EarleyFsmBackend::DFA::edfa_t dfa, st_t state){
+static $(act_t, act_t, st_t, st_t) get_repeat_info(EarleyFsmBackend::DFA::edfa_t dfa, st_t state){
   return dfa_get_repeat_info(dfa->d,state,Earley::callout_action());
 }
 
-st_t construct_repeat_dfa(EarleyFsmBackend::DFA::edfa_t dfa, act_t next, 
+static st_t construct_repeat_dfa(EarleyFsmBackend::DFA::edfa_t dfa, act_t next, 
                           st_t target_s, st_t final){
   return mk_repeat_dfa(dfa->d,next,Earley::repeat_decr_action(),target_s,
       Earley::repeat_final_action(), final);
@@ -120,27 +83,27 @@ st_t construct_repeat_dfa(EarleyFsmBackend::DFA::edfa_t dfa, act_t next,
  */
 
 // Get the symbol-action for the specified symbol.
-act_t grm_get_symb_action(EarleyFsmBackend::DFA::grammar_edfa_t dfa, string_t<`H> symb){
+static act_t grm_get_symb_action(EarleyFsmBackend::DFA::grammar_edfa_t dfa, string_t<`H> symb){
   let symbptr = new symb; // (const char ?)aprintf("%s",symb);
   return Hashtable::lookup(dfa->symb_action_table, symbptr);
 }
 
 // Get the start state for the specified symbol-action.
-st_t grm_get_symb_start(EarleyFsmBackend::DFA::grammar_edfa_t dfa, act_t symb_act){
+static st_t grm_get_symb_start(EarleyFsmBackend::DFA::grammar_edfa_t dfa, act_t symb_act){
   return Axarray::get(dfa->symb_start_states,symb_act - MIN_ACTION);
 }
 
-unsigned int grm_get_num_states(EarleyFsmBackend::DFA::grammar_edfa_t dfa){
+static unsigned int grm_get_num_states(EarleyFsmBackend::DFA::grammar_edfa_t dfa){
   return dfa_get_num_states(dfa->d);
 }
 
-EarleyFsmBackend::DFA::edfa_t grm_get_dfa0(EarleyFsmBackend::DFA::grammar_edfa_t dfa, st_t start){
+static EarleyFsmBackend::DFA::edfa_t grm_get_dfa0(EarleyFsmBackend::DFA::grammar_edfa_t dfa, st_t start){
   return new EarleyFsmBackend::DFA::edfa(dfa->d,start,dfa->action_symb_table);
 }
 
 DEFINE_MK_ANY_EB(EarleyFsmBackend)
 
-EarleyAnyBackend::DFA::edfa_t grm_get_dfa(EarleyFsmBackend::DFA::grammar_edfa_t dfa, st_t start){
+static EarleyAnyBackend::DFA::edfa_t grm_get_dfa(EarleyFsmBackend::DFA::grammar_edfa_t dfa, st_t start){
   return mk_any_eb(grm_get_dfa0(dfa,start));
 }
 
@@ -158,7 +121,7 @@ EarleyAnyBackend::DFA::edfa_t init_dfa() {
   return create_edfa(dfa,symb_info);
 }
 
-EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa0(string_t filename) {
+static EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa0(string_t filename) {
   let si = Earley::new_symb_info();
   let r = fsm_dfa(filename,Earley::symb2act,si);
   if (!r) throw new Core::Invalid_argument((const char ?)aprintf("Invalid DFA in file %s.",filename));
@@ -186,22 +149,3 @@ EarleyAnyBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename){
       grm_get_symb_action, grm_get_symb_start, grm_get_num_states, grm_get_dfa);
 }
 
-
-}
-
-//namespace EarleyFsmBackend{
-//namespace DFA{
-//edfa_t create_edfa(dfa_t dfa, Earley::symb_info_t si){
-//  return new edfa(dfa,1,Earley::get_as_table(si));
-//}
-//}
-
-// DFA::edfa_t init_dfa() {
-//  let r = Earley::fsm2dfa("earley-dfa.txt");
-//  if (!r) {
-//    throw new Core::Failure("Failed to reconstruct DFA.");
-//  }
-//  let $(dfa,_,symb_info) = *r;
-//  return DFA::create_edfa(dfa,symb_info);
-//}
-//}

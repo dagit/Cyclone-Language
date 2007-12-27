@@ -73,18 +73,10 @@ EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
   util namespaces earley earley-parsetree fsm-dfa
 
 
-#EBE_CYC_FILES = earley-backend-c
-#EBE_DFA_FILES = earley-backend-i
-#EBE_EXT_FILES = earley-backend-e ext-dfa 
-#EBE_EXT_CYC_FILES = earley-backend-ec ext-cyc-dfa
-EBE_ANY_FILES = earley-backend-any
+EBE_ANY_FILES = earley-backend
 EBE_EXT_ANY_FILES = ext-any-dfa
 
 EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
-#EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
-#EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
-#EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
-#EBE_EXT_CYC_OBJS := $(foreach file,$(EBE_EXT_CYC_FILES),$(file).o) 
 EBE_ANY_OBJS := $(foreach file,$(EBE_ANY_FILES),$(file).o) 
 EBE_EXT_ANY_OBJS := $(foreach file,$(EBE_EXT_ANY_FILES),$(file).o) 
 
@@ -140,21 +132,6 @@ indexer.cyc: examples/indexer.yk $(PROG_DEP)
 $(LIB_YAKKER) : $(LIB_YAKKER_OBJS)
 	$(ARCHIVE)
     
-earley-backend-c.o: earley-backend.cyc
-	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $< 
-
-earley-backend-i.o: earley-backend.cyc
-	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
-
-earley-backend-e.o: earley-backend.cyc
-	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_EXT_DFA $< 
-
-earley-backend-ec.o: earley-backend.cyc
-	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_EXT_CYC_DFA $< 
-
-earley-backend-any.o: earley-backend.cyc
-	$(CYCLONE) $(CYCFLAGS) -o $@ -c -DUSE_ANY_DFA $< 
-
 include examples/abnf-echo.mk
 include examples/calc.mk
 # Broken: need to be fixed:
