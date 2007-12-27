@@ -74,26 +74,27 @@ EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
 
 
 #EBE_CYC_FILES = earley-backend-c
-EBE_DFA_FILES = earley-backend-i
-EBE_EXT_FILES = earley-backend-e ext-dfa 
+#EBE_DFA_FILES = earley-backend-i
+#EBE_EXT_FILES = earley-backend-e ext-dfa 
 #EBE_EXT_CYC_FILES = earley-backend-ec ext-cyc-dfa
-EBE_EXT_ANY_FILES = ext-any-dfa
 EBE_ANY_FILES = earley-backend-any
+EBE_EXT_ANY_FILES = ext-any-dfa
 
 EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
 #EBE_CYC_OBJS := $(foreach file,$(EBE_CYC_FILES),$(file).o) 
-EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
-EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
+#EBE_DFA_OBJS := $(foreach file,$(EBE_DFA_FILES),$(file).o) 
+#EBE_EXT_OBJS := $(foreach file,$(EBE_EXT_FILES),$(file).o) 
 #EBE_EXT_CYC_OBJS := $(foreach file,$(EBE_EXT_CYC_FILES),$(file).o) 
 EBE_ANY_OBJS := $(foreach file,$(EBE_ANY_FILES),$(file).o) 
+EBE_EXT_ANY_OBJS := $(foreach file,$(EBE_EXT_ANY_FILES),$(file).o) 
 
 #######################################
 ## libyakker-related variables
 #######################################
 
 LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable \
-    $(EBE_FILES) $(EBE_DFA_FILES) $(EBE_EXT_FILES) \
-    $(EBE_ANY_FILES) $(EBE_EXT_ANY_FILES) 
+    $(EBE_FILES) $(EBE_ANY_FILES) $(EBE_EXT_ANY_FILES) 
+    # $(EBE_DFA_FILES) $(EBE_EXT_FILES) 
     # $(EBE_CYC_FILES) $(EBE_EXT_CYC_FILES)
 
 LIB_YAKKER_OBJS := $(foreach file,$(LIB_YAKKER_FILES),$(file).o)

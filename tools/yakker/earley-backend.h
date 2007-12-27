@@ -16,7 +16,6 @@
 
 namespace EarleyFsmBackend{
 #include "earley-backend-priv.h"
-extern DFA::edfa_t init_dfa();
 }
 
 namespace EarleyExtFsmBackend {

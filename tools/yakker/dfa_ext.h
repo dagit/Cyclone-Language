@@ -32,9 +32,7 @@ extern string_t act_2_symb(DFA::edfa_t ed, act_t a);
 
 extern $(act_t, act_t, st_t, st_t) get_repeat_info(DFA::edfa_t ed, st_t state);
 
-extern st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next, 
-                          act_t target_act, st_t target_s, 
-                          act_t final_act, st_t final);
+extern st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next,st_t target_s, st_t final);
 }
 
 #define DFA_TRANS(dfa,s,a) (EXT_DFA_NAMESPACE::trans(dfa,s,a))
@@ -42,8 +40,7 @@ extern st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next,
 
 #define DFA_GET_REPEAT_INFO(dfa,s) EXT_DFA_NAMESPACE::get_repeat_info(dfa,s)
 #define DFA_R_EXTEND(dfa,nt,nt_start,repeat_follow)  \
-  EXT_DFA_NAMESPACE::construct_repeat_dfa(dfa,nt,repeat_decr_action(),nt_start,\
-                                          repeat_final_action(), repeat_follow)
+  EXT_DFA_NAMESPACE::construct_repeat_dfa(dfa,nt,nt_start,repeat_follow)
 
 #define DFA_IN_FINAL(dfa,nt,s) (EXT_DFA_NAMESPACE::in_final(dfa,nt,s))
 #define DFA_IS_FINAL(dfa,s) (EXT_DFA_NAMESPACE::is_final(dfa,s))

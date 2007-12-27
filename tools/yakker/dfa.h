@@ -46,7 +46,7 @@ namespace DFA {
 
   typedef struct edfa@ edfa_t;
 
-  extern edfa_t create_edfa(dfa_t dfa, Earley::symb_info_t si);
+  //extern edfa_t create_edfa(dfa_t dfa, Earley::symb_info_t si);
 
   struct grammar_edfa {
     dfa_t d;
@@ -57,10 +57,6 @@ namespace DFA {
 
   typedef struct grammar_edfa @grammar_edfa_t;
 }
-}
-
-namespace FsmDFA {
-extern EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename);
 }
 
 namespace EarleyAnyBackend{
@@ -77,8 +73,8 @@ namespace DFA {
     string_t (@act_2_symb)(`a_dfa adfa, act_t a);
     $(act_t, act_t, st_t, st_t) (@get_repeat_info)(`a_dfa adfa, st_t state);
     st_t (@construct_repeat_dfa)(`a_dfa adfa, act_t next, 
-                              act_t target_act, st_t target_s, 
-                              act_t final_act, st_t final);  
+                              st_t target_s, 
+                              st_t final);  
   };
   
   typedef struct edfa @ edfa_t;
@@ -94,6 +90,13 @@ namespace DFA {
   typedef struct grammar_edfa@ grammar_edfa_t;
 
 }
+}
+
+namespace FsmDFA {
+//extern EarleyFsmBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename);
+extern EarleyAnyBackend::DFA::edfa_t init_dfa(); // create_edfa with default params.
+extern EarleyAnyBackend::DFA::edfa_t create_edfa(dfa_t dfa, Earley::symb_info_t si);
+extern EarleyAnyBackend::DFA::grammar_edfa_t fsm2grm_edfa(string_t filename);
 }
 
 #define EEB_DECLS(EXT_DFA_NAMESPACE, EB_NAMESPACE, EB_EXT_NAMESPACE)\

@@ -161,11 +161,11 @@ static act_t repeat_action() {
 static act_t final_st_action() {
   return 258;
 }
-static act_t repeat_decr_action() {
+act_t repeat_decr_action() {
   return 259;
 }
 
-static act_t repeat_final_action() {
+act_t repeat_final_action() {
   return 260;
 }
 
@@ -285,7 +285,7 @@ static void repeat_table_cyclone(FILE @f, dfa_t dfa){
   /* Print construct_repeat_dfa stub -- just throws an exception, b/c its not supported. */
   fprintf(f,
       "st_t construct_repeat_dfa(CycDFA::edfa_t self, act_t next,\n" 
-      "       act_t target_act, st_t target_s, act_t final_act, st_t final){\n"
+      "       st_t target_s, st_t final){\n"
       "  throw new Core::Failure(\"construct_repeat_dfa unimplemented.\");\n"
       "}\n");
 }
@@ -1574,7 +1574,7 @@ push_closure(rstate_t rs,
     // Construct chain of states that transition on repeatee_nt and each call
     // this DFA (nt_start). Chain has length "num". The chain ends
     // with the final state.
-    let t_new = construct_repeat_dfa(rs->dfa,repeatee_nt,
+    let t_new = mk_repeat_dfa(rs->dfa,repeatee_nt,
 				     repeat_decr_action(),nt_start,
 				     repeat_final_action(), nt_final);
     set_repeat_count(rs,t_new,num);

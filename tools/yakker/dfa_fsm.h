@@ -28,8 +28,8 @@ extern DFA::edfa_t grm_get_dfa(DFA::grammar_edfa_t dfa, st_t start);
 
 #define DFA_GET_REPEAT_INFO(dfa,s) dfa_get_repeat_info(dfa->d,s,Earley::callout_action())
 #define DFA_R_EXTEND(dfa,nt,nt_start,repeat_follow) \
-        construct_repeat_dfa(dfa->d,nt,repeat_decr_action(),nt_start,\
-                                                          repeat_final_action(), repeat_follow)
+        mk_repeat_dfa(dfa->d,nt,repeat_decr_action(),nt_start,\
+                                    repeat_final_action(), repeat_follow)
 
 // Macros for grammar DFAs.
 

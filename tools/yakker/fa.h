@@ -107,7 +107,7 @@ extern $(act_t, act_t, st_t, st_t) dfa_get_repeat_info(dfa_t dfa, st_t rpt_s, ac
 // the given target state "target_s" on the "target" action. Each
 // state transitions to the next on action "next".
 // The last state is connected to the specified final state "f".
-extern st_t construct_repeat_dfa(dfa_t dfa, act_t next, 
+extern st_t mk_repeat_dfa(dfa_t dfa, act_t next, 
 				 act_t target_act, st_t target_s, 
 				 act_t final_act, st_t f);
 #endif

@@ -46,7 +46,9 @@ namespace Earley {
   
   extern act_t callout_action();
   extern act_t start_states_table_action();
-  
+  extern act_t repeat_decr_action();
+  extern act_t repeat_final_action();
+    
   extern Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si);  		
   extern Hashtable::table_t<str_t,act_t> get_sa_table(symb_info_t si);  		
   extern $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r);

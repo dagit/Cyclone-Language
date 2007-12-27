@@ -7,9 +7,9 @@
 
 #include "tge-scanf.h"
 
-static struct EarleyFsmBackend::DFA::grammar_edfa *grammar = NULL;
+static struct EarleyAnyBackend::DFA::grammar_edfa *grammar = NULL;
 
-static EarleyFsmBackend::DFA::grammar_edfa_t 
+static EarleyAnyBackend::DFA::grammar_edfa_t 
 get_grammar(){
   if (!grammar){
     // fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
@@ -23,10 +23,10 @@ get_grammar(){
 
 //int internal_scanf (EarleyCycBackend::DFA:edfa_t dfa_rep,
 //                    ykbuf_t@ ykb_source, ykbuf_t@ ykb_fmt, const char?`H @ ?args){
-int internal_scanf (EarleyAnyBackend::DFA::edfa_t dfa_rep, fmt_crawl_fun fmt_crawl,
+int internal_scanf (EarleyAnyBackend::DFA::edfa_t fs_dfa_obj, fmt_crawl_fun fmt_crawl,
     string_t input, string_t format_string, string_t<`H> @ ?args){
 
-  let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(dfa_rep,format_string); 
+  let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(fs_dfa_obj,format_string); 
   if (!valid) { 
     return 0;
   }
@@ -43,13 +43,14 @@ int internal_scanf (EarleyAnyBackend::DFA::edfa_t dfa_rep, fmt_crawl_fun fmt_cra
 //  fprintf(stderr,"Parsed pattern %s.\n",pat2string(rule_pat));
 
   let gr_edfa = get_grammar(); 
-  let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
+  let input_ext_dfa_obj = ExtAnyDFA::pat2dfa(rule_pat, gr_edfa);
 
 //  ExtDFA::dfa_dot(ext_edfa);
   
 //  fprintf(stderr,"Parsing input.\n");
-  
-  let $(input_trees, input_valid, input_valid_prefix) = EarleyExtFsmBackend::parse(ext_edfa,input);
+  let input_dfa_obj = ExtAnyDFA::mk_any_eb(input_ext_dfa_obj); // "upcast" to plain edfa.
+  let $(input_trees, input_valid, input_valid_prefix) = 
+    EarleyAnyBackend::parse(input_dfa_obj,input);
   if (!input_valid) {
     return 0;
   }

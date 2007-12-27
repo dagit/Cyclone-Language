@@ -2491,10 +2491,10 @@ $(act_t, act_t, st_t, st_t) dfa_get_repeat_info(dfa_t dfa, st_t s_rpt, act_t cal
 
 // Construct a repeat dfa: ...
 // The new  state is connected to the specified final state "f".
-st_t construct_repeat_dfa(dfa_t dfa, act_t next, 
+st_t mk_repeat_dfa(dfa_t dfa, act_t next, 
 				 act_t target_act, st_t target_s, 
 			  act_t final_act, st_t f){
-// st_t construct_repeat_dfa(dfa_t dfa, unsigned int n, 
+// st_t mk_repeat_dfa(dfa_t dfa, unsigned int n, 
 // 			  act_t next, 
 // 			  st_t target_s, act_t target, st_t f){
     // FIX: is this the right weight?

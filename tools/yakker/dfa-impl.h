@@ -36,8 +36,7 @@
   get_repeat_info(impl,s);})
 #define DFA_R_EXTEND(dfa,nt,nt_start,repeat_follow)  \
   ({let &{.impl=impl,.construct_repeat_dfa=construct_repeat_dfa,...} = dfa;  \
-    construct_repeat_dfa(impl,nt,repeat_decr_action(),nt_start,\
-                                          repeat_final_action(), repeat_follow);})
+    construct_repeat_dfa(impl,nt,nt_start,repeat_follow);})
 #define DFA_IN_FINAL(dfa,nt,s) ({let &{.impl=impl,.in_final=in_final,...} = dfa;  in_final(impl,nt,s);})
 #define DFA_IS_FINAL(dfa,s) ({let &{.impl=impl,.is_final=is_final,...} = dfa;  is_final(impl,s);})
 #define DFA_FINAL_WEIGHT(dfa,f) ({let &{.impl=impl,.final_weight=final_weight,...} = dfa;  final_weight(impl,f);})

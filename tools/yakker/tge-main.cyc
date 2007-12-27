@@ -105,15 +105,19 @@ int main(int argc, const char ?`H?argv) {
     format_string = Buffer::contents(b);
   }
 
-  let $(trees, valid, valid_prefix) = 
-  (backend == 0) ? ({
-    let dfa_obj = &CYC_TG_DFA_NS::dfa_obj;
-    EarleyAnyBackend::parse(dfa_obj,format_string);
-  }) : ({
-    let dfa_rep = EarleyFsmBackend::init_dfa();
-    EarleyFsmBackend::parse(dfa_rep,format_string);
-  });
-  
+//  let $(trees, valid, valid_prefix) = 
+//  (backend == 0) ? ({
+//    let dfa_obj = &CYC_TG_DFA_NS::dfa_obj;
+//    EarleyAnyBackend::parse(dfa_obj,format_string);
+//  }) : ({
+//    let dfa_rep = EarleyFsmBackend::init_dfa();
+//    EarleyFsmBackend::parse(dfa_rep,format_string);
+//  });
+//  
+  let dfa_obj =  (backend == 0) ? &CYC_TG_DFA_NS::dfa_obj
+                                : FsmDFA::init_dfa();
+    
+  let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(dfa_obj,format_string);       
   if (!trees) {
     fprintf(stderr,"Parse failed. Valid prefix: %d\n", valid_prefix);
     return 1;
@@ -166,21 +170,15 @@ int main(int argc, const char ?`H?argv) {
   //      ExtDFA::dfa_dot(ext_edfa);
   //      EarleyExtFsmBackend::parse(ext_edfa,input);
   //    });
-    
-  let edfa_obj =
-  (grm_backend == 0) ? ({
-    let gr_edfa = &CYC_GRM_DFA_NS::grm_dfa_obj;
-    let ext_edfa = ExtAnyDFA::pat2dfa(rule_pat, gr_edfa);
-    ExtAnyDFA::dfa_dot(ext_edfa);
-    ExtAnyDFA::mk_any_eb(ext_edfa);
-  }) : ({
-    fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
-    let gr_edfa = FsmDFA::fsm2grm_edfa("grammar_dfa.txt");
-    let ext_edfa = ExtDFA::pat2dfa(rule_pat, gr_edfa);
-    ExtDFA::dfa_dot(ext_edfa);
-    ExtDFA::mk_any_eb(ext_edfa);
-  });
-
+ 
+  let gr_edfa = (grm_backend == 0) ? &CYC_GRM_DFA_NS::grm_dfa_obj
+      : ({ fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
+           FsmDFA::fsm2grm_edfa("grammar_dfa.txt");});
+  
+  let ext_edfa = ExtAnyDFA::pat2dfa(rule_pat, gr_edfa);
+  ExtAnyDFA::dfa_dot(ext_edfa);
+  
+  let edfa_obj = ExtAnyDFA::mk_any_eb(ext_edfa);
   let $(input_trees, input_valid, input_valid_prefix) = 
     EarleyAnyBackend::parse(edfa_obj,input);
   

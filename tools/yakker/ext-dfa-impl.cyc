@@ -162,16 +162,13 @@ $(act_t, act_t, st_t, st_t) get_repeat_info(DFA::edfa_t ed, st_t state){
 }
 
 // Construct a repeat dfa: ...
-// The new  state is connected to the specified final state "f".
-st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next, 
-                          act_t target_act, st_t target_s, 
-                          act_t final_act, st_t final){
+// The new  state is connected to the specified final state "final".
+st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next, st_t target_s, st_t final){
   let s = fresh_state( (ext_edfa_t)ed );
   // Transitions don't sum to one b/c we've really compacted many states into one.
-  add_trans( (ext_edfa_t)ed, s, target_act, target_s, Semiring::from_inv_prob(2));
-  add_trans( (ext_edfa_t)ed, s, final_act,  final,    Semiring::one_weight );
-  add_trans( (ext_edfa_t)ed, s, next,       s,        
-       Semiring::from_inv_prob(2));
+  add_trans( (ext_edfa_t)ed, s, Earley::repeat_decr_action(),  target_s, Semiring::from_inv_prob(2));
+  add_trans( (ext_edfa_t)ed, s, Earley::repeat_final_action(), final,    Semiring::one_weight );
+  add_trans( (ext_edfa_t)ed, s, next,                  s,        Semiring::from_inv_prob(2));
   return s;
 }
 
