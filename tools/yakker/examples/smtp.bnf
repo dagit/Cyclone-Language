@@ -1,0 +1,187 @@
+; from RFC 821, extracted by hand
+
+smtp-command =
+    "HELO" SP domain CRLF
+  | "MAIL" SP "FROM:" reverse-path CRLF
+  | "RCPT" SP "TO:" forward-path CRLF
+  | "DATA" CRLF
+  | "RSET" CRLF
+  | "SEND" SP "FROM:" reverse-path CRLF
+  | "SOML" SP "FROM:" reverse-path CRLF
+  | "SAML" SP "FROM:" reverse-path CRLF
+  | "VRFY" SP string CRLF
+  | "EXPN" SP string CRLF
+  | "HELP" [SP string] CRLF
+  | "NOOP" CRLF
+  | "QUIT" CRLF
+  | "TURN" CRLF
+.
+
+; for multi-line replies each line should start with same reply code (3DIGIT)
+smtp-reply =
+  3DIGIT SP reply-text CRLF
+| 3DIGIT "-" reply-text CRLF.
+
+reply-text = (%d1-127 - (CR|LF)). ; do we need to allow %d0 or LF?
+
+reverse-path = path.
+
+forward-path = path.
+
+path = "<" [ a-d-l ":" ] mailbox ">".
+
+a-d-l = at-domain | at-domain "," a-d-l.
+
+at-domain = "@" domain.
+
+domain =  element | element "." domain.
+
+element = name | "#" number | "[" dotnum "]".
+
+mailbox = local-part "@" domain.
+
+local-part = dot-string | quoted-string.
+
+name = a ldh-str let-dig.
+
+ldh-str = let-dig-hyp | let-dig-hyp ldh-str.
+
+let-dig = a | d.
+
+let-dig-hyp = a | d | "-".
+
+dot-string = string | string "." dot-string.
+
+string = char | char string.
+
+quoted-string =  DQUOTE qtext DQUOTE.
+
+qtext =  "\" x | "\" x qtext | q | q qtext.
+
+char = c | "\" x.
+
+dotnum = snum "." snum "." snum "." snum.
+
+number = d | d number.
+
+CRLF = CR LF.
+
+CR = %d13.
+
+LF = %d10.
+
+SP = %d32.
+
+snum = 1*3DIGIT.
+
+a = ALPHA.
+
+c = (%d0-127 - (special|SP)).
+
+d = DIGIT.
+
+q = (%d0-127 - (CR|LF|DQUOTE|"\")).
+
+x = %d0-127.
+
+special = "<" | ">" | "(" | ")" | "[" | "]" | "\" | "."
+          | "," | ";" | ":" | "@" | DQUOTE | %d0-31 | %d127.
+
+return-path-line = "Return-Path:" SP reverse-path CRLF.
+
+time-stamp-line = "Received:" SP stamp CRLF.
+
+stamp = from-domain by-domain opt-info ";" daytime.
+
+from-domain = "FROM" SP domain SP.
+
+by-domain = "BY" SP domain SP.
+
+opt-info = [via] [with] [id] [for].
+
+via = "VIA" SP link SP.
+
+with = "WITH" SP protocol SP.
+
+id = "ID" SP string SP.
+
+for = "FOR" SP path SP.
+
+link = <The standard names for links are registered with the Network Information Center>.
+
+protocol = <The standard names for protocols are registered with the Network Information Center>.
+
+daytime = SP date SP time.
+
+date = dd SP mon SP yy.
+
+time = hh ":" mm ":" ss SP zone.
+
+dd = (DIGIT - "0") | (("1"|"2")DIGIT) | "30" | "31".
+
+mon = "JAN" | "FEB" | "MAR" | "APR" | "MAY" | "JUN" |
+          "JUL" | "AUG" | "SEP" | "OCT" | "NOV" | "DEC".
+
+yy = 2*DIGIT.
+
+hh = ("0"|"1")DIGIT | "2"("0"|"1"|"2"|"3"|"4").
+
+mm = ("0"|"1"|"2"|"3"|"4"|"5")DIGIT.
+
+ss = ("0"|"1"|"2"|"3"|"4"|"5")DIGIT.
+
+zone = "UT"  / "GMT"                ; Universal Time
+                                    ; North American : UT
+             /  "EST" / "EDT"                ;  Eastern:  - 5/ - 4
+             /  "CST" / "CDT"                ;  Central:  - 6/ - 5
+             /  "MST" / "MDT"                ;  Mountain: - 7/ - 6
+             /  "PST" / "PDT"                ;  Pacific:  - 8/ - 7
+             /  1ALPHA                       ; Military: Z = UT;
+                                             ;  A:-1; (J not used)
+                                             ;  M:-12; N:+1; Y:+12
+             / ( ("+" / "-") 4DIGIT )        ; Local differential
+                                             ;  hours+min. (HHMM)
+.
+
+; Size limits given in the RFC:
+;
+; There are several objects that have required minimum maximum
+; sizes.  That is, every implementation must be able to receive
+; objects of at least these sizes, but must not send objects
+; larger than these sizes.
+;
+; user
+; 
+;    The maximum total length of a user name is 64 characters.
+; 
+; domain
+; 
+;    The maximum total length of a domain name or number is 64
+;    characters.
+; 
+; path
+; 
+;    The maximum total length of a reverse-path or
+;    forward-path is 256 characters (including the punctuation
+;    and element separators).
+; 
+; command line
+; 
+;    The maximum total length of a command line including the
+;    command word and the <CRLF> is 512 characters.
+; 
+; reply line
+; 
+;    The maximum total length of a reply line including the
+;    reply code and the <CRLF> is 512 characters.
+; 
+; text line
+; 
+;    The maximum total length of a text line including the
+;    <CRLF> is 1000 characters (but not counting the leading
+;    dot duplicated for transparency).
+; 
+; recipients buffer
+; 
+;    The maximum total number of recipients that must be
+;    buffered is 100 recipients.
