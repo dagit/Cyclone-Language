@@ -361,6 +361,19 @@ uri_one_string.p: $(PROG_DEP) uri_orig.bnf
 	cat $@.tmp | ./fix_hostname.pl | ./add_precord.pl URI_reference_t | cat > $@
 	$(RM) $@.tmp
 
+gen/sip.bnf: $(PROG_DEP) gen/rfc3261.bnf
+	./yakker gen/rfc3261.bnf -omit generic-message start-line Request-Line Status-Line header response opaque URI s userinfo reg-name domainlabel > $@
+	echo 'header = hname "=" hvalue.' >> $@
+	echo 'userinfo = user [":" password] "@".' >> $@
+	echo 'opaque = "opaque" EQUAL quoted-string.' >> $@
+	echo 'URI = absoluteURI|abs-path.' >> $@
+	echo 'Request-Line = Method SP Request-URI SP SIP-Version CRLF.' >> $@
+	echo 'Status-Line = SIP-Version SP Status-Code SP Reason-Phrase CRLF.' >> $@
+	echo 'EPS1 = "".' >> $@
+	echo 'EPS2 = "".' >> $@
+	echo 'reg-name = 1*((unreserved|escaped|"$$"|","|";"|":"|"@"|"&"|"="|"+")EPS1).' >> $@
+	echo 'domainlabel = alphanum|(alphanum *((alphanum|"-")EPS2) alphanum).' >> $@
+
 gen/http.bnf: $(PROG_DEP) gen/rfc2616.bnf gen/rfc2617.bnf gen/rfc2396.bnf gen/rfc2822.bnf gen/rfc3501.bnf
 	./yakker gen/rfc2616.bnf \
 	  -externals gen/rfc2617.bnf gen/rfc2396.bnf gen/rfc2822.bnf gen/rfc3501.bnf \
