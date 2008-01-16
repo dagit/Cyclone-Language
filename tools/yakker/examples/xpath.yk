@@ -100,18 +100,45 @@ ElementName    =    QName.
 TypeName    =    QName.
 
     IntegerLiteral    =    Digits.
-    DecimalLiteral    =    ("." Digits) | (Digits "." *DIGIT). /* ws: explicit */
-    DoubleLiteral    =    (("." Digits) | (Digits ["." *DIGIT])) ("e" | "E") ["+" | "-"] Digits. /* ws: explicit */
+    DecimalLiteral    =    ("." Digits) | (Digits "." *DIGIT). ;/* ws: explicit */
+    DoubleLiteral    =    (("." Digits) | (Digits ["." *DIGIT])) ("e" | "E") ["+" | "-"] Digits. ;/* ws: explicit */
     StringLiteral    =    *(DQUOTE (EscapeQuot | (Char - DQUOTE) ) DQUOTE) 
-                     | ("'" *(EscapeApos | (Char - "'")) "'"). /* ws: explicit */
+                     | ("'" *(EscapeApos | (Char - "'")) "'"). ;/* ws: explicit */
     EscapeQuot    =    DQUOTE DQUOTE.
     EscapeApos    =    "''".
+
     Comment    =    "(:" *(CommentContents | Comment) ":)". ; /* ws: explicit *//* gn: comments */
-    QName    =    [http://www.w3.org/TR/REC-xml-names/#NT-QName]. ; /* xgs: xml-version */
-    NCName    =    [http://www.w3.org/TR/REC-xml-names/#NT-NCName]. ; /* xgs: xml-version */
-    Char    =    [http://www.w3.org/TR/REC-xml#NT-Char]. ; /* xgs: xml-version */
+;    QName    =    [http://www.w3.org/TR/REC-xml-names/#NT-QName]. ; /* xgs: xml-version */
+;    NCName    =    [http://www.w3.org/TR/REC-xml-names/#NT-NCName]. ; /* xgs: xml-version */
+;    Char    =    [http://www.w3.org/TR/REC-xml#NT-Char]. ; /* xgs: xml-version */
+; "Fixed" version:
+Char = CHAR.
+
     Digits    =    1*DIGIT.
 ; ORIGINAL VERSION:    CommentContents    =    (Char+ - (Char* ('(:' | ':)') Char*)).
 ; "Fixed" version. Any time the parse hits a comment it will spawn a never-ending branch for CommentContents. So
 ; Also, its incorrect in that it will allow nested comments.
 CommentContents    =    1*Char.
+
+
+; From "Extensible Markup Language (XML) 1.0 (Fourth Edition)"
+; ORIGINAL: NameChar	   =  Letter | Digit | '.' | '-' | '_' | ':' | CombiningChar | Extender
+; "Fixed" version:
+NameChar	   =  Letter | Digit | "." | "-" | "_" | ":".
+
+; From "Namespaces in XML 1.0 (Second Edition)"
+ NCName	   = NCNameStartChar *NCNameChar. ;	/* An XML Name, minus the ":" */
+; ORGINAL: NCNameChar	   = (NameChar - ":").
+; Fixed version:
+ NCNameChar	   =  Letter | Digit | "." | "-" | "_".
+ NCNameStartChar	   = Letter | "_".
+ QName	   = PrefixedName | UnprefixedName.
+ PrefixedName	   =  Prefix ":" LocalPart.
+ UnprefixedName	   =  LocalPart.
+ Prefix	   = NCName.
+ LocalPart	   = NCName.
+
+; Added by hand.
+ Digit = %d48-57.
+; Based on http://www.w3.org/TR/REC-xml#NT-BaseChar
+ Letter = %d65-90 | %d97-120 | %d192-214 | %d216-246 | %d248-255.
