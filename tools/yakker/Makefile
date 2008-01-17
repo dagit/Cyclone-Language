@@ -134,6 +134,8 @@ $(LIB_YAKKER) : $(LIB_YAKKER_OBJS)
     
 include examples/abnf-echo.mk
 include examples/calc.mk
+include examples/xpath.mk
+
 # Broken: need to be fixed:
 #include examples/indexer.mk
 

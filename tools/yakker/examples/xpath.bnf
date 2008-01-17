@@ -142,3 +142,6 @@ NameChar	   =  Letter | Digit | "." | "-" | "_" | ":".
  Digit = %d48-57.
 ; Based on http://www.w3.org/TR/REC-xml#NT-BaseChar
  Letter = %d65-90 | %d97-120 | %d192-214 | %d216-246 | %d248-255.
+{
+grammar_t parse_string(char ?s) {return NULL;}
+}

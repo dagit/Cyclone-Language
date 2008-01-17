@@ -54,14 +54,10 @@ int main(int argc, const char ?`H?argv) {
       fprintf(stderr,"Argument %d not valid depth: %s.\n",argi, argv[argi]);
   }
 
-  let $(trees, valid, valid_prefix) = 
-  (backend == 0) ? ({
-    let dfa_obj = &CYC_DFA_NS::dfa_obj;
-    EarleyAnyBackend::parse(dfa_obj,format_string);
-  }) : ({
-    let dfa_rep = EarleyFsmBackend::init_dfa();
-    EarleyFsmBackend::parse(dfa_rep,input);
-  });
+  let dfa_obj =  (backend == 0) ? &CYC_DFA_NS::dfa_obj
+                                : FsmDFA::init_dfa();
+    
+  let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(dfa_obj,input);       
   
   if (trees) {
     fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", valid,

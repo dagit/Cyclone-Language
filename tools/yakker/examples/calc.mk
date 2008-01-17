@@ -16,6 +16,7 @@ calc-flat-dfa.cyc: examples/calc.bnf yakker
 calccrawl.cyc: examples/calc.bnf yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl start $< > $@
 	echo '#define CRAWLFUN p_start' >> $@
+	echo '#define CYC_DFA_NS CycDFA' >> $@
 	echo '#include "crawl-main.cyc"' >> $@
 
 #########
