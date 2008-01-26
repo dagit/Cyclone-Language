@@ -101,20 +101,68 @@ class Parseviz {
   static var zoom = 1.0;
   static var gridHeight = 20;
   static var gridWidth = 12;
+  static function hex(cCode:Int):String {
+    switch (cCode%16) {
+    case 0: return "0";
+    case 1: return "1";
+    case 2: return "2";
+    case 3: return "3";
+    case 4: return "4";
+    case 5: return "5";
+    case 6: return "6";
+    case 7: return "7";
+    case 8: return "8";
+    case 9: return "9";
+    case 10: return "A";
+    case 11: return "B";
+    case 12: return "C";
+    case 13: return "D";
+    case 14: return "E";
+    case 15: return "F";
+    default: return ""; // impossible
+    }
+  }
   public static function
   drawText(spr:DisplayObjectContainer,tf:TextFormat,
            x:Float,y:Float,s:String):Sprite
   {
     var c = new Sprite();
     for (i in 0...s.length) {
-      var t:TextField = new TextField();
-      t.defaultTextFormat = tf;
-      t.autoSize = flash.text.TextFieldAutoSize.LEFT;
-      t.selectable = false;
-      t.text = s.charAt(i);
-      t.x = i*gridWidth;
-      t.y = 0;
-      c.addChild(t);
+      var cCode = s.charCodeAt(i);
+      if (31 < cCode && cCode < 127) {
+	var t:TextField = new TextField();
+	t.defaultTextFormat = tf;
+	t.autoSize = flash.text.TextFieldAutoSize.LEFT;
+	t.selectable = false;
+	t.text = Std.chr(cCode);
+	t.x = i*gridWidth;
+	t.y = 0;
+	c.addChild(t);
+      }
+      else {
+	{
+	  var upper = hex(Std.int(cCode / 16));
+	  var t:TextField = new TextField();
+	  t.defaultTextFormat = quarterFont;
+	  t.autoSize = flash.text.TextFieldAutoSize.LEFT;
+	  t.selectable = false;
+	  t.text = upper;
+	  t.x = i*gridWidth;
+	  t.y = 0;
+	  c.addChild(t);
+	}
+	{
+	  var lower = hex(cCode % 16);
+	  var t:TextField = new TextField();
+	  t.defaultTextFormat = quarterFont;
+	  t.autoSize = flash.text.TextFieldAutoSize.LEFT;
+	  t.selectable = false;
+	  t.text = lower;
+	  t.x = (i+0.3) * gridWidth;
+	  t.y = 0.4 * gridHeight;
+	  c.addChild(t);
+	}
+      }
     }
     c.x = x;
     c.y = y;
@@ -231,6 +279,7 @@ class Parseviz {
     return h;
   }
   static var font = new TextFormat("Courier",16,0x0);
+  static var quarterFont = new TextFormat("Courier",12,0x0);
   static var parseInput:String = "";
   static var parseAbove:Array<Dynamic> = [];
   static var parseBelow:Array<Dynamic> = [];
@@ -438,7 +487,9 @@ class Parseviz {
     (MouseEvent.CLICK,
      function (e:Event) {
        try {
-         parseInput = app.parseInput.text + "\r\n";
+         parseInput = app.parseInput.text;
+	 /* The above assignment messes with line endings, we force CRLF */
+	 parseInput = StringTools.replace(parseInput,"\r","\r\n");
          var parses = Earley.parseToRender(parseInput);
          parseAbove = parses.left;
          parseBelow = parses.right;
