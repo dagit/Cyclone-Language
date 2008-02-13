@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bnf.h"
+// #include "bnf.h"
 #include "util.h"
 #include "funtable.h"
 #include "pm_bnf.h"
@@ -84,6 +84,8 @@ const char ?ast2string(rule_pat_t p){
   return strconcat_l(List::imp_rev(ps));
 }
 
+
+/*
 rule_t pat2parse_rule(rule_pat_t p){
   switch (p) {
   case &SymbPat(x):
@@ -104,7 +106,7 @@ rule_t pat2parse_rule(rule_pat_t p){
     return r;
   }
 }
-
+*/
 
 bool is_special_char(unsigned int i) {
   char c = (char)i;

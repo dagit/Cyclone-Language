@@ -67,27 +67,16 @@ endef
 #######################################
 ## Earley-related variables
 #######################################
-EBE_FILES = analyze axarray cs bnf  semiring fa nfa_lazy nfa_eager \
-     lex pr prose prose_elim_grm string_dfa_engine1 \
-  string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces earley earley-parsetree fsm-dfa
-
-
-EBE_ANY_FILES = earley-backend
-EBE_EXT_ANY_FILES = ext-any-dfa
-
+# Earley-backend files.
+EBE_FILES = axarray semiring earley-parsetree fsm-dfa util \
+            dfa-impl earley-common earley-backend ext-any-dfa
 EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
-EBE_ANY_OBJS := $(foreach file,$(EBE_ANY_FILES),$(file).o) 
-EBE_EXT_ANY_OBJS := $(foreach file,$(EBE_EXT_ANY_FILES),$(file).o) 
 
 #######################################
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable \
-    $(EBE_FILES) $(EBE_ANY_FILES) $(EBE_EXT_ANY_FILES) 
-    # $(EBE_DFA_FILES) $(EBE_EXT_FILES) 
-    # $(EBE_CYC_FILES) $(EBE_EXT_CYC_FILES)
+LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable $(EBE_FILES)  
 
 LIB_YAKKER_OBJS := $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
@@ -154,8 +143,11 @@ imapcl.o: examples/imapcl.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
 
 # --novcgen is temporary until a bug is fixed
-imap.o: $(GENDIR)/imap.cyc
+imap.o: imap.cyc
 	$(CYCLONE) -I. -c $< -o $@ --novcgen
+
+imap.cyc: gen/imap_revised_fixed.bnf $(PROG_DEP)
+	./yakker $(YAKFLAGS) -gen command -no-main -no-globals $< > $@
 
 imapp.key:
 	openssl genrsa > $@

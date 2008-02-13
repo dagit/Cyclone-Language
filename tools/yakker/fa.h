@@ -76,6 +76,10 @@ extern List::list_t<$(act_t,st_t)@> dfa_get_trans_map(dfa_t dfa,st_t s);
 
 extern void lookahead_glush(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 
+extern const char ?fsm_char_escape(unsigned int c);
+// return -1 if its not an escaped character.
+extern int fsm_char_unescape(const char? s);
+
 extern void nfa_dot(FILE @f,Set::set_t<st_t> final_states, cs_pred_t special);
 extern void dfa_dot(FILE @f, dfa_t dfa, cs_pred_t special);
 

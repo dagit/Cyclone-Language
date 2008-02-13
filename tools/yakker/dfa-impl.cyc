@@ -1,0 +1,1243 @@
+/* fa.cyc
+ * Finite automata library
+ */
+
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
+   This file is part of the Cyclone project.
+
+   Cyclone is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   Cyclone is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Cyclone; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+#include <hashtable.h>
+#include <list.h>
+#include <iter.h>
+#include <math.h>
+#include "bnf.h"
+#include "cs.h"
+#include "axarray.h"
+#include "analyze.h"
+#include "fa.h"
+#include "pr.h"
+#include "util.h"
+#include "semiring.h"
+
+#include <time.h>
+
+int st_hash(st_t a) { return (int)a; }
+int st_cmp(st_t a,st_t b) {
+  if (a == b) return 0; else if (a<b) return -1; else return 1;
+}
+st_t nfa_number_of_states = 1;
+
+int act_hash(act_t a) { return (int)a; }
+int act_cmp(act_t a,act_t b) {
+  if (a == b) return 0; else if (a<b) return -1; else return 1;
+}
+
+
+
+
+unsigned int num_conflicts_ll = 0;
+unsigned int num_conflicts_dfa = 0;
+unsigned int num_conflicts_change_order = 0;
+unsigned int num_conflicts_resolved = 0;
+unsigned int num_conflicts_unresolved = 0;
+unsigned int num_conflicts_unbounded = 0;
+
+int uint_cmp(unsigned int a, unsigned int b) {
+  if (a == b) return 0; else if (a<b) return -1; else return 1;
+}
+
+#define iterator(x) (Set::make_iter(Core::heap_region,x))
+//static Iter::iter_t<`a> iterator(Set::set_t<`a,`H> x : regions(`a) > `H) {
+//  return Set::make_iter(Core::heap_region,x);
+//}
+#define dict_iter(x) (Dict::make_iter(Core::heap_region,x))
+//static Iter::iter_t<$(`a,`b)> dict_iter(Dict::dict_t<`a,`b,`H> x : regions($(`a,`b)) > `H) {
+//  return Dict::make_iter(Core::heap_region,x);
+//}
+
+const char ?txtfile(const char ?x);
+
+
+/******************************* DFAS *******************************/
+/*
+  Each state of a DFA is identified by a number.
+
+  State 0 is a dead state: all transitions out of state 0 lead to
+  state 0, and state 0 is not a final state.
+
+  State 1 is the (unique) initial state.
+
+  Each state has a list of transitions out of the state.
+
+  The default transition out of a state is the dead state 0.
+
+  A DFA has a set of final states (unlike the NFAs above which only
+  needed a single final state).
+
+  Each final state has some number of "attributes".  Essentially
+  the attributes are used to say which of a number of alternatives
+  were reached, e.g., in a dfa for a regular expression
+  (r1 | r2 | r3) a final state might correspond to final states
+  for r1, r2, or r3; we might want to know whether a final state
+  of the dfa corresponds to more than one of r1, r2, r3, that tells
+  us about ambiguities.
+
+  Each DFA action also has an associated weight.
+
+*/
+
+static void att_print(FILE @f, att_t a) {
+  fprintf(f,"%u",a);
+}
+static int att_hash(att_t a) { return (int)a; }
+static int att_cmp(att_t a,att_t b) { return Core::intcmp((int)a,(int)b); }
+aset_t aset_empty() {
+  return Set::empty(att_cmp);
+}
+aset_t aset_insert(aset_t attrs,att_t x) {
+  return Set::insert(attrs,x);
+}
+aset_t aset_union(aset_t attrs1,aset_t attrs2) {
+  return Set::union_two(attrs1,attrs2);
+}
+aset_t aset_diff(aset_t attrs1,aset_t attrs2) {
+  return Set::diff(attrs1,attrs2);
+}
+aset_t aset_singleton(att_t x) {
+  return Set::insert(aset_empty(),x);
+}
+
+using Semiring;
+
+/* A span indicates that every action in the range [lb,ub), where
+   lb is implicit, should cause a transition to target with weight w */
+struct span {
+  st_t  target;
+  act_t ub;
+  weight_t w;
+};
+typedef struct span @span_t;
+
+// create a new span w/ default weight.
+span_t new_span(st_t target, act_t ub){return new span(target,ub,one_weight);}
+
+/* Transitions.  lb is the implicit lower bound for the first span,
+   the implicit lb for subsequent spans is given by the ub of the
+   previous span. */
+struct trans {
+  act_t                lb;
+  List::list_t<span_t> spans;
+};
+typedef struct trans @trans_t;
+typedef struct trans *trans_opt_t;
+
+struct DFA {
+  unsigned int number_of_states;
+  Hashtable::table_t<st_t,aset_t> final_attrs; // for final states only
+  Hashtable::table_t<st_t,weight_t@`H> final_weights; // for final states only
+  Axarray::xarray_t<trans_opt_t> states;
+
+  Set::set_t<st_t> final_states; // this could be calculated from final_attrs or final_weights.
+
+  //  Hashtable::table_t<act_t,str_t> act_map;
+
+  // For compression
+  // if (ranges) then actions in the transitions are translated
+  // as follows:
+  // suppose there are n actions numbered 0 to n-1.
+  // then ranges has n+1 elements and
+  // action 0 is translated to [ range[0],range[1] )
+  // ...
+  // action n-1 is translated to [ range[n-1],range[n] )
+  unsigned int ?ranges;
+  unsigned int number_of_actions; // numelts(ranges)-1
+};
+
+unsigned int dfa_get_num_states(dfa_t dfa){
+	return dfa->number_of_states;
+}
+
+
+int dfa_is_final(dfa_t dfa,st_t s) {
+  return Set::member(dfa->final_states,s);
+}
+Set::set_t<st_t> dfa_final_states(dfa_t dfa) {
+  return dfa->final_states;
+}
+aset_t dfa_final_attrs(dfa_t dfa,st_t s) {
+  return Hashtable::lookup(dfa->final_attrs,s);
+}
+weight_t dfa_final_weight(dfa_t dfa,st_t s){
+  return *(Hashtable::lookup(dfa->final_weights,s));
+}
+st_t target(dfa_t dfa,st_t s,act_t a) {
+  let t = Axarray::get(dfa->states,s);
+  if (!t) return 0; /* target is the dead state */
+  if (a < t->lb) return 0;
+  for (let sp = t->spans; sp; sp = sp->tl)
+    if (a < sp->hd->ub) return sp->hd->target;
+  /* Should never get here */
+  // We now use target() sometimes when we do not expect a target
+  // internal_err("no target for action %u in state %u\n",a,s);
+  return 0;
+}
+
+$(st_t,weight_t) target_w_weight(dfa_t dfa,st_t s,act_t a) {
+  let t = Axarray::get(dfa->states,s);
+  if (!t) return $(0,zero_weight); /* target is the dead state */
+  if (a < t->lb) return $(0,zero_weight);
+  for (let sp = t->spans; sp; sp = sp->tl)
+    if (a < sp->hd->ub) return $(sp->hd->target,sp->hd->w);
+  /* Should never get here */
+  // We now use target() sometimes when we do not expect a target
+  // internal_err("no target for action %u in state %u\n",a,s);
+  return $(0,zero_weight);
+}
+
+void dfa_add_trans(dfa_t dfa,st_t s, st_t dst, act_t act, weight_t w) {
+  let t = Axarray::get(dfa->states,s);
+  if (!t) {
+    t = new trans(act,List::list(new span(dst,act+1,w)));
+    Axarray::set(dfa->states,s,t);
+    return;
+  }
+  if (act < t->lb) {
+    let old_lb = t->lb;
+    let sp1 = new span(dst,act+1,w);
+    let sp2 = new span(0,old_lb,zero_weight);
+    t->lb = act;
+    t->spans = new List::List(sp1,new List::List(sp2, t->spans));
+    return;
+  }
+  let lb = t->lb;
+  for (let ss = t->spans; ss; ss = ss->tl){
+    if (act < ss->hd->ub){ 
+      if (ss->hd->target == dst)
+	// FIX: add check that weights are the same.
+	return; // nothing to change
+      let old_span = ss->hd;
+      if (act > lb) {
+	ss->hd = new span(old_span->target,act,old_span->w);
+	ss->tl = new List::List(old_span /* filler, about to be changed */, 
+				ss->tl);
+	ss = ss->tl;
+      }
+
+      ss->hd = new span(dst,act+1,w);
+
+      if (act+1 < old_span->ub){
+	ss->tl = new List::List(new span(old_span->target,old_span->ub,old_span->w),
+				ss->tl);
+	ss = ss->tl;
+      }
+
+      return;
+    }
+    lb = ss->hd->ub;
+  }
+
+  // act was not within the the spans. add as new span at end of list.
+  let new_ss = List::list(new span(dst,act+1,w));
+  if (act > lb) {
+    new_ss = new List::List(new span(0,act,zero_weight), new_ss);
+  } 
+  t->spans = List::imp_append(t->spans, new_ss);
+}
+
+aset_t dfa_get_transitions(dfa_t dfa,st_t s) {
+  let t = Axarray::get(dfa->states,s);
+  let txs = Set::empty(st_cmp); // FIX: should be act_cmp
+  if (!t) return txs; /* target is the dead state */
+
+  let lb = t->lb;
+  for (let sp = t->spans; sp; sp = sp->tl){
+    if (sp->hd->target){ // add every element of this span to txs.
+      for (int ub = sp->hd->ub; lb < ub; lb++)
+	txs = Set::insert(txs,lb);
+    } else // skips this span
+      lb = sp->hd->ub;
+  }
+
+  return txs;
+}
+
+List::list_t<$(act_t,st_t)@> dfa_get_trans_map(dfa_t dfa,st_t s) {
+  let t = Axarray::get(dfa->states,s);
+  let txs = NULL;
+  if (!t) return txs; /* target is the dead state */
+
+  let lb = t->lb;
+  for (let sp = t->spans; sp; sp = sp->tl) {
+		if (sp->hd->target) { // add every element of this span to txs.
+			for (int ub = sp->hd->ub; lb < ub; lb++)
+				txs = new List::List(new $(lb, sp->hd->target), txs);
+		} else
+			// skips this span
+			lb = sp->hd->ub;
+	}
+
+  return txs;
+}
+
+// Return pointer to first action not equal to a ("excl" = excluding), 
+// for which there's a transition to a non-empty state.
+// Return NULL if there is none.
+act_t* first_action_excl(dfa_t dfa,st_t s,act_t a) {
+  let t = Axarray::get(dfa->states,s);
+  if (!t) return NULL; /* target is the dead state */
+
+  let lb = t->lb;
+  for (let sp = t->spans; sp; sp = sp->tl){
+    if (sp->hd->target != 0){
+      if (lb != a)
+	return new lb;      
+      else if (lb+1 < sp->hd->ub)
+	// if the next one is still within range, return it.
+	// otherwise, move on to next range
+	return new (lb+1);
+    } 
+    lb = sp->hd->ub;
+  }
+  
+  return NULL;
+}
+
+dfa_t dfa_create() {
+  return new DFA {
+    .number_of_states = 1, // there's always a "dead" state 0
+      .final_attrs = Hashtable::create(11,st_cmp,st_hash),
+      .final_weights = Hashtable::create(11,st_cmp,st_hash),
+      .states = Axarray::create(11,NULL),
+      .final_states = Set::empty(st_cmp),
+       //      .act_map = Hashtable::create(11,st_cmp,st_hash),
+      .ranges = NULL,
+      .number_of_actions = MAXACTION+1
+      };
+}
+void dfa_expand(dfa_t dfa) {
+  debugprint(1,"Expanding dfa... ");
+  if (dfa->ranges) {
+    for (let i = 0; i < dfa->number_of_states; i++) {
+      let t = Axarray::get(dfa->states,i);
+      if (!t) continue;
+      t->lb = dfa->ranges[t->lb];
+      for (let sp = t->spans; sp; sp = sp->tl) {
+	sp->hd->ub = dfa->ranges[sp->hd->ub];
+      }
+    }
+    dfa->ranges = NULL;
+    dfa->number_of_actions = MAXACTION+1;
+  }
+  debugprint(1,"done\n");
+}
+void dfa_compress(dfa_t dfa) {
+  debugprint(1,"Compressing dfa... ");
+  Set::set_t<unsigned int> edge_actions = Set::empty(uint_cmp);
+  for (let i = 0; i < dfa->number_of_states; i++) {
+    let t = Axarray::get(dfa->states,i);
+    if (!t) continue;
+    let lb = t->lb;
+    edge_actions = Set::insert(edge_actions,lb);
+    for (let sp = t->spans; sp; sp = sp->tl) {
+      edge_actions = Set::insert(edge_actions,sp->hd->ub);
+    }
+  }
+  let num_edge_actions = Set::cardinality(edge_actions);
+  debugprint(1,"%d ranges... ",num_edge_actions);
+  unsigned int ?ranges = new {for j < num_edge_actions : 0 };
+
+  Dict::dict_t<unsigned int,unsigned int> action_map = Dict::empty(uint_cmp);
+  for (let i = 0; !Set::is_empty(edge_actions); i++) {
+    let a = Set::choose(edge_actions); // NB: we assume this is sorted
+    edge_actions = Set::delete(edge_actions,a);
+    ranges[i] = a;
+    action_map = Dict::insert(action_map,a,i);
+  }
+  for (let i = 0; i < dfa->number_of_states; i++) {
+    let t = Axarray::get(dfa->states,i);
+    if (!t) continue;
+    t->lb = Dict::lookup(action_map,t->lb);
+    for (let sp = t->spans; sp; sp = sp->tl) {
+      sp->hd->ub = Dict::lookup(action_map,sp->hd->ub);
+    }
+  }
+  dfa->ranges = ranges;
+  dfa->number_of_actions = numelts(ranges)-1;
+  debugprint(1,"done\n");
+}
+st_t dfa_fresh_state(dfa_t dfa) {
+  return dfa->number_of_states++;
+}
+void dfa_register_state(dfa_t dfa,st_t s) {
+  if (dfa->number_of_states <= s)
+    dfa->number_of_states = s + 1;
+}
+void dfa_add_final(dfa_t dfa, st_t final, aset_t attrs) {
+  // NB: we allow marking a state final with empty attrs
+  aset_t *att_opt = Hashtable::lookup_opt(dfa->final_attrs,final);
+  if (att_opt) {
+    Hashtable::remove(dfa->final_attrs,final);
+    Hashtable::insert(dfa->final_attrs,final,aset_union(*att_opt,attrs));
+  }
+  else
+    Hashtable::insert(dfa->final_attrs,final,attrs);
+  dfa->final_states = Set::insert(dfa->final_states,final);
+}
+void dfa_set_final(dfa_t dfa, st_t final, aset_t attrs) {
+  // NB: we allow marking a state final with empty attrs
+  aset_t *att_opt = Hashtable::lookup_opt(dfa->final_attrs,final);
+  if (att_opt) {
+    Hashtable::remove(dfa->final_attrs,final);
+  }
+  Hashtable::insert(dfa->final_attrs,final,attrs);
+  dfa->final_states = Set::insert(dfa->final_states,final);
+}
+
+const char ?fsm_char_escape(unsigned int c) {
+  switch (c){
+  case '\t':
+    return aprintf("\\t");
+  case '\n':
+    return aprintf("\\n");
+  case ' ':
+    return aprintf("SPACE");
+  case '\'':
+    return aprintf("\\'");
+  case '"':
+    return aprintf("\\\"");
+  default:
+    if (isprint(c))
+      return aprintf("%c",(unsigned char)c);
+    else
+      return aprintf("\\%03u",c);
+  }
+}
+
+int fsm_char_unescape(const char? s) {
+  if (!strcmp(s,"\\t")) return '\t';
+  else if (!strcmp(s,"\\n")) return '\n';
+  else if (!strcmp(s,"SPACE")) return ' ';
+  else if (!strcmp(s,"\\'")) return '\'';
+  else if (!strcmp(s,"\\\"")) return '"';
+  else {
+    if (s[0] == '\\' && s[1]){
+      int c;
+      if (sscanf(s+1,"%u",&c))
+        return c;
+      else return -1;
+    }
+
+    if (!s[1]) // its a single character.
+      return s[0];
+    else 
+      return -1;
+  }
+}
+
+// Create a DFA from an FSM file.
+$(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename,
+				   act_t (@symb2act)(const char ?`H, `a),`a symb_info)
+{
+
+  FILE *f = fopen(filename,"r");
+  if (!f) {
+    fprintf(stderr, "Failed to open file %s.\n",filename);
+    return NULL;
+  }
+  
+  dfa_t dfa = dfa_create();
+
+  int src,dst;
+  char ?ln = calloc(1000,sizeof(char));
+  char ?dst_or_val = calloc(100,sizeof(char));
+  char ?symb = calloc(100,sizeof(char));
+  char ?val_str = calloc(100,sizeof(char));
+  weight_t val;
+
+  let ln_s = fgets(ln,1000,f);
+  for (let lineno = 1; ln_s != NULL; (ln_s = fgets(ln,1000,f)), lineno++){
+    let num_conv = sscanf( ln, "%d %s %s %s", &src, dst_or_val, symb, val_str);
+    src++; // incr. all state numbers to avoid state 0, which is the dead state.
+    dfa_register_state(dfa,src);
+
+    switch (num_conv) {
+    case 0:
+      fprintf(stderr, "Parse error: scanf unable to perform any conversions on line: %d.\n", lineno);
+      return NULL;
+    case 1: // Final state, cost 1
+      dfa->final_states = Set::insert(dfa->final_states,src);
+      Hashtable::insert(dfa->final_weights,src,new one_weight);
+      break;
+    case 2: // Final state, given cost
+      dfa->final_states = Set::insert(dfa->final_states,src);
+      let r = scan_weight(dst_or_val,&val);
+      if (!r){
+	fprintf(stderr, "Parse error: scanf unable to convert weight: %s, on line %d.\n", dst_or_val, lineno);
+	return NULL;
+      }
+      if ( !check_nonzero(val) ){
+	fprintf(stderr, "Final weight of ~zero on line %d.\n", lineno);
+      }
+      Hashtable::insert(dfa->final_weights,src,new val);
+      break;
+    case 3: // Arc, cost 1
+      let r = sscanf(dst_or_val,"%d",&dst);
+      if (r != 1){
+	fprintf(stderr, "Parse error: scanf unable to convert destination state number: %s, on line %d.\n", dst_or_val, lineno);
+	return NULL;
+      }
+      dst++;
+      dfa_register_state(dfa,dst);
+
+      let act = fsm_char_unescape(symb);
+      if (act == -1){
+	act = symb2act(symb,symb_info);
+      }
+
+      dfa_add_trans(dfa,src,dst,act,one_weight);
+      break;
+    case 4: // Arc, given cost
+      let r = sscanf(dst_or_val,"%d",&dst);
+      if (r != 1){
+	fprintf(stderr, "Parse error: scanf unable to convert destination state number: %s, on line %d.\n", dst_or_val, lineno);
+	return NULL;
+      }
+      dst++;
+      dfa_register_state(dfa,dst);
+
+      let act = fsm_char_unescape(symb);
+      if (act == -1){
+	act = symb2act(symb,symb_info);
+      }
+
+      let r = scan_weight(val_str,&val);
+      if (!r){
+	fprintf(stderr, "Parse error: scanf unable to convert weight: %s, on line %d.\n", val_str, lineno);
+	return NULL;
+      }
+
+      dfa_add_trans(dfa,src,dst,act,val);
+      break;
+    default:
+      fprintf(stderr, "Internal error: too many conversions in scanf.\n");
+      return NULL;
+    }
+  } // end while(num_conv != EOF)
+
+  // FIX: should coalesce spans of each state (for efficiency).
+
+  // Build mapping of DFA final states to completed symbols.
+
+  let dfa_final = Set::empty(st_cmp);
+  let final_st_action = symb2act("FINAL-STATE",symb_info);
+
+  for (let states = Set::to_list(dfa_final_states(dfa));
+       states != NULL; states = states->tl) {
+    let action_attrs = Set::empty(st_cmp); // should be attr_cmp
+    let s = states->hd;
+    let t = target(dfa,s,final_st_action);
+    if (t==0) {
+			dfa_final = Set::insert(dfa_final,s);
+		} else {
+			for (let s_txs = Set::to_list(dfa_get_transitions(dfa,t));
+					s_txs != NULL; s_txs = s_txs->tl) {
+				action_attrs = Set::insert(action_attrs,s_txs->hd);
+			}
+		}
+    dfa_set_final(dfa,s,action_attrs);
+  }
+
+  return new $(dfa,dfa_final);
+}
+
+
+/* Return the graph with an edge between state s and t iff
+   s moves to t in a single step, and neither s nor t is
+   the dead state */
+#define IGNOREDEAD 1
+stgraph_t dfa_onestep(dfa_t dfa) {
+  let g = Graph::empty(st_cmp);
+  for (let i = (IGNOREDEAD?1:0); i < dfa->number_of_states; i++) {
+    g = Graph::add_node(g,i);
+    let t = Axarray::get(dfa->states,i);
+    if (!t) continue;
+    if (!IGNOREDEAD && t->lb > 0) {
+      g = Graph::add_node(g,0);
+      g = Graph::add_edge(g,i,0);
+    }
+    for (let x = t->spans; x; x = x->tl) {
+      let target = x->hd->target;
+      if (IGNOREDEAD && !target) continue; /* ignore the dead state */
+      g = Graph::add_node(g,target);
+      g = Graph::add_edge(g,i,target);
+      if (!IGNOREDEAD && x->tl == NULL) {
+        if (x->hd->ub < MAXACTION+1) {
+          g = Graph::add_node(g,0);
+          g = Graph::add_edge(g,i,0);
+        }
+      }
+    }
+  }
+  return g;
+}
+
+/* Return the reachability graph of the states of a dfa,
+   ignoring the dead state */
+stgraph_t dfa_reachable(dfa_t dfa) {
+  return Graph::tc(dfa_onestep(dfa));
+}
+
+/* Build a spanning tree with state 1 as the root using a dumb BFS.
+   Return the tree as a predecessor array: pred[s] is the parent of s
+   in the tree.  pred[s] == 0 iff s is 0, 1, or not reachable from 1. */
+static st_t ?dfa_spantree(dfa_t dfa) {
+  let onestep = dfa_onestep(dfa);
+  let pred = new { for i < dfa->number_of_states : (st_t)0 };
+  let working = Set::singleton(st_cmp,1);
+  let marked = working;
+  while (!Set::is_empty(working)) {
+    let next = Set::empty(st_cmp);
+    while (!Set::is_empty(working)) {
+      let x = Set::choose(working);
+      working = Set::delete(working,x);
+      let x_targets = Set::diff(Graph::get_targets(onestep,x),marked);
+      marked = Set::union_two(marked,x_targets);
+      next = Set::union_two(next,x_targets);
+      while (!Set::is_empty(x_targets)) {
+        let x_target = Set::choose(x_targets);
+        x_targets = Set::delete(x_targets,x_target);
+        pred[x_target] = x;
+      }
+    }
+    working = next;
+  }
+  return pred;
+}
+/* Print an input that reaches state s */
+void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s) {
+  if (s == 1) {
+    fprintf(f,"<the empty string>\n");
+    return;
+  }
+  if (spantree[s] == 0) {
+    fprintf(f,"<no input reaches state %u>\n",s);
+    return;
+  }
+  let result = NULL;
+  let current = s; /* Work backwards from s to the initial state 1  */
+  while (current != 1) {
+    /* pred is one state closer to the initial state */
+    let pred = spantree[current];
+    if (pred == 0) goto DFA_EXAMPLE_BAD;
+    let t = Axarray::get(dfa->states,pred);
+    if (!t) goto DFA_EXAMPLE_BAD;
+
+    /* Find the transition from pred to the current state */
+    let lb = t->lb;
+    for (let sp = t->spans; sp; sp = sp->tl) {
+      let target = sp->hd->target;
+      let ub = sp->hd->ub;
+      if (target != current) { lb = ub; continue; }
+      /* Characters in [lb,ub) go from pred to current; find
+         one to use in our example, preferring printable chars */
+      int c = lb;
+      for (let i = lb; i < ub; i++) {
+        if (isprint(i)) { c = i; break; }
+      }
+      result = new List::List(c,result);
+      break;
+    }
+    current = pred;
+  }
+  /* Print the example using C string escapes, except that DQUOTE is not escaped */
+  for (; result; result = result->tl) {
+    switch (result->hd) {
+    case '\a': fprintf(f,"\\a"); break;
+    case '\b': fprintf(f,"\\b"); break;
+    case '\f': fprintf(f,"\\f"); break;
+    case '\n': fprintf(f,"\\n"); break;
+    case '\r': fprintf(f,"\\r"); break;
+    case '\t': fprintf(f,"\\t"); break;
+    case '\v': fprintf(f,"\\v"); break;
+    case '\\': fprintf(f,"\\\\"); break;
+    case c:
+      if (c>=' ' && c<='~') fprintf(f,"%c",c);
+      else fprintf(f,"\\%d%d%d",((c>>6)&7),((c>>3)&7),(c&7));
+      break;
+    }
+  }
+  fprintf(f,"\n");
+  return;
+ DFA_EXAMPLE_BAD:
+  fprintf(f,"Internal error: dfa_example\n");
+  return;
+}
+
+/* Warn if a final state for alternative A can reach a final state
+   for a different alternative B.  This would mean that a string
+   matching one alternative used to build the dfa is a prefix of
+   a string used to match another alternative.
+ */
+typedef Set::set_t<Set::set_t<st_t>> stsetset_t;
+
+/* Modify a DFA (if necessary) so that each final state has only one
+   attribute.  Ties are broken as follows: when an attribute is also
+   the attribute of a previous final state (matching a prefix), we
+   drop it.  Otherwise we use the lowest numbered attribute.
+   Return true iff a tie had to be broken.
+*/
+static int leq_all(att_t a,aset_t x) {
+  att_t b;
+  for (let i = iterator(x); Iter::next(i,&b); ) {
+    if (b < a) return 0;
+  }
+  return 1;
+}
+int dfa_tiebreak(dfa_t dfa) {
+  /* What final states can a given final state reach? */
+  let final_reachable = node_intersect(dfa_reachable(dfa),dfa->final_states);
+
+  /* { s | s is a final state with only one attribute } */
+  let unique = Set::empty(st_cmp);
+
+  /* { a | there is a final state with attribute a and no other attribute } */
+  let unique_attrs = Set::empty(att_cmp);
+
+  /* { s | s is a final state with more than one attribute } */
+  let shared = Set::empty(st_cmp);
+
+  st_t f;
+  for (let i = iterator(dfa->final_states); Iter::next(i,&f); ) {
+    let f_attrs = Hashtable::lookup(dfa->final_attrs,f);
+    let num_f_attrs = Set::cardinality(f_attrs);
+    switch (num_f_attrs) {
+    case 0:
+      internal_err("final state %u has no attributes\n",f);
+      break;
+    case 1:
+      unique = Set::insert(unique,f);
+      unique_attrs = Set::insert(unique_attrs,Set::choose(f_attrs));
+      break;
+    default:
+      shared = Set::insert(shared,f);
+      break;
+    }
+  }
+
+  if (Set::cardinality(shared) == 0){
+    eprintf("All LL(1) conflicts were resolved in the lookahead dfa\n");
+    return 0;
+  }
+
+  let spantree = dfa_spantree(dfa);
+  for (let i = iterator(shared); Iter::next(i,&f); ) {
+    num_conflicts_dfa++;
+    let f_attrs = Hashtable::lookup(dfa->final_attrs,f);
+
+    eprintf("Some input matches these alternatives simultaneously:");
+    fprint_uintset(stderr,f_attrs);
+    eprintf("Example: ");
+    dfa_example(stderr,dfa,spantree,f);
+
+    let attrs = f_attrs;
+    st_t g;
+    for (let j = iterator(unique); Iter::next(j,&g); ) {
+      if (Graph::is_edge(final_reachable,g,f)) {
+        let g_attrs = Hashtable::lookup(dfa->final_attrs,g);
+        attrs = Set::diff(attrs,g_attrs);
+      }
+    }
+    if (Set::cardinality(attrs) == 1) {
+      num_conflicts_resolved++;
+      let chosen = Set::choose(attrs);
+      eprintf("Choose %u to win by prefix test\n",chosen);
+      Hashtable::insert(dfa->final_attrs,f,attrs);
+      if (!leq_all(chosen,f_attrs)) {
+	num_conflicts_change_order++;
+	eprintf("*** THIS IS A CHANGE IN ORDER\n");
+      }
+      continue;
+    }
+    attrs = Set::diff(attrs,unique_attrs);
+    if (Set::cardinality(attrs) == 1) {
+      num_conflicts_resolved++;
+      let chosen = Set::choose(attrs);
+      eprintf("Choose %u to win by exclusive test\n",chosen);
+      Hashtable::insert(dfa->final_attrs,f,attrs);
+      if (!leq_all(chosen,f_attrs)) {
+	num_conflicts_change_order++;
+	eprintf("*** THIS IS A CHANGE IN ORDER\n");
+      }
+      continue;
+    }
+    num_conflicts_unresolved++;
+    let chosen = Set::choose(f_attrs); // NB: WE ASSUME THIS IS THE SMALLEST
+    eprintf("Unable to resolve by prefix test or exclusive test (so %u wins)\n",chosen);
+    Hashtable::insert(dfa->final_attrs,f,Set::singleton(att_cmp,chosen));
+  }
+  return Set::cardinality(shared);
+}
+
+/* An nstate is a set of nfa states plus a hash value, used
+   for making maps from nstates.  We ensure that the dead
+   nfa state 0 never appears in the set; this makes sense
+   because there is a default transition to 0. */
+typedef $(int,Set::set_t<st_t>) @nstate_t; // int is hash value = sum of elements
+static int
+nstate_hash(nstate_t n) {
+  return (*n)[0];
+}
+static int
+nstate_cmp(nstate_t n1, nstate_t n2) {
+  return Set::setcmp((*n1)[1],(*n2)[1]);
+}
+static nstate_t
+nstate_empty() {
+  return new $(0,Set::empty(st_cmp));
+}
+static nstate_t
+nstate_insert(nstate_t n,st_t a) {
+  let &$(h,s) = n;
+  if (a == 0 || Set::member(s,a)) return n;
+  return new $(h+a,Set::insert(s,a));
+}
+
+// Convert a set of states to an nstate.
+static nstate_t
+stset2nstate(Set::set_t<st_t,`H> X) {
+  let result = nstate_empty();
+  while (!Set::is_empty(X)) {
+    let x = Set::choose(X);
+    X = Set::delete(X,x);
+    result = nstate_insert(result,x);
+  }
+  return result;
+}
+
+/* Does the dfa accept strings of unbounded length? */
+int dfa_unbounded(dfa_t dfa) {
+  let reachable = dfa_reachable(dfa);
+  let cyclic_states = Set::empty(st_cmp);
+  for (let i = 1; i < dfa->number_of_states; i++) {
+    if (Graph::is_edge(reachable,i,i)) {
+      cyclic_states = Set::insert(cyclic_states,i);
+    }
+  }
+
+  let unbounded_attrs = Set::empty(att_cmp);
+  st_t f;
+  for (let i = iterator(dfa->final_states); Iter::next(i,&f); ) {
+    st_t g;
+    for (let j = iterator(cyclic_states); Iter::next(j,&g); ) {
+      if (Graph::is_edge(reachable,g,f)) {
+	let f_attrs = Hashtable::lookup(dfa->final_attrs,f);
+	unbounded_attrs = Set::union_two(unbounded_attrs,f_attrs);
+	break;
+      }
+    }
+  }
+  if (Set::cardinality(unbounded_attrs)) {
+    eprintf("The following attributes may require unbounded lookahead:");
+    fprint_uintset(stderr,unbounded_attrs);
+    return 1;
+  }
+  return 0;
+}
+
+/************************* DFA MINIMIZATION *************************/
+/* Hopcroft's algorithm as explained by Gries */
+
+/* Currently we have a time/space dependence on the number of possible
+   actions, which will be a problem if we want to support Unicode.
+   However, it is sufficient for minimization to consider only those
+   actions which start a new range out of a state in the dfa.  Proof:
+
+   If (Bj,a) splits Bi, then there are states s,t in Bi such that
+   delta(s,a) in Bj and delta(t,a) not in Bj.  Now suppose a is not
+   the start of a range out of s and t.  Then
+     delta(s,a) == delta(s,a-1)
+     delta(t,a) == delta(t,a-1)
+   hence it would be sufficient to consider (Bj,a-1) instead of (Bj,a).
+   Repeat until you reach an a that is the start of a range.
+
+   Therefore, instead of looping over all actions, we can loop over
+   all actions that start ranges.
+*/
+
+/* Return an array delta_inv such that delta_inv[s][a] is the set of states that
+   transition to state s on action a */
+/* Note the space dependence on MAXACTION */
+typedef Set::set_t<st_t> @{MAXACTION+1} ?delta_inv_t;
+static delta_inv_t make_delta_inv(dfa_t dfa) {
+  /* For each state a mapping from actions to state sets */
+  let emptyset = Set::empty(st_cmp);
+  let result = new {for i < dfa->number_of_states : new {for j < MAXACTION+1 : emptyset }};
+  for (let i = 0; i < dfa->number_of_states; i++) {
+    let smap = result[i];
+    switch (Axarray::get(dfa->states,i)) {
+    case NULL: break;
+    case t:
+      let lb = t->lb;
+      {
+        let zmap = result[0];
+        for (let a = 0; a < lb; a++)
+          zmap[a] = Set::insert(zmap[a],i);
+      }
+      for (let x = t->spans; x; x = x->tl) {
+        let ub = x->hd->ub;
+        let target = x->hd->target;
+        let tmap = result[target];
+        for (let a = lb; a < ub; a++)
+          tmap[a] = Set::insert(tmap[a],i);
+        lb = ub;
+      }
+    }
+  }
+  return result;
+}
+/* Calculate the set of states that transition to a state B on action a; */
+/* the union of the sets delta_inv[s][a] for all s in B */
+static Set::set_t<st_t>
+B_delta_inv(delta_inv_t delta_inv, Set::set_t<st_t,`H> B, act_t a) {
+  let result = Set::empty(st_cmp);
+  let B_iter = iterator(B);
+  st_t s;
+  while (Iter::next(B_iter,&s))
+    result = Set::union_two(result,delta_inv[s][a]);
+  return result;
+}
+static inline void L_insert_f(int ?L,unsigned int i) {
+  if (L[i] >= 0) return;
+  let last = numelts(L)-1;
+  let next = L[last];
+  L[last] = i;
+  L[i] = next;
+  return;
+}
+static inline int L_member_f(int ?L,unsigned int i) {
+  return L[i] >= 0;
+}
+static inline int L_next_f(int ?L) {
+  let last = numelts(L)-1;
+  if (L[last] == last) return -1;
+  let result = L[last];
+  L[last] = L[result];
+  return result;
+}
+/* We do not eliminate unreachable states. */
+dfa_t dfa_minimize0(dfa_t dfa);
+dfa_t dfa_minimize(dfa_t dfa) {
+  if (1) {
+    dfa_compress(dfa);
+    dfa = dfa_minimize0(dfa);
+    dfa_expand(dfa);
+    return dfa;
+  }
+  else return dfa_minimize0(dfa);
+}
+dfa_t dfa_minimize0(dfa_t dfa) {
+  time_t start_time = time(NULL);
+  debugprint(1,"Minimizing... ");
+  unsigned int number_of_blocks = 1; // Block 0 is for non-final states (state 0 is always non-final)
+  unsigned int ?state2block = new {for i < dfa->number_of_states : 0};
+  let block2states = Axarray::create(101,Set::empty(st_cmp));
+
+  /* A straightforward representation of L as
+       Set::set_t<$(unsigned int,unsigned int)@>
+     turns out to be a bottleneck.  This one trades off space for speed.
+     It is the same as the one in Gries' paper, but is singly-linked
+     instead of doubly-linked.
+     Not suitable for unicode because space is proportional to MAXACTION. */
+  unsigned int last = dfa->number_of_states * (dfa->number_of_actions + 1);
+  int ?L = new { for i < last+1 : -1 };
+  L[last] = last;
+#define L_insert(i) L_insert_f(L,i)
+#define L_member(i) (L[i]>=0)
+#define L_next L_next_f(L)
+
+  /* Determine the initial partition of the states into blocks.
+     A state s is in the same block as state t if
+         (s is final iff t is final) and
+         (the final attributes of s equal the final attributes of t)
+     In the case where all final states have the same attributes, this
+     is the same as Hopcroft's algorithm.
+     The work list L is set up to contain the splits for all final blocks
+     (we don't bother to see if the non-final block is smaller than some
+     final block).
+  */
+  {
+    let attrs2block = Hashtable::create(101,nstate_cmp,nstate_hash);
+    for (let i = 0; i < dfa->number_of_states; i++) {
+      unsigned int b = 0;
+      if (Set::member(dfa->final_states,i)) {
+        let attrs = stset2nstate(Hashtable::lookup(dfa->final_attrs,i));
+        if (!Hashtable::try_lookup(attrs2block,attrs,&b)) {
+          b = number_of_blocks++;
+          Hashtable::insert(attrs2block,attrs,b);
+        }
+      }
+      state2block[i] = b;
+      Axarray::set(block2states,b,Set::insert(Axarray::get(block2states,b),i));
+    }
+    for (let block = 0; block < number_of_blocks; block++) {
+      // TODO: Not sure why we have to insert all blocks here.  It should
+      // be sufficient to insert all but block 0.  However, this demonstrably
+      // fails for conflict 19 of imap.bnf.
+      let b = block * (dfa->number_of_actions);
+      for (let i = 0; i < dfa->number_of_actions; i++)
+	L_insert(b+i);
+    }
+  }
+
+  if (number_of_blocks < 2) {
+    /* No final states.  So return the minimal non-accepting DFA: two
+       states, one dead, and an initial state that is not a final
+       state and that transitions to the dead state on every action */
+  DEAD:
+    let result = dfa_create();
+    result->ranges = dfa->ranges;
+    result->number_of_actions = dfa->number_of_actions;
+    dfa_fresh_state(result);
+    let delta = time(NULL) - start_time;
+    debugprint(1,"+elapsed time %d\n",delta);
+    return result;
+  }
+
+  let delta_inv = make_delta_inv(dfa);
+
+  /* The main loop of Hopcroft's algorithm. */
+  int Lidx;
+  while ( (Lidx = L_next) >= 0) {
+    let a = Lidx % (dfa->number_of_actions);
+    let Bj_num = Lidx / (dfa->number_of_actions);
+    let Bj = Axarray::get(block2states,Bj_num);
+    let Bj_inv = B_delta_inv(delta_inv,Bj,a);
+    st_t s_in_Bj_inv;
+    let D = Set::empty(uint_cmp);
+    for (let x = iterator(Bj_inv); Iter::next(x,&s_in_Bj_inv); ) {
+      D = Set::insert(D,state2block[s_in_Bj_inv]);
+    }
+    unsigned int i;
+    for (let x = iterator(D); Iter::next(x,&i); ) {
+      let Bi = Axarray::get(block2states,i);
+      let B1 = Set::intersect(Bi,Bj_inv);
+      if (Set::cardinality(B1) == Set::cardinality(Bi))
+	// all in, so no split here
+	continue;
+      let B2 = Set::diff(Bi,B1);
+
+      /* After this, B1 will replace Bi as block number i,
+	 and B2 will be a new block number number_of_blocks. */
+      let Bi_num = i;
+      let B1_num = i;
+      let B2_num = number_of_blocks++;
+      for (let c = 0; c < dfa->number_of_actions; c++) {
+        if (L_member(Bi_num*(dfa->number_of_actions)+c)) // (Bi,c) in L
+          // L = L - (Bi,c) + (B1,c) + (B2,c), noting Bi and B1 have same index
+	  L_insert(B2_num*(dfa->number_of_actions)+c);
+        else if (Set::cardinality(B1) < Set::cardinality(B2))
+	  L_insert(B1_num*(dfa->number_of_actions)+c);
+        else
+	  L_insert(B2_num*(dfa->number_of_actions)+c);
+      }
+      Axarray::set(block2states,B1_num,B1); // overwriting Bi
+      Axarray::set(block2states,B2_num,B2);
+      while (!Set::is_empty(B2)) {
+        let s = Set::choose(B2);
+        B2 = Set::delete(B2,s);
+        state2block[s] = B2_num;
+      }
+    }
+  }
+
+  /* The analysis is done.  Now we construct the minimal dfa,
+     with one state for each block */
+
+  /* Make sure the original dead state 0 maps to the new dead state 0. */
+  if (state2block[0] != 0) {
+    let s = state2block[0];
+    for (let i = 0; i < dfa->number_of_states; i++)
+      if (state2block[i] == s) state2block[i] = 0;
+      else if (state2block[i] == 0) state2block[i] = s;
+  }
+  /* If the initial state 1 is in the same block as the dead state 0,
+     return the minimal non-accepting dfa */
+  if (state2block[1] == 0) goto DEAD;
+  /* Make sure the original initial state 1 maps to the new initial state 1 */
+  if (state2block[1] > 1) {
+    let s = state2block[1];
+    for (let i = 0; i < dfa->number_of_states; i++)
+      if (state2block[i] == s) state2block[i] = 1;
+      else if (state2block[i] == 1) state2block[i] = s;
+  }
+
+  /* Now build the dfa */
+  let result = dfa_create();
+  result->number_of_states = number_of_blocks;
+  result->ranges = dfa->ranges;
+  result->number_of_actions = dfa->number_of_actions;
+  Set::set_t<st_t> completed_blocks =
+    /* A block is completed if we have added all its transitions and final
+       attributes.  The dead state starts out as completed. */
+    Set::singleton(st_cmp,0);
+  for (let i = 0; i < dfa->number_of_states; i++) {
+    let b = state2block[i];
+    if (Set::member(completed_blocks,b)) continue;
+    completed_blocks = Set::insert(completed_blocks,b);
+    if (Set::member(dfa->final_states,i))
+      dfa_add_final(result,b,Hashtable::lookup(dfa->final_attrs,i));
+    let t = Axarray::get(dfa->states,i);
+    if (!t) continue; // All transitions are to dead state, nothing to do
+    let new_t = new trans(t->lb,NULL);
+    let new_spans = NULL;
+    for (let x = t->spans; x; x = x->tl) {
+      let target = state2block[x->hd->target];
+      new_spans = new List::List(new_span(target,x->hd->ub),new_spans);
+    }
+    new_spans = List::imp_rev(new_spans);
+    new_t->spans = new_spans;
+    // FIX: this might not be the minimal representation of the transitions,
+    // since multiple targets in the original might be combined in the new.
+    Axarray::set(result->states,b,new_t);
+  }
+  debugprint(1,"Minimization from %u states to %u states\n",dfa->number_of_states,
+             result->number_of_states);
+  let delta = time(NULL) - start_time;
+  debugprint(1,"elapsed time %d\n",delta);
+  return result;
+}
+
+
+/* Return a new dfa that accepts the shortest prefix such that
+   only one final attribute is possible. */
+static aset_t
+reachable_attributes(dfa_t dfa, stgraph_t reachable, st_t s) {
+  let final_reachable =
+    Set::intersect(dfa->final_states,Graph::get_targets(reachable,s));
+  if (Set::member(dfa->final_states,s)) final_reachable = Set::insert(final_reachable,s);
+  let result = aset_empty();
+  while (!Set::is_empty(final_reachable)) {
+    let x = Set::choose(final_reachable);
+    final_reachable = Set::delete(final_reachable,x);
+    result = aset_union(result,Hashtable::lookup(dfa->final_attrs,x));
+  }
+  return result;
+}
+
+// YHM: what does this function do?
+static dfa_t short_circuit(dfa_t dfa) {
+  let reachable = dfa_reachable(dfa);
+  let done = Set::empty(st_cmp);
+  done = Set::insert(done,0);
+  let todo = Set::empty(st_cmp);
+  todo = Set::insert(todo,1);
+  Dict::dict_t<st_t,st_t> stmap = Dict::empty(st_cmp);
+  stmap = Dict::insert(stmap,0,0);
+  let result = dfa_create();
+  stmap = Dict::insert(stmap,1,dfa_fresh_state(result));
+  while (!Set::is_empty(todo)) {
+    /* Invariants: done and todo are disjoint sets of old states.
+       (x in done) iff (x in stmap). */
+    let old_st = Set::choose(todo);
+    todo = Set::delete(todo,old_st);
+    done = Set::insert(done,old_st);
+    let new_st = Dict::lookup(stmap,old_st);
+    let a = reachable_attributes(dfa,reachable,old_st);
+    if (Set::cardinality(a) == 0) continue;
+    if (Set::cardinality(a) == 1) { /* This is where short-circuits take place */
+      dfa_add_final(result,new_st,a);
+      continue;
+    }
+    if (Set::member(dfa->final_states,old_st))
+      dfa_add_final(result,new_st,Hashtable::lookup(dfa->final_attrs,old_st));
+    let old_trans = Axarray::get(dfa->states,old_st);
+    if (!old_trans) continue;
+    let lb = old_trans->lb;
+    let new_spans = NULL;
+    for (let old_spans = old_trans->spans; old_spans; old_spans = old_spans->tl) {
+      let ub = old_spans->hd->ub;
+      let old_target = old_spans->hd->target;
+      st_t new_target;
+      if (!Dict::lookup_bool(stmap,old_target,&new_target)) {
+        /* old_target is neither in done nor todo */
+        new_target = dfa_fresh_state(result);
+        stmap = Dict::insert(stmap,old_target,new_target);
+        todo = Set::insert(todo,old_target);
+      }
+      new_spans = new List::List(new_span(new_target,ub),new_spans);
+      lb = ub;
+    }
+    new_spans = List::imp_rev(new_spans);
+    let new_trans = new trans(old_trans->lb,new_spans);
+    Axarray::set(result->states,new_st,new_trans);
+  }
+  return result;
+}
+
+$(act_t, act_t, st_t, st_t) dfa_get_repeat_info(dfa_t dfa, st_t s_rpt, act_t call_a) {
+    // Find the non-term to which repeat is bound.
+    // TODO: after determinizing, possibly many calls from single
+    // state, but shouldn't be any terminals (is this true?). So, we
+    // will need to perform repeat for *all* nonterminals that appear.
+    let rpter_act = *(first_action_excl(dfa, s_rpt, call_a));
+    
+    // Find the action of the repeated symbol.
+    let s_repeatee = target(dfa, s_rpt, rpter_act);
+    let rptee_act = * (first_action_excl(dfa, s_repeatee, 0));
+
+    // Find the start state of the repeated DFA.
+    let rptee_start = target(dfa,s_rpt,call_a);
+
+    // Get the follow state.
+    let repeat_follow = target(dfa, s_repeatee, rptee_act);
+    
+    return $(rpter_act, rptee_act, rptee_start, repeat_follow);
+}
+
+// Construct a repeat dfa: ...
+// The new  state is connected to the specified final state "f".
+st_t mk_repeat_dfa(dfa_t dfa, act_t next, 
+				 act_t target_act, st_t target_s, 
+			  act_t final_act, st_t f){
+// st_t mk_repeat_dfa(dfa_t dfa, unsigned int n, 
+// 			  act_t next, 
+// 			  st_t target_s, act_t target, st_t f){
+    // FIX: is this the right weight?
+
+  let d = dfa_fresh_state(dfa);
+  
+  // Transitions don't sum to one b/c we've really compacted many states into one.
+  let target_span = new span(target_s,target_act+1,Semiring::from_inv_prob(2));
+  // everything b/w target_act and final_act.
+  let pre_final_span = new span(NOTRANSITION,final_act,zero_weight);
+  let final_span = new span(f,final_act+1,Semiring::one_weight);
+  // everything b/w final_act and next.
+  let pre_next_span = new span(NOTRANSITION,next,zero_weight);
+  let next_span = new span(d,next+1,Semiring::from_inv_prob(2));
+
+  let spans = next > final_act+1 ?
+    List::list(final_span, pre_next_span, next_span) : 
+    List::list(final_span, next_span);
+  spans = final_act > target_act + 1 ?
+    new List::List(target_span, new List::List(pre_final_span, spans)) : 
+    new List::List(target_span, spans);
+  Axarray::set(dfa->states,d,new trans(target_act,spans));
+  return d;
+}

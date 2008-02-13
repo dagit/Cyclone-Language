@@ -1,0 +1,132 @@
+/* (So far incomplete) Earley parser */
+
+#include <buffer.h>
+#include <string.h>
+#include <core.h>
+#include <stdlib.h>
+#include <list.h>
+#include <graph.h>
+#include "fa.h"
+#include "axarray.h"
+#include "pm_bnf.h"
+#include "semiring.h"
+
+#include "earley.h"
+
+using Semiring;
+
+namespace Earley;
+
+
+/* The alphabet of the automaton is the set of terminals and
+   non-terminals.  Assume for now that cs_t can represent a set of
+   terminals and non-terminals.  Number our new actions starting
+   at 256.
+
+   NB: there is a max number of actions hard-coded in cs.h.
+*/
+
+struct symbInfo {
+  unsigned int symb_action_counter;
+  struct Hashtable::Table<str_t,act_t> @symb_action_table;
+  struct Hashtable::Table<act_t,str_t> @action_symb_table;
+};
+
+Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si){return si->action_symb_table;}
+Hashtable::table_t<str_t,act_t> get_sa_table(symb_info_t si){return si->symb_action_table;}
+
+act_t callout_action() {
+  return 256;
+}
+static act_t repeat_action() {
+  return 257;
+}
+static act_t final_st_action() {
+  return 258;
+}
+act_t repeat_decr_action() {
+  return 259;
+}
+
+act_t repeat_final_action() {
+  return 260;
+}
+
+act_t start_states_table_action(){
+	return 261;
+}
+
+symb_info_t new_symb_info(){
+  struct Hashtable::Table<act_t,str_t> @ as_table =
+    Hashtable::create(11,st_cmp,st_hash);
+  Hashtable::insert(as_table,callout_action(),new "CALL");
+  Hashtable::insert(as_table,repeat_action(),new "REPEAT");
+  Hashtable::insert(as_table,repeat_decr_action(),new "REPEAT-DECR");
+  Hashtable::insert(as_table,repeat_final_action(),new "REPEAT-FINAL");
+  Hashtable::insert(as_table,final_st_action(),new "FINAL-STATE");
+  Hashtable::insert(as_table,start_states_table_action(),new "__START-STATES-TABLE__");
+
+  struct Hashtable::Table<str_t,act_t> @sa_table =
+    Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+  Hashtable::insert(sa_table,new "CALL",callout_action());
+  Hashtable::insert(sa_table,new "REPEAT",repeat_action());
+  Hashtable::insert(sa_table,new "REPEAT-DECR",repeat_decr_action());
+  Hashtable::insert(sa_table,new "REPEAT-FINAL",repeat_final_action());
+  Hashtable::insert(sa_table,new "FINAL-STATE",final_st_action());
+  Hashtable::insert(sa_table,new "__START-STATES-TABLE__",start_states_table_action());
+
+  let ssnf_table = Hashtable::create(11,strptrcmp,Hashtable::hash_stringptr);
+
+  return new symbInfo(MIN_ACTION,sa_table,as_table);
+}
+
+static act_t new_action(symb_info_t si) {
+  let a = si->symb_action_counter++;
+  if (a > MAXACTION) {
+    fprintf(stderr,"Internal error: maximum number of actions exceeded\n");
+    fflush(stderr);
+    exit(1);
+  }
+  return a;
+}
+const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
+////////////////////////////////////////////////////////////////////////
+// CAUSES COMPILER EXCEPTION:
+//   let as_table = 
+//     Hashtable::create(11,st_cmp,st_hash);
+//   Hashtable::insert(as_table,callout_action(),new "CALL");
+//   Hashtable::insert(as_table,repeat_action(),new "REPEAT");
+//   Hashtable::insert(as_table,final_st_action(),new "FINAL-STATE");
+////////////////////////////////////////////////////////////////////////
+  let sopt = Hashtable::lookup_opt(as_table,act);
+  if (sopt == NULL || *sopt == NULL) return NULL;
+  else return **sopt;
+}
+
+
+
+act_t symb2act(string_t<`H> symb, symb_info_t si) {
+//   let symbptr = new symb;
+  // TODO: document why we copy the string in the line below.
+  let symbptr = new (const char ?)aprintf("%s",symb);
+  let aptr = Hashtable::lookup_opt(si->symb_action_table,symbptr);
+  if (aptr != NULL) return *aptr;
+  let a = new_action(si);
+  if (debug)
+    fprintf(stderr,"Symbol %s has action 0x%x\n",symb,a);
+  // allocate a new string before putting it in table to ensure
+  // that
+  Hashtable::insert((_@)si->symb_action_table,symbptr,a);
+  Hashtable::insert((_@)si->action_symb_table,a,symbptr);
+  return a;
+}
+
+$(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename) {
+  let si = new_symb_info();
+  let r = fsm_dfa(filename,symb2act,si);
+  if (!r) return NULL;
+  else{
+    let &$(dfa,final_states) = (_@)r;
+    return new $(dfa,final_states,si);
+  }
+}
