@@ -604,7 +604,7 @@ int main(int argc, const char ?`H?argv) {
       debugprint(1,"Flattenning grammar ... ");
       if (flattenp == 2)
 	Flatten::fully_flatten_alts = 1;
-      gr = flatten_grammar(gr);
+      gr = Flatten::flatten_grammar(gr);
     }
 
     debugprint(1,"Adding bnf/ast generation ... ");
@@ -649,7 +649,7 @@ int main(int argc, const char ?`H?argv) {
     
     if (flattenp == 2)
       Flatten::fully_flatten_alts = 1;
-    ds = flatten_grammar(ds);
+    ds = Flatten::flatten_grammar(ds);
     debugprint(1,"done\n");
   }
   
