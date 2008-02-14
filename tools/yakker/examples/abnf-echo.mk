@@ -8,7 +8,7 @@ abnf-lookahead.cyc: examples/abnf-echo.bnf
 	./yakker -no-main -gen rulelist $< > $@
 
 # Targets for stand-alone abnf-echo program.
-abnf-echo: abnf-echo.o $(LIB_YAKKER)
+abnf-echo: abnf-echo.o bnf.o pr.o cs.o $(LIB_YAKKER)
 	$(CYCLONE) -o $@ $^  -lssl -lcrypto
 
 abnf-echo.cyc: examples/abnf-echo.bnf
@@ -34,12 +34,13 @@ abnf-earley.cyc: examples/abnf-echo.bnf yakker
 
 # Targets for stand-alone abnf-echo program.
 
-abnf-echo-earley: $(AE_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $(AE_OBJS) -lssl -lm $(LIB_YAKKER)
+abnf-echo-earley: $(AE_OBJS) bnf.o pr.o cs.o $(LIB_YAKKER)
+	$(CYCLONE) -o $@ $^ -lssl -lm
 
 aecrawl.cyc: examples/abnf-echo.bnf yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl rulelist $< > $@
 	echo '#define CRAWLFUN p_rulelist' >> $@
+	echo '#define CYC_DFA_NS CycDFA' >> $@
 	echo '#include "crawl-main.cyc"' >> $@
 
 
