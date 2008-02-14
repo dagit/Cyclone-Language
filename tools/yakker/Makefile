@@ -69,7 +69,7 @@ endef
 #######################################
 # Earley-backend files.
 EBE_FILES = axarray semiring earley-parsetree fsm-dfa util \
-            dfa-impl earley-common earley-backend ext-any-dfa
+            dfa-core earley-common earley-backend ext-any-dfa
 EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
 
 #######################################
