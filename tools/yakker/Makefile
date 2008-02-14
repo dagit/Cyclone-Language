@@ -39,7 +39,7 @@ CYCBISON=$(BINDIR)/cycbison
 CYCLEX=$(BINDIR)/cyclex
 STRINGIFY=$(BINDIR)/stringify
 
-YAKKER_FILES = analyze axarray cs bnf extract semiring fa nfa_lazy nfa_eager \
+YAKKER_FILES = analyze axarray cs bnf extract semiring fa dfa-core nfa_lazy nfa_eager \
   flatten termgrammar lex pads \
   parse_tab parsergen crawlergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \

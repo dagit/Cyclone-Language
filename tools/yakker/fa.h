@@ -50,12 +50,14 @@ typedef Set::set_t<att_t> aset_t;
 extern struct DFA;
 typedef struct DFA @dfa_t;
 
+extern dfa_t dfa_create();
+
 // Does state s have a transition on a in DFA dfa?
 // Returns: target state, if yes; 0, if no.
-st_t target(dfa_t dfa,st_t s,act_t a);
+extern st_t target(dfa_t dfa,st_t s,act_t a);
 
 // Returns: target state and transition weight, if yes; $(0,zero_weight) if no.
-$(st_t,Semiring::weight_t) target_w_weight(dfa_t dfa,st_t s,act_t a);
+extern $(st_t,Semiring::weight_t) target_w_weight(dfa_t dfa,st_t s,act_t a);
 
 extern act_t* first_action_excl(dfa_t dfa,st_t s,act_t a);
 extern Set::set_t<st_t> dfa_final_states(dfa_t dfa);
@@ -69,6 +71,7 @@ extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t righ
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa, int lazyfill);
 
+extern void dfa_add_final(dfa_t dfa, st_t final, aset_t attrs);
 extern void dfa_add_trans(dfa_t dfa,st_t s, st_t dst, act_t act, Semiring::weight_t w);
 extern unsigned int dfa_get_num_states(dfa_t dfa);
 extern st_t dfa_fresh_state(dfa_t dfa);
