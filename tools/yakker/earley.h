@@ -29,55 +29,51 @@ namespace Earley {
 //	// Given a symbol name A, return corresponding "epsilon" version.
 //  extern string_t eps_symb(string_t symb);
 
-  typedef List::list_t<datatype ParseTree @`H,`H> parse_forest_t;
-  typedef List::List_t<datatype ParseTree @`H,`H> Parse_forest_t;
-
-  typedef datatype ParseTree @`H parse_tree_t;
+//////////////////////////////////////////////
+//// SHARED functions (frontend and backend)
+/////////////////////////////////////////////
 
   typedef struct symbInfo @`H symb_info_t;
+  struct symbInfo {
+    unsigned int symb_action_counter;
+    struct Hashtable::Table<str_t,act_t> @symb_action_table;
+    struct Hashtable::Table<act_t,str_t> @action_symb_table;
+  };
+
   extern symb_info_t new_symb_info();
   extern act_t symb2act(string_t<`H> symb, symb_info_t si);
+  extern string_t act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table);
 
-  extern datatype ParseTree{
-    NonTerm(const char ?`H, int, int, Semiring::weight_t, parse_forest_t);
-    SharedNonTerm(const char ?`H, int, int, Semiring::weight_t, List::List_t<parse_forest_t,`H>);
-  };
-  
+
   extern act_t callout_action();
+  extern act_t repeat_action();
+  extern act_t final_st_action();
   extern act_t start_states_table_action();
   extern act_t repeat_decr_action();
   extern act_t repeat_final_action();
   
   extern Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si);  		
   extern Hashtable::table_t<str_t,act_t> get_sa_table(symb_info_t si);  		
-  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r);
   extern $(dfa_t,Set::set_t<st_t>,symb_info_t) *fsm2dfa(const char ?filename) ;
 
+//  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) compile(grammar_t grm, rule_t r);
   // returns: int pair: a) the number of valid complete parses of the string.
   //                    b) the number of valid prefix parses of the string.
-  extern $(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_final, 
-		     const char ?input, int show_progress);
+//  extern $(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_final, 
+//		     const char ?input, int show_progress);
 
 //  extern parse_forest_t recognize_frag(dfa_t dfa, symb_info_t symb_info, const char?`H symb_name, 
 //				       const char ?input, int show_progress);
 
-
-  /* Global variable that saves last derivation tree.
-   !! Treat as read-only outside of earley.cyc.
-   */
-  extern datatype ParseTree *last_derivation_tree;
-  /* Print left-most parse tree to depth of "depth". Use -1 to print entire tree. */
-  extern void print_LT(datatype ParseTree @pt, int depth);
-  /* Print right-most parse tree to depth of "depth". Use -1 to print entire tree. */
-  extern void print_RT(datatype ParseTree @pt, int depth);
+  //////////////////////////////////////////////
+  //// FRONTEND only
+  /////////////////////////////////////////////
 
   // is_grm argument indicates whether to treat the dfa as encoding a grammar and, hence, print
   // grammar-related decls.
   extern void dfa2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info, string_t dfa_namespace, int is_grm);
 
   extern void act2symb_haxe(FILE @f, symb_info_t si);
-
-  extern int isAmb_parse_tree(datatype ParseTree @pt);
 
   // Convert and print the rule as an NFA in FSM format.
   // Writes two files based on the filename_base: .fsm and .sym. The

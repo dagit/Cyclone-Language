@@ -31,6 +31,7 @@
 #include "corerules.h"
 #include "namespaces.h"
 #include "earley.h"
+#include "earley-dispatch.h"
 
 //#include "dfa.h"
 //#include "earley-backend.h"
@@ -159,10 +160,8 @@ static const char ?add_namespace = NULL;
 "         -eagernfa              use eager nfa construction (default is lazy)\n"\
 "         -depend                produce a dependency graph of symbols in DOT format\n"\
 "         -earley <regexp>       Earley parse stdin according to regexp and grammar\n"\
-"         -earley-line <regexp>  Earley parse stdin, line-by-line, according to regexp and grammar\n"\
 "         -earley-shell <regexp> Earley parse files specified interactively on command line, according to regexp and grammar\n"\
 "         -earley-fsm <regexp>   Earley parse stdin according to regexp and grammar, using FSM for weighted parsing\n"\
-"         -earley-run <regexp>   Earley parse stdin according to regexp and linked dfa\n"\
 "         -earley-gen-dot <regexp>   Generate a dot-encoded DFA of the regexp.\n"\
 "         -earley-gen-cyc <regexp>   Generate a cyclone-encoded DFA of the regexp.\n"\
 "         -earley-gen-haxe <regexp>   Generate a haxe-encoded DFA of the regexp.\n"\
@@ -289,12 +288,6 @@ int main(int argc, const char ?`H?argv) {
       earley_regexp = argv[i+1];
       i += 1;
     }
-    else if (strcmp("-earley-line",argv[i]) == 0) {
-      if (i+1 >= argc) die();
-      earley_mode = 1;
-      earley_regexp = argv[i+1];      
-      i += 1;
-    }
     else if (strcmp("-earley-shell",argv[i]) == 0) {
       if (i+1 >= argc) die();
       earley_mode = 2;
@@ -304,12 +297,6 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-earley-fsm",argv[i]) == 0) {
       if (i+1 >= argc) die();
       earley_mode = 3;
-      earley_regexp = argv[i+1];
-      i += 1;
-    }
-    else if (strcmp("-earley-run",argv[i]) == 0) {
-      if (i+1 >= argc) die();
-      earley_mode = 4;
       earley_regexp = argv[i+1];
       i += 1;
     }
@@ -675,370 +662,11 @@ int main(int argc, const char ?`H?argv) {
     if (minus_elimp)
       minus_elim(ds); // also marks character sets, needed for the conversion
     
-    switch (earley_mode){
-    case 0:
-      // TODO: assume regexp is a symbol for now
-      let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
-    
-      printf("Earley parsing stdin... "); fflush(stdout);
-      int c;
-      let b = Buffer::create(101);
-      while ( (c = fgetc(stdin)) != EOF)
-	Buffer::add_char(b,c);
-      let $(valid,valid_prefix) = Earley::recognize(dfa,symb_info,dfa_final,Buffer::contents(b), 1);
-      printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
-      fflush(stdout);
-      break;
-    case 1:      
-      // TODO: assume regexp is a symbol for now
-      let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
-    
-      while(1){
-	printf("Earley parsing stdin... "); fflush(stdout);
-	int c;
-	let b = Buffer::create(101);
-	while ( (c = fgetc(stdin)) != '\n' && c != EOF)
-	  Buffer::add_char(b,c);
-	let $(valid,valid_prefix) = Earley::recognize(dfa,symb_info,dfa_final,Buffer::contents(b), 1);
-	printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
-	fflush(stdout);
-      }
-    case 3: // Use FSM
-      dfa_t *p_dfa = NULL;
-      Earley::symb_info_t *p_symb_info = NULL;
-      Set::set_t<st_t> *p_dfa_final = NULL;
-
-      /* Convert grammar to weighted NFA */
-      char f1[]@zeroterm = "f1-XXXXXX";
-      char f2[]@zeroterm = "f2-XXXXXX";
-      char f3[]@zeroterm = "f3-XXXXXX";
-      mkTemp(f1);
-      mkTemp(f2);
-      mkTemp(f3);
-
-      // TODO: assume regexp is a symbol for now
-      Earley::rule_fsm(f1,f2,ds,SYMB(earley_regexp));
-
-      /* Run FSM */
-      let cmd = aprintf("fsmcompile -i %s %s | "
-                        "fsmrmepsilon | "
-                        "fsmdeterminize | "
-                        "fsmprint -i %s > %s",
-                        f2,f1,f2,f3);
-      if (system(cmd) != 0) {
-        fprintf(stderr,"Error: fsm failed\n");
-        remove(f1); remove(f2); remove(f3);
-        exit(1);
-      }
-
-      let r = Earley::fsm2dfa(f3);
-      if (r){
-        let $(dfa,dfa_final,symb_info) = *r;
-        p_dfa = new dfa;
-        p_dfa_final = new dfa_final;
-        p_symb_info = new symb_info;	      
-      } else {
-        fprintf(stderr,"Failed to reconstruct DFA.\n");
-        remove(f1); remove(f2); remove(f3);
-        exit(1);
-      }
-
-      remove(f1); remove(f2); remove(f3);
-      printf("Earley parsing stdin... "); fflush(stdout);
-      int c;
-      let b = Buffer::create(101);
-      while ( (c = fgetc(stdin)) != EOF )
-      	Buffer::add_char(b,c);
-
-//  	  let dfa_rep = new DFA::Rep::dfa_rep(*p_dfa,1,*p_dfa_final,Earley::get_as_table(*p_symb_info));
-//      let $(trees,valid,valid_prefix) = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
-//      printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
-
-  	  let $(valid,valid_prefix) = 
-  	    Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), 0);
-  	  printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
-  	  if (valid) printf("Parse tree saved.\n");
-  	  fflush(stdout);
-     
-      break;
-    case 4: // Run with linked code
-    	// DEPRECATED
-      printf("This flag is no longer supported.\n");
-//      printf("Earley parsing stdin... "); fflush(stdout);
-//      int c;
-//      let b = Buffer::create(101);
-//      while ( (c = fgetc(stdin)) != EOF )
-//      	Buffer::add_char(b,c);
-//
-//  	  let dfa_rep = 0;
-//      let $(trees,valid,valid_prefix) = EarleyBackend::parse(dfa_rep,Buffer::contents(b));
-//      printf("done -- is valid string :%d; is valid prefix: %d\n",valid,valid_prefix);
-
-      break;
-    // Use FSM to generate dfa  
-    case 8: // in FSM
-      /* Convert grammar to weighted NFA */
-      char f1[]@zeroterm = "f1-XXXXXX";
-      char f2[]@zeroterm = "f2-XXXXXX";
-      mkTemp(f1);
-      mkTemp(f2);
-
-      // TODO: assume regexp is a symbol for now
-      Earley::rule_fsm(f1,f2,ds,SYMB(earley_regexp));
-
-      /* Run FSM */
-      let cmd = aprintf("fsmcompile -i %s %s | "
-                        "fsmrmepsilon | "
-                        "fsmdeterminize | "
-                        "fsmprint -i %s",
-                        f2,f1,f2);
-      if (system(cmd) != 0) {
-        fprintf(stderr,"Error: fsm failed\n");
-        remove(f1); remove(f2);
-        exit(1);
-      }
-      break;
-    case 5: // in dot 
-    case 6: // in cyclone
-    case 7: // in haxe
-    	dfa_t *p_dfa = NULL;
-      Earley::symb_info_t *p_symb_info = NULL;
-      Set::set_t<st_t> *p_dfa_final = NULL;
-
-      /* Convert grammar to weighted NFA */
-      char f1[]@zeroterm = "f1-XXXXXX";
-      char f2[]@zeroterm = "f2-XXXXXX";
-      char f3[]@zeroterm = "f3-XXXXXX";
-      mkTemp(f1);
-      mkTemp(f2);
-      mkTemp(f3);
-
-      debugprint(1,"starting rule_fsm(%s,%s)...",f1,f2);
-      // TODO: assume regexp is a symbol for now
-      Earley::rule_fsm(f1,f2,ds,SYMB(earley_regexp));
-      debugprint(1,"done\n");
-
-      /* Run FSM */
-      debugprint(1,"starting fsm > %s ...",f3);
-      let cmd = aprintf("fsmcompile -i %s %s | "
-                        "fsmrmepsilon | "
-                        "fsmdeterminize | "
-                        "fsmprint -i %s > %s",
-                        f2,f1,f2,f3);
-      if (system(cmd) != 0) {
-        fprintf(stderr,"Error: fsm failed\n");
-        remove(f1); remove(f2); remove(f3);
-        exit(1);
-      }
-      debugprint(1,"done\n");
-
-      let r = Earley::fsm2dfa(f3);
-      if (r){
-        let $(dfa,dfa_final,symb_info) = *r;
-        p_dfa = new dfa;
-        p_dfa_final = new dfa_final;
-        p_symb_info = new symb_info;	      
-      } else {
-        fprintf(stderr,"Failed to reconstruct DFA.\n");
-        remove(f1); remove(f2); remove(f3);
-        exit(1);
-      }
-
-      remove(f1); remove(f2); remove(f3);
-
-      let filename = aprintf("/dev/stdout");
-      switch (earley_mode) {
-      case 5:
-        // TODO: assume regexp is a symbol for now
-        Earley::dfa2dot(*p_dfa,*p_symb_info,filename);
-        break;
-      case 6:
-        FILE *f = fopen(filename,"w");
-        if (f) {
-          Earley::dfa2cyclone(f,*p_dfa,*p_symb_info,cyc_namespace,0);
-          fclose(f);
-        }
-        else fprintf(stderr, "Failed to open file %s.\n",filename);
-        break;
-      case 7:
-        FILE *f = fopen(filename,"w");
-        if (f) {
-          Earley::act2symb_haxe(f,*p_symb_info);
-          dfa_haxe(f,*p_dfa);
-          fclose(f);
-        }
-        else fprintf(stderr, "Failed to open file %s.\n",filename);
-        break;
-        default:
-        fprintf(stderr,"Invalid DFA format.\n");
-      }
-      break;
-    case 2:
-    default:
-      if (earley_mode > 5){
-	fprintf(stderr,"Internal error: invalid value for variable earley_mode. Assuming shell mode.\n");
-      }
-      char cmd[200]@zeroterm={for i<199:0};
-      char arg[200]@zeroterm={for i<199:0};
-      int done = 0;
-      dfa_t *p_dfa = NULL;
-      Earley::symb_info_t *p_symb_info = NULL;
-      Set::set_t<st_t> *p_dfa_final = NULL;
-      while(!done) {
-	int c;
-	
-	// Print prompt.
-	printf("earley:> "); fflush(stdout);
-	
-	// Get the command followed by arbitrary whitespace.
-	scanf("%s",cmd);
-	
-	// Parse command line
-	if (!strcmp(cmd, "compile")) {
-
-	  // TODO: assume regexp is a symbol for now
-	  let $(dfa,dfa_final,symb_info) = Earley::compile(ds,SYMB(earley_regexp));
-	  p_dfa = new dfa;
-	  p_dfa_final = new dfa_final;
-	  p_symb_info = new symb_info;
-
-	} else if (!strcmp(cmd, "print-nfa")) {
-
-	  char filename[200]@zeroterm={for i<199:0};
-	  scanf("%s %s",arg,filename);
-
-	  if (!strcmp(arg,"fsm")){
-	    // TODO: assume regexp is a symbol for now
-            let fsm_file = aprintf("%s.fsm",filename);
-            let sym_file = aprintf("%s.sym",filename);
-	    Earley::rule_fsm(fsm_file,sym_file,ds,SYMB(earley_regexp));
-	  } else {
-	    fprintf(stderr,"Invalid NFA format: %s.\n",arg);
-	  }
-	  
-	} else if (!strcmp(cmd, "load-dfa")){
-
-	  char filename[200]@zeroterm={for i<199:0};
-	  scanf("%s %s",arg,filename);
-
-	  if (!strcmp(arg,"fsm")){
-	    let r = Earley::fsm2dfa(filename);
-	    if (r){
-	      let $(dfa,dfa_final,symb_info) = *r;
-	      p_dfa = new dfa;
-	      p_dfa_final = new dfa_final;
-	      p_symb_info = new symb_info;	      
-	    } else {
-	      fprintf(stderr,"Failed to reconstruct DFA.\n");
-	    }
-	  } else {
-	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);
-	  }
-	  
-	} else if (!strcmp(cmd, "print-dfa")){
-
-	  char filename[200]@zeroterm={for i<199:0};
-	  scanf("%s %s",arg,filename);
-
-	  if (!p_dfa || !p_symb_info) {
-	    fprintf(stderr, "Need to compile or load DFA first.\n");
-	    continue;
-	  }
-
-	  if (!strcmp(arg,"dot")){
-	    // TODO: assume regexp is a symbol for now
-	    Earley::dfa2dot(*p_dfa,*p_symb_info,filename);
-	  }
-          else if (!strcmp(arg,"cyclone")) {
-            FILE *f = fopen(filename,"w");
-            if (f) { 
-              Earley::dfa2cyclone(f,*p_dfa,*p_symb_info,cyc_namespace,0);
-              fclose(f); 
-            }
-            else fprintf(stderr, "Failed to open file %s.\n",filename);
-	  } else if (!strcmp(arg,"haxe")) {
-            FILE *f = fopen(filename,"w");
-            if (f) { 
-              Earley::act2symb_haxe(f,*p_symb_info);
-              dfa_haxe(f,*p_dfa);
-              fclose(f); 
-            }
-            else fprintf(stderr, "Failed to open file %s.\n",filename);
-	  } else {
-	    fprintf(stderr,"Invalid DFA format: %s.\n",arg);
-	  }
-
-	} else if (!strcmp(cmd, "parse")){
-
-	  if (!p_dfa || !p_dfa_final){
-	    fprintf(stderr, "Need to compile DFA first.\n");
-	    continue;
-	  }
-
-	  // Read file name
-	  scanf("%s",arg);
-
-	  // Check for options
-	  let show_progress = 0;
-	  if (!strcmp(arg,"--show-prog")){
-	    show_progress = 1;
-	    scanf("%s",arg);
-	  }
-
-	  // Read the file
-	  printf("Earley parsing %s ... \n",arg); 
-	  FILE *fp = fopen(arg,"r");
-	  if (!fp){
-	    fprintf(stderr,"Bad file name.\n");
-	    continue;
-	  }
-	  let b = Buffer::create(101);
-	  while ( (c = fgetc(fp)) != EOF)
-	    Buffer::add_char(b,c);
-	  fclose(fp);
-	  printf("File read complete.\n"); 
-
-	  // Parse the file
-	  let $(valid,valid_prefix) = 
-	    Earley::recognize(*p_dfa,*p_symb_info, *p_dfa_final,Buffer::contents(b), show_progress);
-	  printf("done -- is valid string :%d. is valid prefix: %d\n",valid, valid_prefix);
-	  if (valid) printf("Parse tree saved.\n");
-	  fflush(stdout);
-
-  	} else if (!strcmp(cmd,"amb?")){
-
-	  let is_amb = Earley::isAmb_parse_tree(Earley::last_derivation_tree);
-	  if (is_amb)
-	    printf("Parse tree is ambiguous.\n");
-	  else
-	    printf("Parse tree is not ambiguous.\n");
-
-  	} else if (!strcmp(cmd,"print")){
-
-	  scanf("%s",arg);
-	  let arg_end = (char @@zeroterm)arg;
-	  let depth = strtod(arg,&arg_end);
-	  if (arg_end == arg){
-	    fprintf(stderr,"Bad depth.\n");
-	    continue;
-	  }
-	  Earley::print_LT(Earley::last_derivation_tree,depth);
-	  printf("\n");
-	  Earley::print_RT(Earley::last_derivation_tree,depth);
-	  printf("\n");
-  	} else if (!strcmp(cmd,"exit")){
-	  done = 1; // shell is done; exit loop.
-	} else {
-	  fprintf(stderr,"Undefined command.\n");
-	  continue;
-	}
-      }
-      break;
-    }
+    dispatch_earley(earley_mode, earley_regexp, ds);
     return 0;
   }
   
-    if (earley_grmp != EARLEY_GEN_GRM_NONE){
+  if (earley_grmp != EARLEY_GEN_GRM_NONE){
     switch (earley_grmp) {
     case EARLEY_GEN_GRM_NONE:
       break; // do nothing.

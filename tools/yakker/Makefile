@@ -43,7 +43,7 @@ YAKKER_FILES = analyze axarray cs bnf extract semiring fa nfa_lazy nfa_eager \
   flatten termgrammar lex pads \
   parse_tab parsergen crawlergen pr prose prose_elim_grm string_dfa_engine1 \
   string_dfa_engine2_1 corerules corerules_grm \
-  util namespaces earley \
+  util namespaces earley-common earley earley-dispatch \
   yakker
   
 

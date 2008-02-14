@@ -26,11 +26,6 @@ namespace Earley;
    NB: there is a max number of actions hard-coded in cs.h.
 */
 
-struct symbInfo {
-  unsigned int symb_action_counter;
-  struct Hashtable::Table<str_t,act_t> @symb_action_table;
-  struct Hashtable::Table<act_t,str_t> @action_symb_table;
-};
 
 Hashtable::table_t<act_t,str_t> get_as_table(symb_info_t si){return si->action_symb_table;}
 Hashtable::table_t<str_t,act_t> get_sa_table(symb_info_t si){return si->symb_action_table;}
@@ -38,10 +33,10 @@ Hashtable::table_t<str_t,act_t> get_sa_table(symb_info_t si){return si->symb_act
 act_t callout_action() {
   return 256;
 }
-static act_t repeat_action() {
+act_t repeat_action() {
   return 257;
 }
-static act_t final_st_action() {
+act_t final_st_action() {
   return 258;
 }
 act_t repeat_decr_action() {
@@ -89,7 +84,8 @@ static act_t new_action(symb_info_t si) {
   }
   return a;
 }
-const char ?act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
+
+string_t act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
 ////////////////////////////////////////////////////////////////////////
 // CAUSES COMPILER EXCEPTION:
 //   let as_table = 
