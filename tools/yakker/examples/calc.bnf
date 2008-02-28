@@ -4,7 +4,7 @@ goo = "+".
 ; number = "3".
 DIGIT = %d48-57.
 number = 1*(DIGIT).
-expr =  expr "+"{printf(" + ");} expr  | expr "*" expr | number$n {printf("%s",n);} | "{" number$number "}" {printf("{%s}",number);}.
+expr =  expr "+"{printf(" + ");} expr  | expr "*" expr | number$n {printf("%s",n);} | "{" number "}" {printf("{%s}",number);}.
 ; expr = [ nullable "bye" expr ].
 start = "a "{printf("a ");} expr.
 

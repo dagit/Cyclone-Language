@@ -13,6 +13,18 @@
 #include "semiring.h"
 #include "earley-backend.h"
 
+#include "ykbuf.h"
+#define YKLIMIT ykb->lim
+#define YKCURSOR ykb->cur
+#define YKFILL(n) (ykfill(ykb,(n)))
+#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+#define YKMARKER ykb->mark
+#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })
+#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
+//int ykdebug = 0;
+//datatype exn { Parse_error };
+//datatype exn.Parse_error Parse_error_val = Parse_error;
+
 using List;
 using Semiring;
 
@@ -180,7 +192,7 @@ void add_weights(rstate_t rs, earley_node_t node, weight_t forward, weight_t inn
  */
 void
 push_closure(rstate_t rs,
-    const char ?input,
+    unsigned char ? @nozeroterm input,
     unsigned int i,
     earley_item_t ei, // YHM: I think this should be an early node
     // instead of an earley item for
@@ -476,7 +488,6 @@ mk_parse_forest(rstate_t rs,
 // Reconstruct a parse tree. Throws Invalid_argument if earley graph is ambiguous 
 parse_tree_t
 mk_parse_tree(rstate_t rs,
-     string_t input,
      string_t<`H> top_level_name,
      earley_node_t en,
      act_t resp_act) {
@@ -525,7 +536,7 @@ mk_parse_tree(rstate_t rs,
       let retn_tree_opt = Hashtable::lookup_opt(trees,retn_link);
       let retn_tree;
       if (!retn_tree_opt){
-        retn_tree = mk_parse_tree(rs, input, NULL, retn_link, resp_act);
+        retn_tree = mk_parse_tree(rs, NULL, retn_link, resp_act);
         Hashtable::insert(trees,retn_link,retn_tree);
       } else
         retn_tree = *retn_tree_opt;
@@ -580,8 +591,8 @@ static void rstate_dot(rstate_t rs) {
 
 /////////////////////////////////////////////////
 
-$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int) 
-parse(DFA::edfa_t dfa, const char? input) {
+$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int)
+ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb) {
   /* Keep track of parse trees */
   let
   links = Hashtable::create(11,earley_node_cmp,earley_node_hash);
@@ -600,8 +611,12 @@ parse(DFA::edfa_t dfa, const char? input) {
     ,weights //PROB
     ,rcounts
   };
+  
+  // Save the input form the beginning so that we have access to it later.
+  let input_save = YKSAVE;
+  
   push_closure(rs,
-      input,
+      ykb->save + input_save,
       0,
       earley_item_0,
       NULL,NULL, /* bogus action: */ 0
@@ -626,7 +641,7 @@ parse(DFA::edfa_t dfa, const char? input) {
         // Earley node that completed nullable RHS.
         let causal_node = new $(t,i,i);
         let w_m = final_w;
-        push_closure(rs,input,i,new $(ttarget,i),
+        push_closure(rs,ykb->save + input_save,i,new $(ttarget,i),
             causal_node, causal_node, symb_act
             ,w_m, w_m //PROB
         );
@@ -640,12 +655,36 @@ parse(DFA::edfa_t dfa, const char? input) {
   }
 #endif
 
+  // TODO: do we need to check start state for being a final state?
+  
   /* Scan the input */
-  let input_len = strlen(input);
   let i;
   let live = 1;
-  for (i = 0; live && i < input_len; i++) {
-    live = 0; // reset for this round.
+  let hit_final = 0;
+  int c = 0;
+  
+  for (i = 0; live && !hit_final; i++) {
+    if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+    int c = *YKCURSOR++; // consume current element.
+
+    // reset for this round.
+    live = 0;
+    hit_final = 0;
+    
+    for (let si_list = Set::to_list(Axarray::get(estates,i));
+        si_list != NULL;
+        si_list = si_list->tl) {
+
+      let &$(state,parent) = si_list->hd;
+      if (parent == 0 && DFA_IS_DFA_FINAL(dfa,state))
+          hit_final++;
+    }
+    if (hit_final) {
+      fprintf(stderr,"Hit final: %d.\n",hit_final);
+      live = 1;
+      break;
+    }
+
     //fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     for (let si_list = Set::to_list(Axarray::get(estates,i));
         si_list != NULL;
@@ -653,15 +692,17 @@ parse(DFA::edfa_t dfa, const char? input) {
 
       let &$(state,parent) = si_list->hd;
       //fprintf(stderr,"Considering (%d,%d) for %c. ",state,parent,input[i]);
-      let $(k,w) = DFA_TRANS_W(dfa,state,input[i]); //PROB
+      let $(k,w) = DFA_TRANS_W(dfa,state,c); //PROB
       //fprintf(stderr,"k = %d.\n",k);
       if (k != 0) {// where k==0 indicates there is no valid target.
 
         live++;
-
+//        if (parent == 0 && DFA_IS_DFA_FINAL(dfa,k))
+//          hit_final++;
+        
         let enode = new $(state,parent,i);
         let &$(forward,inner) = Hashtable::lookup(rs->weights,enode);
-        push_closure(rs,input,i+1,new $(k,parent),enode,NULL, input[i]
+        push_closure(rs,ykb->save + input_save,i+1,new $(k,parent),enode,NULL, c
             ,Semiring::mult(w, forward), Semiring::mult(w, inner) //PROB
         );
       }
@@ -670,16 +711,17 @@ parse(DFA::edfa_t dfa, const char? input) {
   
   if (!live){
     fprintf(stderr, "Parse error at input character %d.\n",i-1);
-    exit(1);
+    YKCURSOR = YKRESTORE(input_save);
+    return $(NULL,0,0);
   } else {
-    fprintf(stderr, "No parse errors detected. Searching for final states.\n");
+    fprintf(stderr, "No parse errors detected. Searching for final states at position %d.\n", i);
     //rstate_dot(rs);
   }
   /* See if we ended up in a final state */
   let partial_parses = 0;
   let complete_parses = 0;
   let trees = NULL;
-  for (let slast_list = Set::to_list(Axarray::get(estates,input_len));
+  for (let slast_list = Set::to_list(Axarray::get(estates,i));
       slast_list != NULL;
       slast_list = slast_list->tl) {
     partial_parses++;
@@ -688,19 +730,28 @@ parse(DFA::edfa_t dfa, const char? input) {
       complete_parses++;
 
         if (do_reconstruct) {
-          let en = new $(state,parent /*== 0*/,input_len);
+          let en = new $(state,parent /*== 0*/,i);
           try{
-            let derivation_tree = mk_parse_tree(rs,input,"TOP LEVEL",en, /* bogus action: */ 0);
+            let derivation_tree = mk_parse_tree(rs,"TOP LEVEL",en, /* bogus action: */ 0);
             let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
             trees = new List::List(new $(derivation_tree,w_forward),trees);
           } catch {
             case &Core::Invalid_argument(msg):
-              fprintf(stderr,"Ambiguous tree at early node (%d,0,%d):\n\t%s\n",state,input_len,msg);
+              fprintf(stderr,"Ambiguous tree at early node (%d,0,%d):\n\t%s\n",state,i,msg);
             break;  
           }
         }
     }
   }
 
+  YKRESTORE(input_save); // commit: don't set YKCURSOR, because we don't want to rewind the input.
+                         // the purpose of the save was only to prevent discarding.
+  
   return $(trees,complete_parses,partial_parses);  
+}
+
+$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int) 
+parse(DFA::edfa_t dfa, const char? input) {
+  let ykinput = string2ykbuf(input);
+  return ykb_parse(dfa, ykinput);
 }

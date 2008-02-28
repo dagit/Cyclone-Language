@@ -622,60 +622,166 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
   
   /* print final attributes */
   for (let i = 1; i < len; i++) {
-    if (!Set::member(dfa->final_states,i)) continue;
-    fprintf(f,"act_t __attr%d[] = {",i);
+    if (!Set::member(dfa->final_states, i))
+      continue;
+    fprintf(f, "act_t __attr%d[] = {", i);
     let firstattr = 1;
-    let x = Hashtable::lookup(dfa->final_attrs,i);
+    let x = Hashtable::lookup(dfa->final_attrs, i);
     while (!Set::is_empty(x)) {
-      if (firstattr) firstattr = 0;
-      else fprintf(f,",");
+      if (firstattr)
+        firstattr = 0;
+      else
+        fprintf(f, ",");
       let y = Set::choose(x);
       x = Set::delete(x,y);
-      fprintf(f,"%u",y);
+      fprintf(f, "%u", y);
     }
-    fprintf(f,"};\n");
+    fprintf(f, "};\n");
   }
-  fprintf(f,"act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {\nswitch (state) {\n");
-  for (let i = 1; i < len; i++) {
-    if (!Set::member(dfa->final_states,i)) continue;
-    fprintf(f,"case %d: return __attr%d;\n",i,i);
-  }
-  fprintf(f,"default: return NULL;\n}\n}\n");
-  
-  /* print transitions */
-  let first = 1;
-  fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) {\nswitch (state) {\n");
-  for (let i = 1; i < len; i++) {
-    let transitions = Axarray::get(dfa->states,i);
-    if (!transitions) continue;
-    let allzeros = 1;
-    for (let spans = transitions->spans; spans; spans = spans->tl) {
-      if (spans->hd->target == 0) continue;
-      allzeros = 0;
-      break;
-    }
-    if (allzeros) continue;
-    fprintf(f,"case %d: {",i);
-    fprintf(f,"switch (act) {");
-    let lb = transitions->lb;
-    for (let spans = transitions->spans; spans; spans = spans->tl) {
-      let ub = spans->hd->ub;
-      let target = spans->hd->target;
-      if (target) { /* Don't print transitions to dead state 0 */
-        for (let j = lb; j < ub; j++) {
-          fprintf(f," case %d: return $(%d,%s);",j,target,
-          		Semiring::print_weight(spans->hd->w));
-        }
-      }
-      lb = ub;
-    }
-    fprintf(f,"default: return $(0,Semiring::one_weight);}};\n");
-  }
-  fprintf(f,"default: return $(0,Semiring::one_weight);\n}\n}\n");
 
+  // Flag: encode transitions with switch statement or with table lookup.
+  int use_switch = 1;
+  if (use_switch){
+    fprintf(f,
+        "act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {\nswitch (state) {\n");
+    for (let i = 1; i < len; i++) {
+      if (!Set::member(dfa->final_states, i))
+        continue;
+      fprintf(f, "case %d: return __attr%d;\n", i, i);
+    }
+    fprintf(f, "default: return NULL;\n}\n}\n");
+
+    /* print transitions */
+    let first = 1;
+    fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) {\nswitch (state) {\n");
+    for (let i = 1; i < len; i++) {
+      let transitions = Axarray::get(dfa->states,i);
+      if (!transitions) continue;
+      let allzeros = 1;
+      for (let spans = transitions->spans; spans; spans = spans->tl) {
+        if (spans->hd->target == 0) continue;
+        allzeros = 0;
+        break;
+      }
+      if (allzeros) continue;
+      fprintf(f,"case %d: {",i);
+      fprintf(f,"switch (act) {");
+      let lb = transitions->lb;
+      for (let spans = transitions->spans; spans; spans = spans->tl) {
+        let ub = spans->hd->ub;
+        let target = spans->hd->target;
+        if (target) { /* Don't print transitions to dead state 0 */
+          for (let j = lb; j < ub; j++) {
+            fprintf(f," case %d: return $(%d,%s);",j,target,
+                Semiring::print_weight(spans->hd->w));
+          }
+        }
+        lb = ub;
+      }
+      fprintf(f,"default: return $(0,Semiring::one_weight);}};\n");
+    }
+    fprintf(f,"default: return $(0,Semiring::one_weight);\n}\n}\n");
+
+    /* Print final states info. */
+    fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {\nswitch (state) {\n");
+    Hashtable::iter_c(print_final,dfa->final_weights,f);
+    fprintf(f,"default: return $(0,Semiring::zero_weight);\n}\n}\n");
+
+  } else {
+
+    /* print final attributes */
+    fprintf(f, "act_t ? final_attrs_table[] = {\n");
+    for (let i = 1; i < len; i++) {
+      if (i > 1) fprintf(f,",\n  ");
+      else fprintf(f,"  (act_t ?) ");
+
+      if (!Set::member(dfa->final_states, i)){
+        fprintf(f, "NULL");
+      } else {
+        fprintf(f,"__attr%d",i);
+      }
+    }
+    fprintf(f,"\n};\n");
+    fprintf(f,
+        "act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {return final_attrs_table[state];}\n");
+
+    /* Print default transition function for states without any transitions. */
+    fprintf(f,"$(st_t,Semiring::weight_t) trans_NONE(act_t act) {return $(0,Semiring::one_weight);}\n");
+
+    /* Print transition functions. */
+    for (let i = 1; i < len; i++) {
+      let transitions = Axarray::get(dfa->states,i);
+      if (!transitions) continue;
+      let allzeros = 1;
+      for (let spans = transitions->spans; spans; spans = spans->tl) {
+        if (spans->hd->target == 0) continue;
+        allzeros = 0;
+        break;
+      }
+      if (allzeros) continue;
+      fprintf(f,"$(st_t,Semiring::weight_t) trans_state_%d(act_t act) {\n",i);
+      fprintf(f,"  switch (act) {");
+      let lb = transitions->lb;
+      for (let spans = transitions->spans; spans; spans = spans->tl) {
+        let ub = spans->hd->ub;
+        let target = spans->hd->target;
+        if (target) { /* Don't print transitions to dead state 0 */
+          for (let j = lb; j < ub; j++) {
+            fprintf(f," case %d: return $(%d,%s);",j,target,
+                Semiring::print_weight(spans->hd->w));
+          }
+        }
+        lb = ub;
+      }
+      fprintf(f,"  default: return $(0,Semiring::one_weight);\n  }\n}\n");
+    }
+    
+    /* Print table of transition functions. */
+    fprintf(f,"typedef $(st_t,Semiring::weight_t)(@trans_fun)(act_t act);\n\n");
+    fprintf(f,"static trans_fun trans_funs[] = {\n");
+    for (let i = 1; i < len; i++) {
+      if (i > 1) fprintf(f,",\n");
+      let transitions = Axarray::get(dfa->states,i);
+      if (!transitions) {
+        fprintf(f,"trans_NONE");
+        continue;
+      }
+      let allzeros = 1;
+      for (let spans = transitions->spans; spans; spans = spans->tl) {
+        if (spans->hd->target == 0) continue;
+        allzeros = 0;
+        break;
+      }
+      if (allzeros) {
+        fprintf(f,"trans_NONE");
+        continue;
+      }
+
+      fprintf(f,"trans_state_%d",i);
+    }
+    fprintf(f,"};\n\n");
+    
+    fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) { return trans_funs[state](act);}\n");
+
+    /* Print final states info. */
+    fprintf(f,"static $(int,Semiring::weight_t) final_info_table[] = {\n");
+    for (let i = 1; i < len; i++) {
+      if (i > 1) fprintf(f,",\n");
+
+      switch(Hashtable::lookup_opt(dfa->final_weights, i)){
+      case NULL: fprintf(f,"  $(0,%s)",Semiring::print_weight(Semiring::zero_weight));
+        break;
+      case &w: fprintf(f,"  $(1,%s)",Semiring::print_weight(*w));
+        break;
+      }
+    }
+    fprintf(f,"\n};\n");
+    fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {return final_info_table[state];}\n");
+  }
+  
   /* Print trans. */
   fprintf(f,"st_t trans(CycDFA::edfa_t self, st_t state,act_t act) {\n"
-            "  return trans_w(self,state,act).f0;"
+            "  return trans_w(self,state,act).f0;\n"
             "}\n");
   
   /* Print in_final. */
@@ -688,11 +794,6 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
       "  }\n"
       "  return 0;\n"
       "}\n");
-  
-  /* Print final states info. */
-  fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {\nswitch (state) {\n");
-  Hashtable::iter_c(print_final,dfa->final_weights,f);
-  fprintf(f,"default: return $(0,Semiring::zero_weight);\n}\n}\n");
   
   /* Print is_final and final_weight. */
   fprintf(f,"int is_final(CycDFA::edfa_t self, st_t state) {\n"

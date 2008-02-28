@@ -65,6 +65,6 @@ parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs, rule_pat_t p, strp
 
 // Returns the number of arguments scanned.
 extern int
-crawl_with_pat(rule_pat_t p, EarleyParsetree::parse_tree_t pt, string_t ykinput,
+crawl_with_pat(rule_pat_t p, EarleyParsetree::parse_tree_t pt, unsigned char ? @nozeroterm ykinput,
     strptr_array<`r1,`r2> args);
 #endif

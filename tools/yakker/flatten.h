@@ -25,6 +25,10 @@ namespace Flatten {
   // Flag: for alts, put every alternative as a separate symbol definition.
   // default is 0;
   extern int fully_flatten_alts;
+  // Prefix to use when generating names for flattening.
+  // If NULL, then no prefix is used.
+  extern const char ? name_prefix;
+
   extern int is_flattened_symb(string_t s);
   extern grammar_t flatten_grammar(grammar_t<`H> g);
 }

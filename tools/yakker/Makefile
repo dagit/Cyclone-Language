@@ -170,12 +170,31 @@ echop: echop.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 #	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
-imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
 #	$(CYCLONE) $^ -o build/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
-	$(CYCLONE) $^ -o $@ -lsqlite3 -lpthread -lssl -lcrypto
+imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
+	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
+
+# Earley-based IMAP server
+imapserver-e: imapserver.o imap-scanf-e.o  cs.o imap-tg-dfa.o imap-grm-dfa.o $(LIB_YAKKER)
+	$(CYCLONE) -o $@ $^ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
+
+include examples/imap.mk
 
 imapserver.o: $(EXDIR)/imapserver.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
+
+# Earley-based scanf
+imap-scanf-e.cyc: gen/imap-tg.bnf yakker
+	./yakker $(YAKFLAGS) -gen-crawl command \
+                             -flatten-full -flatten-prefix TG000\
+                             -no-minus-elim \
+                             -no-globals \
+                             $< > $@
+	echo '#include "tge-scanf.h"' >> $@
+	echo '#include "ykbuf.h"' >> $@
+	echo '#include "imap-scanf-incl.cyc"' >> $@
+
+imap-scanf-e.o: imap-scanf-incl.cyc
 
 # Targets for testing pattern match parsers-generators.  Generates
 # BNF that can parse a pattern-match and produce a new BNF specialized

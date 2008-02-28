@@ -322,7 +322,8 @@ static int session_handler(int fd) {
   while (server_state != LOGOUT) {
     force(server_state,NOT_AUTHENTICATED,AUTHENTICATED,SELECTED);
 
-    if (command_scanf(inbuf,"(command %tag CAPABILITY)",&tag))
+//     if (command_scanf(inbuf,"(command %tag CAPABILITY)",&tag))
+    if (command_scanf(inbuf,"T CAPABILITY\r\n",&tag))
       {
 	/* (CAPABILITY tag) */
 	fprintf(outbuf,"* CAPABILITY IMAP4rev1\r\n");
@@ -499,7 +500,7 @@ static int session_handler(int fd) {
        force(server_state,AUTHENTICATED,SELECTED);
        const char ?sql = NULL;
        sql = aprintf("select * from mailboxes where mailbox = '%s';",
-                     mailbox);
+                     val1);
        sqlite3_stmt *stmt = NULL;
        int rc = sqlite3_prepare(db, sql, -1, &stmt, NULL);
        if (rc != SQLITE_OK) {

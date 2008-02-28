@@ -1,0 +1,290 @@
+{
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+DIGIT = %d48-57.
+zone = ("+"|"-") 4DIGIT.
+ATOM-CHAR = %d33|%d35-36|%d38-39|%d43-91|%d94-122|%d124-126.
+atom = 1*ATOM-CHAR.
+x-command = "X" atom "".
+ASTRING-CHAR = %d33|%d35-36|%d38-39|%d43-91|%d93-122|%d124-126.
+CHAR8 = %d1-255.
+CR = %d13.
+LF = %d10.
+CRLF = CR LF.
+number = 1*DIGIT.
+PLUS = %d43.
+optional-plus = [PLUS].
+literal = "{" number optional-plus "}" CRLF @repeat(number)CHAR8.
+DQUOTE = %d34.
+quoted-specials = %d34|%d92.
+QUOTED-CHAR = %d1-9|%d11-12|%d14-33|%d35-91|%d93-127|("\" quoted-specials).
+quoted = DQUOTE *QUOTED-CHAR DQUOTE.
+string = quoted|literal.
+astring = 1*ASTRING-CHAR|string.
+userid = astring.
+SP = %d32.
+mailbox = "INBOX"|astring.
+unsubscribe = "UNSUBSCRIBE" SP mailbox.
+digit-nz = %d49-57.
+nz-number = digit-nz *DIGIT.
+uniqueid = nz-number.
+seq-number = nz-number|"*".
+seq-range = seq-number ":" seq-number.
+sequence-set = (seq-number|seq-range) *("," sequence-set).
+copy = "COPY" SP sequence-set SP mailbox.
+header-fld-name = astring.
+header-list = "(" header-fld-name *(SP header-fld-name) ")".
+section-msgtext = "HEADER"|("HEADER.FIELDS" [".NOT"] SP header-list)|"TEXT".
+section-part = nz-number *("." nz-number).
+section-text = section-msgtext|"MIME".
+section-spec = section-msgtext|(section-part ["." section-text]).
+section = "[" [section-spec] "]".
+fetch-att = "ENVELOPE"|"FLAGS"|"INTERNALDATE"|("RFC822" [".HEADER"|".SIZE"|".TEXT"])|("BODY" ["STRUCTURE"])|"UID"|("BODY" section ["<" number "." nz-number ">"])|("BODY.PEEK" section ["<" number "." nz-number ">"]).
+tagged-ext-comp = astring|(tagged-ext-comp *(SP tagged-ext-comp))|("(" tagged-ext-comp ")").
+tagged-ext-simple = sequence-set|number.
+tagged-ext-val = tagged-ext-simple|("(" [tagged-ext-comp] ")").
+fetch-modif-params = tagged-ext-val.
+tagged-label-char = %d45-46|%d48-58|%d65-90|%d95|%d97-122.
+tagged-label-fchar = %d45-46|%d65-90|%d95|%d97-122.
+tagged-ext-label = tagged-label-fchar *tagged-label-char.
+fetch-modifier-name = tagged-ext-label.
+fetch-modifier = fetch-modifier-name [SP fetch-modif-params].
+fetch-modifiers = SP "(" fetch-modifier *(SP fetch-modifier) ")".
+fetch = "FETCH" SP sequence-set SP ("ALL"|"FULL"|"FAST"|fetch-att|("(" fetch-att *(SP fetch-att) ")")) [fetch-modifiers].
+charset = atom|quoted.
+date-day = 1*2DIGIT.
+date-month = "Jan"|"Feb"|"Mar"|"Apr"|"May"|"Jun"|"Jul"|"Aug"|"Sep"|"Oct"|"Nov"|"Dec".
+date-year = 4DIGIT.
+date-text = date-day "-" date-month "-" date-year.
+date = date-text|(DQUOTE date-text DQUOTE).
+flag-keyword = atom.
+search-key = "ALL"|"ANSWERED"|("BCC" SP astring)|("BEFORE" SP date)|("BODY" SP astring)|("CC" SP astring)|"DELETED"|"FLAGGED"|("FROM" SP astring)|("KEYWORD" SP flag-keyword)|"NEW"|"OLD"|("ON" SP date)|"RECENT"|"SEEN"|("SINCE" SP date)|("SUBJECT" SP astring)|("TEXT" SP astring)|("TO" SP astring)|"UNANSWERED"|"UNDELETED"|"UNFLAGGED"|("UNKEYWORD" SP flag-keyword)|"UNSEEN"|"DRAFT"|("HEADER" SP header-fld-name SP astring)|("LARGER" SP number)|("NOT" SP search-key)|("OR" SP search-key SP search-key)|("SENTBEFORE" SP date)|("SENTON" SP date)|("SENTSINCE" SP date)|("SMALLER" SP number)|("UID" SP sequence-set)|"UNDRAFT"|sequence-set|("(" search-key *(SP search-key) ")").
+search-program = ["CHARSET" SP charset SP] search-key *(SP search-key).
+search-mod-params = tagged-ext-val.
+search-modifier-name = tagged-ext-label.
+search-return-opt = search-modifier-name [SP search-mod-params].
+search-return-opts = SP "RETURN" SP "(" [search-return-opt *(SP search-return-opt)] ")".
+search = "SEARCH" [search-return-opts] SP search-program.
+flag-extension = "\" atom.
+flag = "\Answered"|"\Flagged"|"\Deleted"|"\Seen"|"\Draft"|flag-keyword|flag-extension.
+flag-list = "(" [flag *(SP flag)] ")".
+store-att-flags = ["+"|"-"] "FLAGS" [".SILENT"] SP (flag-list|(flag *(SP flag))).
+store-modif-params = tagged-ext-val.
+store-modifier-name = tagged-ext-label.
+store-modifier = store-modifier-name [SP store-modif-params].
+store-modifiers = SP "(" store-modifier *(SP store-modifier) ")".
+store = "STORE" SP sequence-set [store-modifiers] SP store-att-flags.
+uid = "UID" SP (copy|fetch|search|store).
+time = 2DIGIT ":" 2DIGIT ":" 2DIGIT.
+TEXT-CHAR = %d1-9|%d11-12|%d14-127.
+text = 1*TEXT-CHAR.
+tagged-ext = tagged-ext-label SP tagged-ext-val.
+tag-string = string.
+tag = 1*(%d33|%d35-36|%d38-39|%d44-91|%d93-122|%d124-126).
+subscribe = "SUBSCRIBE" SP mailbox.
+status-att-val = ("MESSAGES" SP number)|("RECENT" SP number)|("UIDNEXT" SP nz-number)|("UIDVALIDITY" SP nz-number)|("UNSEEN" SP number).
+status-att-list = status-att-val *(SP status-att-val).
+status-att = "MESSAGES"|"RECENT"|"UIDNEXT"|"UIDVALIDITY"|"UNSEEN".
+status = "STATUS" SP mailbox SP "(" status-att *(SP status-att) ")".
+select-param-name = tagged-ext-label.
+select-param-value = tagged-ext-val.
+select-param = select-param-name [SP select-param-value].
+select-params = SP "(" select-param *(SP select-param) ")".
+select = "SELECT" SP mailbox [select-params].
+section-binary = "[" [section-part] "]".
+search-return-value = tagged-ext-val.
+search-return-data = search-modifier-name SP search-return-value.
+search-correlator = SP "(" "TAG" SP tag-string ")".
+auth-type = atom.
+capability = ("AUTH=" auth-type)|atom.
+capability-data = "CAPABILITY" *(SP capability).
+flag-perm = flag|"\*".
+resp-text-code = "ALERT"|("BADCHARSET" [SP "(" astring *(SP astring) ")"])|capability-data|"PARSE"|("PERMANENTFLAGS" SP "(" [flag-perm *(SP flag-perm)] ")")|"READ-ONLY"|"READ-WRITE"|"TRYCREATE"|("UIDNEXT" SP nz-number)|("UIDVALIDITY" SP nz-number)|("UNSEEN" SP nz-number)|(atom [SP 1*(%d1-9|%d11-12|%d14-92|%d94-127)]).
+resp-text = ["[" resp-text-code "]" SP] text.
+resp-cond-state = ("OK"|"NO"|"BAD") SP resp-text.
+response-tagged = tag SP resp-cond-state CRLF.
+Namespace-Response-Extension = SP string SP "(" string *(SP string) ")".
+nil = "NIL".
+Namespace-Descr = "(" string SP ((DQUOTE QUOTED-CHAR DQUOTE)|nil) *Namespace-Response-Extension ")".
+Namespace = nil|("(" 1*Namespace-Descr ")").
+Namespace-Response = "NAMESPACE" SP Namespace SP Namespace SP Namespace.
+esearch-response = "ESEARCH" [search-correlator] [SP "UID"] *(SP search-return-data).
+mbx-list-oflag = "\Noinferiors"|flag-extension.
+mbx-list-sflag = "\Noselect"|"\Marked"|"\Unmarked".
+mbx-list-flags = (*(mbx-list-oflag SP) mbx-list-sflag *(SP mbx-list-oflag))|(mbx-list-oflag *(SP mbx-list-oflag)).
+mailbox-list = "(" [mbx-list-flags] ")" SP ((DQUOTE QUOTED-CHAR DQUOTE)|nil) SP mailbox.
+mailbox-data = ("FLAGS" SP flag-list)|("LIST" SP mailbox-list)|("LSUB" SP mailbox-list)|("SEARCH" *(SP nz-number))|("STATUS" SP mailbox SP "(" [status-att-list] ")")|(number SP "EXISTS")|(number SP "RECENT")|Namespace-Response|esearch-response.
+flag-fetch = flag|"\Recent".
+msg-att-dynamic = "FLAGS" SP "(" [flag-fetch *(SP flag-fetch)] ")".
+nstring = string|nil.
+body-extension = nstring|number|("(" body-extension *(SP body-extension) ")").
+body-fld-param = ("(" string SP string *(SP string SP string) ")")|nil.
+body-fld-dsp = ("(" string SP body-fld-param ")")|nil.
+body-fld-lang = nstring|("(" string *(SP string) ")").
+body-fld-loc = nstring.
+body-fld-md5 = nstring.
+body-ext-1part = body-fld-md5 [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]].
+body-fld-desc = nstring.
+body-fld-enc = (DQUOTE ("7BIT"|"8BIT"|"BINARY"|"BASE64"|"QUOTED-PRINTABLE") DQUOTE)|string.
+body-fld-id = nstring.
+body-fld-octets = number.
+body-fields = body-fld-param SP body-fld-id SP body-fld-desc SP body-fld-enc SP body-fld-octets.
+media-subtype = string.
+media-basic = ((DQUOTE ("APPLICATION"|"AUDIO"|"IMAGE"|"MESSAGE"|"VIDEO") DQUOTE)|string) SP media-subtype.
+body-type-basic = media-basic SP body-fields.
+body-fld-lines = number.
+addr-adl = nstring.
+addr-host = nstring.
+addr-mailbox = nstring.
+addr-name = nstring.
+address = "(" addr-name SP addr-adl SP addr-mailbox SP addr-host ")".
+env-bcc = ("(" 1*address ")")|nil.
+env-cc = ("(" 1*address ")")|nil.
+env-date = nstring.
+env-from = ("(" 1*address ")")|nil.
+env-in-reply-to = nstring.
+env-message-id = nstring.
+env-reply-to = ("(" 1*address ")")|nil.
+env-sender = ("(" 1*address ")")|nil.
+env-subject = nstring.
+env-to = ("(" 1*address ")")|nil.
+envelope = "(" env-date SP env-subject SP env-from SP env-sender SP env-reply-to SP env-to SP env-cc SP env-bcc SP env-in-reply-to SP env-message-id ")".
+media-message = DQUOTE "MESSAGE" DQUOTE SP DQUOTE "RFC822" DQUOTE.
+media-text = DQUOTE "TEXT" DQUOTE SP media-subtype.
+body-type-text = media-text SP body-fields SP body-fld-lines.
+body-ext-mpart = body-fld-param [SP body-fld-dsp [SP body-fld-lang [SP body-fld-loc *(SP body-extension)]]].
+body-type-mpart = 1*body SP media-subtype [SP body-ext-mpart].
+body-type-msg = media-message SP body-fields SP envelope SP body SP body-fld-lines.
+body-type-1part = (body-type-basic|body-type-msg|body-type-text) [SP body-ext-1part].
+body = "(" (body-type-1part|body-type-mpart) ")".
+date-day-fixed = (SP DIGIT)|2DIGIT.
+date-time = DQUOTE date-day-fixed "-" date-month "-" date-year SP time SP zone DQUOTE.
+msg-att-static = ("ENVELOPE" SP envelope)|("INTERNALDATE" SP date-time)|("RFC822" [".HEADER"|".TEXT"] SP nstring)|("RFC822.SIZE" SP number)|("BODY" ["STRUCTURE"] SP body)|("BODY" section ["<" number ">"] SP nstring)|("UID" SP uniqueid).
+msg-att = "(" (msg-att-dynamic|msg-att-static) *(SP (msg-att-dynamic|msg-att-static)) ")".
+message-data = nz-number SP ("EXPUNGE"|("FETCH" SP msg-att)).
+resp-cond-bye = "BYE" SP resp-text.
+response-payload = resp-cond-state|resp-cond-bye|mailbox-data|message-data|capability-data.
+response-fatal = "*" SP resp-cond-bye CRLF.
+response-done = response-tagged|response-fatal.
+response-data = "*" SP response-payload CRLF.
+base64-char = %d43|%d47-57|%d65-90|%d97-122.
+base64-terminal = (2base64-char "==")|(3base64-char "=").
+base64 = *(4base64-char) [base64-terminal].
+continue-req = "+" SP (resp-text|base64) CRLF.
+response = *(continue-req|response-data) response-done.
+resp-specials = %d93.
+resp-cond-auth = ("OK"|"PREAUTH") SP resp-text.
+resp-code-apnd = "APPENDUID" SP nz-number SP sequence-set.
+rename-param-name = tagged-ext-label.
+rename-param-value = tagged-ext-val.
+rename-param = rename-param-name [SP rename-param-value].
+rename-params = SP "(" rename-param *(SP rename-param) ")".
+rename = "RENAME" SP mailbox SP mailbox [rename-params].
+password = astring.
+partial = "<" number "." nz-number ">".
+list-char = %d33|%d35-39|%d42-91|%d93-122|%d124-126.
+list-mailbox = 1*list-char|string.
+lsub = "LSUB" SP mailbox SP list-mailbox.
+login = "LOGIN" SP userid SP password.
+OCTET = %d0-255.
+literal8 = "~{" number optional-plus "}" CRLF @repeat(number)OCTET.
+list-wildcards = %d37|%d42.
+list = "LIST" SP mailbox SP list-mailbox.
+greeting = "*" SP (resp-cond-auth|resp-cond-bye) CRLF.
+examine = "EXAMINE" SP mailbox [select-params].
+delete = "DELETE" SP mailbox.
+create-param-name = tagged-ext-label.
+create-param-value = tagged-ext-val.
+create-param = create-param-name [SP create-param-value].
+create-params = SP "(" create-param *(SP create-param) ")".
+create = "CREATE" SP mailbox [create-params].
+command-select = "CHECK"|"CLOSE"|"EXPUNGE"|copy|fetch|store|uid|search.
+authenticate = "AUTHENTICATE" SP auth-type *(CRLF base64).
+command-nonauth = login|authenticate|"STARTTLS".
+append-data-ext = tagged-ext.
+append-data = literal|literal8|append-data-ext.
+append-ext-name = tagged-ext-label.
+append-ext-value = tagged-ext-val.
+append-ext = append-ext-name SP append-ext-value.
+append-opts = [SP flag-list] [SP date-time] *(SP append-ext).
+append-message = append-opts SP append-data.
+append = "APPEND" SP mailbox 1*append-message.
+command-auth = append|create|delete|examine|list|lsub|rename|select|status|subscribe|unsubscribe.
+command-any = "CAPABILITY"|"LOGOUT"|"NOOP"|x-command.
+command = tag SP (command-any|command-auth|command-nonauth|command-select) CRLF.
+atom-specials = %d0-32|%d34|%d37|%d40-42|%d92-93|%d123|%d127.
+Namespace-Command = "NAMESPACE".
+CTL = %d0-31|%d127.
+CHAR = %d1-127.
+ALPHA = %d65-90|%d97-122.
+{
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

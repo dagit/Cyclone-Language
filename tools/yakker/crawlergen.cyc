@@ -229,8 +229,7 @@ void gen0(rule_t r, grammar_t grm) {
 
   case &Rcount(c, r2):
     printf("{\n");
-    // FIX: need to get this bounds right, given new interp. of repeat.
-    printf("unsigned int bounds = atoi(%s);\n", c);
+    printf("unsigned int bounds = numelts(children);\n");
     printf("unsigned int count;\n");
     printf("for (count = 0; count < bounds; count++) {\n");
     gen0(r2,grm);
@@ -435,8 +434,7 @@ void gen0(rule_t r, grammar_t grm) {
 
   case &Rcount(c, r2):
     printf("{\n");
-    // FIX: need to get this bounds right, given new interp. of repeat.
-    printf("unsigned int bounds = atoi(%s);\n", c);
+    printf("unsigned int bounds = numelts(children);\n");
     printf("unsigned int count;\n");
     printf("for (count = 0; count < bounds; count++) {\n");
     gen0(r2,grm);

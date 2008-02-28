@@ -143,12 +143,14 @@ ykbuf_t @data2ykbuf(const char ?@nozeroterm s) {
   They assume two variables, ykb of type ykbuf_t, and ykcursor of type
   unsigned char ?@nozeroterm.
 
+NOTE: These macros appear to be out of date w.r.t. actual generated code.
 #define YKLIMIT ykb->lim
 #define YKCURSOR ykcursor
 #define YKFILL(n) (ykcursor = ykfill(ykb,ykcursor))
 #define YKMARKER ykb->mark
 //#define YKSAVE ((ykb->save)?(ykb->save_count++):((ykb->save=ykcursor),ykb->save_count++))
 //#define YKDISCARD ((--ykb->save_count)?0:(ykb->save==NULL))
+// returns x, the offset of the save from the ykb->save marker.
 #define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykcursor-ykb->save; else ykb->save = ykcursor; x; })
 #define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
 */

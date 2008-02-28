@@ -37,6 +37,7 @@
 using List;
 
 int include_anon_binder = 1;
+int include_named_binder = 1;
 
 /* Is a rule a necessary argument? */
 static
@@ -626,11 +627,18 @@ $(rule_t,const char ?,rule_t) mk_bnfgen_binder (const char ?`H symb_name){
   r_binder_symb->v = fresh_name();
   r_binder_symb->a = aprintf("return %s;",r_binder_symb->v);
 
-  let r = include_anon_binder ? ALT(r_binder, r_binder_symb) : r_binder_symb;
+  let r = (include_anon_binder && include_named_binder) ? ALT(r_binder, r_binder_symb) 
+          : (include_anon_binder ? r_binder : r_binder_symb);
+      
   return $(r,r_binder_spec_name,r_binder_spec);
 }
 
-grammar_t grammar2bindgrammar(grammar_t g) {
+grammar_t grammar2bindgrammar(grammar_t<`H> g) {
+  if (!(include_anon_binder || include_named_binder)){
+    internal_err("Bindgrammar called but both named and anonymous binders are disabled.\n");
+    return g;
+  }
+  
   reset_globals();
   init_arityt(g);
 

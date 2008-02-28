@@ -5,7 +5,7 @@ CALC_FILES = calc-flat-dfa calccrawl
 CALC_OBJS:=$(foreach yfile,$(CALC_FILES),$(yfile).o)
 
 calc-earley: $(CALC_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $(CALC_OBJS)  -lssl -lm $(LIB_YAKKER)
+	$(CYCLONE) -o $@ $(CALC_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
 
 calc-flat-dfa.txt: examples/calc.bnf yakker
 	./yakker -flatten-full -earley-gen-fsm start examples/calc.bnf > $@
@@ -31,6 +31,9 @@ CALC_TG_RUN_OBJS:=$(foreach yfile,$(CALC_TG_RUN_FILES),$(yfile).o)
 
 calc-tg-run: $(CALC_TG_RUN_OBJS) $(LIB_YAKKER)
 	$(CYCLONE) -o $@ $(CALC_TG_RUN_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
+
+calc-testscanf: cs.o calc-tg-dfa.o calc-grm-dfa.o calc-scanf.o $(LIB_YAKKER)
+	$(CYCLONE) -o $@ cs.o calc-tg-dfa.o calc-grm-dfa.o calc-scanf.o -lssl -lm $(LIB_YAKKER) -lcrypto
 
 calc-tg-dfa.cyc: gen/calc-tg.bnf yakker
 	./yakker -flatten-full -no-minus-elim -cyc-namespace CalcTGCycDFA -earley-gen-cyc start $< > $@
@@ -58,6 +61,8 @@ calc-tg-run.cyc: gen/calc-tg.bnf yakker tge-main.cyc
 	echo '#define CYC_GRM_DFA_NS CalcCycDFA' >> $@
 	echo '#include "tge-main.cyc"' >> $@
 
+calc-scanf.o: calc-testscanf.cyc
+
 calc-scanf.cyc: gen/calc-tg.bnf yakker
 	./yakker $(YAKFLAGS) -gen-crawl start \
                              -flatten-full \
@@ -65,10 +70,17 @@ calc-scanf.cyc: gen/calc-tg.bnf yakker
                              -no-globals \
                              $< > $@
 	echo '#include "tge-scanf.h"' >> $@
-	echo 'int start_scanf(string_t input, const char ?fmt, ...const char?`H @ args){' >> $@
-	echo '  let dfa_rep = EarleyCycBackend::init_dfa();' >> $@
-	echo '  return internal_scanf(dfa_rep, p_start<>,input,fmt,args);' >> $@
+	echo '#include "ykbuf.h"' >> $@
+	echo 'namespace CalcTGCycDFA{' >> $@
+	echo '  extern struct EarleyAnyBackend::DFA::edfa dfa_obj;' >> $@
 	echo '}' >> $@
+	echo 'namespace CalcCycDFA{' >> $@
+	echo '  extern struct EarleyAnyBackend::DFA::grammar_edfa grm_dfa_obj;' >> $@
+	echo '}' >> $@
+	echo 'int start_scanf(ykbuf_t@ ykb, const char ?fmt, ...const char?`H @ args){' >> $@
+	echo '  return internal_ykb_scanf(&CalcTGCycDFA::dfa_obj, p_start<>,&CalcCycDFA::grm_dfa_obj,ykb,fmt,args);' >> $@
+	echo '}' >> $@
+	echo '#include "calc-testscanf.cyc"' >> $@
 
 gen/calc-tg.bnf: examples/calc.bnf yakker
 	./yakker -escape "\\%()" -flatten-full -bindgrammar -termgrammar_bnf $< > $@

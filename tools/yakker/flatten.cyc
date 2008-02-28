@@ -62,6 +62,10 @@ using List;
 // Flag: for alts, put every alternative as a separate symbol definition.
 int fully_flatten_alts = 0;
 
+// Prefix to use when generating names for flattening.
+// If NULL, then no prefix is used.
+const char ? name_prefix = NULL;
+
 int is_flattened_symb(string_t s) {
   let suff = strstr(s,"__");
   if (!suff)
@@ -380,7 +384,8 @@ grammar_t flatten_grammar(grammar_t<`H> g) {
     let &$(n,r,a) = ds->hd;
     if (arity_rule(SYMB(n))) {
       // append underscore to make it easy to differentiate suffix from original symbol name.
-      let &$(new_defs, r_flat) = flatten_rule(strconcat(n,"_"),r);
+      let derived_prefix = strconcat(name_prefix, strconcat(n,"_"));
+      let &$(new_defs, r_flat) = flatten_rule(derived_prefix,r);
       res = revappend(new_defs,res);
       res = new List(new $(n, r_flat, a), res);
     } else {

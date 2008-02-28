@@ -22,7 +22,7 @@ AE_FILES = abnf-flat-dfa aecrawl
 AE_OBJS:=$(foreach yfile,$(AE_FILES),$(yfile).o)
 
 abnf-flat-dfa.cyc: examples/abnf-echo.bnf yakker
-	./yakker -flatten-full -earley-gen-cyc rulelist $< > $@
+	./yakker -flatten-full -cyc-namespace ABNFCycDFA -earley-gen-cyc rulelist $< > $@
 
 abnf-flat-dfa.txt: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -earley-gen-fsm rulelist $< > $@
@@ -35,14 +35,15 @@ abnf-earley.cyc: examples/abnf-echo.bnf yakker
 # Targets for stand-alone abnf-echo program.
 
 abnf-echo-earley: $(AE_OBJS) bnf.o pr.o cs.o $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $^ -lssl -lm
+	$(CYCLONE) -o $@ $^ -lssl -lm -lcrypto
 
-aecrawl.cyc: examples/abnf-echo.bnf yakker crawl-main.cyc
+aecrawl.cyc: examples/abnf-echo.bnf yakker
 	./yakker -flatten-full -gen-crawl rulelist $< > $@
 	echo '#define CRAWLFUN p_rulelist' >> $@
-	echo '#define CYC_DFA_NS CycDFA' >> $@
+	echo '#define CYC_DFA_NS ABNFCycDFA' >> $@
 	echo '#include "crawl-main.cyc"' >> $@
 
+aecrawl.o: crawl-main.cyc
 
 #######################################
 # Earley debugging targets
