@@ -640,7 +640,7 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
   }
 
   // Flag: encode transitions with switch statement or with table lookup.
-  int use_switch = 1;
+  int use_switch = 0;
   if (use_switch){
     fprintf(f,
         "act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {\nswitch (state) {\n");
@@ -703,7 +703,7 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
     }
     fprintf(f,"\n};\n");
     fprintf(f,
-        "act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {return final_attrs_table[state];}\n");
+        "act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {return final_attrs_table[state-1];}\n");
 
     /* Print default transition function for states without any transitions. */
     fprintf(f,"$(st_t,Semiring::weight_t) trans_NONE(act_t act) {return $(0,Semiring::one_weight);}\n");
@@ -761,7 +761,7 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
     }
     fprintf(f,"};\n\n");
     
-    fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) { return trans_funs[state](act);}\n");
+    fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) { return trans_funs[state-1](act);}\n");
 
     /* Print final states info. */
     fprintf(f,"static $(int,Semiring::weight_t) final_info_table[] = {\n");
@@ -776,7 +776,7 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
       }
     }
     fprintf(f,"\n};\n");
-    fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {return final_info_table[state];}\n");
+    fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {return final_info_table[state-1];}\n");
   }
   
   /* Print trans. */
