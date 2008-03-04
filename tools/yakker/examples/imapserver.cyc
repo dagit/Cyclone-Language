@@ -332,7 +332,7 @@ static int session_handler(int fd) {
 	fprintf(outbuf,"%s OK CAPABILITY completed\r\n",tag);
 	fflush(outbuf);
       }
-    else if (-1 != command_scanf(inbuf,"T NOOP\r\n",&tag)){
+    else if (-1 != command_scanf(inbuf,"%r NOOP\r\n",&tag)){
       /* (NOOP tag) */
       /* TODO: do stuff like renew timeout, report status */
       fprintf(stderr, "Received NOOP\n");

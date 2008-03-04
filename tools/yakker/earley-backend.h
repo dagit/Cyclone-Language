@@ -12,7 +12,7 @@ extern $(List::list_t<$(EarleyParsetree::parse_tree_t,Semiring::weight_t)@>,int,
   parse(DFA::edfa_t dfa_rep, const char? input);
 
 extern $(List::list_t<$(EarleyParsetree::parse_tree_t,Semiring::weight_t)@>,int,int)
-  ykb_parse(DFA::edfa_t dfa_rep, ykbuf_t@ ykb);
+  ykb_parse(DFA::edfa_t dfa_rep, ykbuf_t@ ykb, int parse_until_eof);
 }
 
 #endif /*EARLEYBACKEND_H_*/

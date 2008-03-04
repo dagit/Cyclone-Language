@@ -67,7 +67,7 @@ int internal_ykb_scanf (
   // Parse the actual input
   fprintf(stderr,"Parsing actual input.\n");  
   let $(input_trees, input_valid, input_valid_prefix) = 
-    EarleyAnyBackend::ykb_parse(input_dfa_obj,ykb);
+    EarleyAnyBackend::ykb_parse(input_dfa_obj,ykb,0);
   fprintf(stderr,"Done parsing actual input.\n");  
 
   if (!input_valid) {
