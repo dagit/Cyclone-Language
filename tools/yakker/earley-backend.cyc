@@ -664,9 +664,6 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb) {
   int c = 0;
   
   for (i = 0; live && !hit_final; i++) {
-    if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
-    int c = *YKCURSOR++; // consume current element.
-
     // reset for this round.
     live = 0;
     hit_final = 0;
@@ -680,10 +677,13 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb) {
           hit_final++;
     }
     if (hit_final) {
-      fprintf(stderr,"Hit final: %d.\n",hit_final);
+//      fprintf(stderr,"Hit final: %d.\n",hit_final);
       live = 1;
       break;
     }
+
+    if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+    int c = *YKCURSOR++; // consume current element.
 
     //fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(input[i]));fflush(stderr);
     for (let si_list = Set::to_list(Axarray::get(estates,i));

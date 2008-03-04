@@ -323,22 +323,23 @@ static int session_handler(int fd) {
     force(server_state,NOT_AUTHENTICATED,AUTHENTICATED,SELECTED);
 
 //     if (command_scanf(inbuf,"(command %tag CAPABILITY)",&tag))
-    if (command_scanf(inbuf,"T CAPABILITY\r\n",&tag))
+    if (-1 != command_scanf(inbuf,"T CAPABILITY\r\n",&tag))
       {
 	/* (CAPABILITY tag) */
+        fprintf(stderr, "Received CAPABILITY\n");
 	fprintf(outbuf,"* CAPABILITY IMAP4rev1\r\n");
 	/* TODO: Also send other capabilities */
 	fprintf(outbuf,"%s OK CAPABILITY completed\r\n",tag);
 	fflush(outbuf);
       }
-    else if (command_scanf(inbuf,"(command %tag NOOP)",&tag)){
+    else if (-1 != command_scanf(inbuf,"T NOOP\r\n",&tag)){
       /* (NOOP tag) */
       /* TODO: do stuff like renew timeout, report status */
       fprintf(stderr, "Received NOOP\n");
       fprintf(outbuf,"%s OK NOOP completed\r\n",tag);
       fflush(outbuf);
       }
-    else if (command_scanf(inbuf,"(command %tag LOGOUT)",&tag)){
+    else if (-1 != command_scanf(inbuf,"(command %tag LOGOUT)",&tag)){
       /* (LOGOUT tag) */
       fprintf(outbuf,"* BYE Cyclone IMAP server logging out\r\n");
       fprintf(outbuf,"%s OK LOGOUT completed\r\n",tag);
@@ -347,7 +348,7 @@ static int session_handler(int fd) {
       server_state = LOGOUT;
     }
 //     else if (command_scanf(inbuf,"(command %tag %login)",&tag,&val1)){
-    else if (command_scanf(inbuf,"(command %tag (login %userid %password))",&tag,&val1,&val2)) {
+    else if (-1 != command_scanf(inbuf,"(command %tag (login %userid %password))",&tag,&val1,&val2)) {
       /* (LOGIN tag username password) */
       force(server_state,NOT_AUTHENTICATED);
       username = val1;
@@ -402,13 +403,13 @@ static int session_handler(int fd) {
       }
     }
 
-    else if (command_scanf(inbuf,"(command %tag STARTTLS)",&tag)){
+    else if (-1 != command_scanf(inbuf,"(command %tag STARTTLS)",&tag)){
       /* (STARTTLS tag) */
       force(server_state,NOT_AUTHENTICATED);
       /* TODO */
     }
 
-    else if (command_scanf(inbuf,"(command %tag %authenticate)",&tag,&val1)) {
+    else if (-1 != command_scanf(inbuf,"(command %tag %authenticate)",&tag,&val1)) {
       /* (AUTHENTICATE tag methodname) */
       force(server_state,NOT_AUTHENTICATED);
       const char ?type=NULL, ?stuff=NULL;
@@ -442,7 +443,7 @@ static int session_handler(int fd) {
 //        */
 //       break;
 
-    else if (command_scanf(inbuf,"(command %tag (create %mailbox))",&tag,&val1)){
+    else if (-1 != command_scanf(inbuf,"(command %tag (create %mailbox))",&tag,&val1)){
       /* (CREATE tag mbox_name) */
       force(server_state,AUTHENTICATED,SELECTED);
 
@@ -495,7 +496,7 @@ static int session_handler(int fd) {
 //       */
 //       break;
 
-    else if (command_scanf(inbuf,"(command %tag (list %mailbox %list-mailbox))",&tag,&val1,&val2)){
+    else if (-1 != command_scanf(inbuf,"(command %tag (list %mailbox %list-mailbox))",&tag,&val1,&val2)){
 //       /* (LIST tag reference_name mbox_name) */
        force(server_state,AUTHENTICATED,SELECTED);
        const char ?sql = NULL;

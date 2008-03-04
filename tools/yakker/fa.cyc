@@ -688,13 +688,14 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
     fprintf(f,"default: return $(0,Semiring::zero_weight);\n}\n}\n");
 
   } else {
+    // Generate code based on tables
 
     /* print final attributes */
     fprintf(f, "act_t ? final_attrs_table[] = {\n");
+    // handle state 0:
+    fprintf(f, "  (act_t ?)NULL");
     for (let i = 1; i < len; i++) {
-      if (i > 1) fprintf(f,",\n  ");
-      else fprintf(f,"  (act_t ?) ");
-
+      fprintf(f,",\n  ");
       if (!Set::member(dfa->final_states, i)){
         fprintf(f, "NULL");
       } else {
@@ -703,7 +704,9 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
     }
     fprintf(f,"\n};\n");
     fprintf(f,
-        "act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {return final_attrs_table[state-1];}\n");
+        "act_t ?final_attrs(CycDFA::edfa_t self, st_t state) {\n"
+        "  if (state >= num_dfa_states) return NULL;\n"
+        "return final_attrs_table[state];}\n");
 
     /* Print default transition function for states without any transitions. */
     fprintf(f,"$(st_t,Semiring::weight_t) trans_NONE(act_t act) {return $(0,Semiring::one_weight);}\n");
@@ -739,11 +742,13 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
     /* Print table of transition functions. */
     fprintf(f,"typedef $(st_t,Semiring::weight_t)(@trans_fun)(act_t act);\n\n");
     fprintf(f,"static trans_fun trans_funs[] = {\n");
+    // handle state 0:
+    fprintf(f, "  trans_NONE");
     for (let i = 1; i < len; i++) {
-      if (i > 1) fprintf(f,",\n");
+      fprintf(f,",\n");
       let transitions = Axarray::get(dfa->states,i);
       if (!transitions) {
-        fprintf(f,"trans_NONE");
+        fprintf(f,"  trans_NONE");
         continue;
       }
       let allzeros = 1;
@@ -753,30 +758,37 @@ void dfa_cyclone(FILE @f, dfa_t dfa) {
         break;
       }
       if (allzeros) {
-        fprintf(f,"trans_NONE");
+        fprintf(f,"  trans_NONE");
         continue;
       }
 
-      fprintf(f,"trans_state_%d",i);
+      fprintf(f,"  trans_state_%d",i);
     }
     fprintf(f,"};\n\n");
     
-    fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) { return trans_funs[state-1](act);}\n");
+//    "  if (state >= num_dfa_states) printf(\"\\nInvalid state: %%d.\\n\",state);\n"
+    fprintf(f,"$(st_t,Semiring::weight_t) trans_w(CycDFA::edfa_t self, st_t state,act_t act) {\n"
+              "  if (state >= num_dfa_states) return $(0,Semiring::zero_weight);\n"
+              "  return trans_funs[state](act);}\n");
 
     /* Print final states info. */
     fprintf(f,"static $(int,Semiring::weight_t) final_info_table[] = {\n");
+    // handle state 0:
+    let zweight_str = Semiring::print_weight(Semiring::zero_weight); 
+    fprintf(f,"  $(0,%s)",zweight_str);
     for (let i = 1; i < len; i++) {
-      if (i > 1) fprintf(f,",\n");
-
+      fprintf(f,",\n");
       switch(Hashtable::lookup_opt(dfa->final_weights, i)){
-      case NULL: fprintf(f,"  $(0,%s)",Semiring::print_weight(Semiring::zero_weight));
+      case NULL: fprintf(f,"  $(0,%s)",zweight_str);
         break;
       case &w: fprintf(f,"  $(1,%s)",Semiring::print_weight(*w));
         break;
       }
     }
     fprintf(f,"\n};\n");
-    fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {return final_info_table[state-1];}\n");
+    fprintf(f,"$(int,Semiring::weight_t) final_info(st_t state) {\n"
+        "  if (state >= num_dfa_states) return $(0,%s);\n"
+        "  return final_info_table[state];}\n",zweight_str);
   }
   
   /* Print trans. */

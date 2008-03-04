@@ -39,9 +39,10 @@ int internal_ykb_scanf (
     EarleyAnyBackend::DFA::grammar_edfa_t gr_edfa,
     ykbuf_t@ ykb, string_t format_string, string_t<`H> @ ?args){
 
+  // Parse the format string
   let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(fs_dfa_obj,format_string); 
   if (!valid) { 
-    return 0;
+    return -1;
   }
   
 //  if (trees->tl) {
@@ -63,11 +64,15 @@ int internal_ykb_scanf (
   let input_dfa_obj = ExtAnyDFA::mk_any_eb(input_ext_dfa_obj); // "upcast" to plain edfa.
 
   let ykb_save = YKSAVE;
+  // Parse the actual input
+  fprintf(stderr,"Parsing actual input.\n");  
   let $(input_trees, input_valid, input_valid_prefix) = 
     EarleyAnyBackend::ykb_parse(input_dfa_obj,ykb);
+  fprintf(stderr,"Done parsing actual input.\n");  
+
   if (!input_valid) {
     YKCURSOR = YKRESTORE(ykb_save);
-    return 0;
+    return -1;
   }
   
 //  fprintf(stderr,"done -- is valid string :%d; is valid prefix: %d\n", input_valid,

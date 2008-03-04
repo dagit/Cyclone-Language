@@ -614,23 +614,23 @@ static bool is_regexp(const char ?s){
 }
 
 static
-$(rule_t,const char ?,rule_t) mk_bnfgen_binder (const char ?`H symb_name){
+$(rule_t,$(const char ?,rule_t)*) mk_bnfgen_binder (const char ?`H symb_name){
   // FIX: make sure this name is unique w.r.t. input grammar.
-  let r_binder = SYMB("anon-tg-binder"); // generic binder
-  let r_binder_spec = SEQ(LIT("%"), LIT(symb_name)); // binder specific to this symbol.
+  let r_anon_binder = SYMB("anon-tg-binder"); // generic binder
+  let r_named_binder = SEQ(LIT("%"), LIT(symb_name)); // binder specific to this symbol.
   let a = aprintf("return new BinderPat(\"%s\");", symb_name);
-  r_binder->a = a;
-  r_binder_spec->a = a;
+  r_anon_binder->a = a;
+  r_named_binder->a = a;
 
-  let r_binder_spec_name = aprintf("%s-tg-binder",symb_name);
-  let r_binder_symb = SYMB(r_binder_spec_name); 
-  r_binder_symb->v = fresh_name();
-  r_binder_symb->a = aprintf("return %s;",r_binder_symb->v);
+  let binder_nonterm_name = aprintf("%s-tg-binder",symb_name);
+  let r_binder_nonterm = SYMB(binder_nonterm_name); 
+  r_binder_nonterm->v = fresh_name();
+  r_binder_nonterm->a = aprintf("return %s;",r_binder_nonterm->v);
 
-  let r = (include_anon_binder && include_named_binder) ? ALT(r_binder, r_binder_symb) 
-          : (include_anon_binder ? r_binder : r_binder_symb);
-      
-  return $(r,r_binder_spec_name,r_binder_spec);
+  return (include_anon_binder && include_named_binder) ? 
+       $(ALT(r_anon_binder, r_binder_nonterm), new $(binder_nonterm_name,r_named_binder)) 
+     : (include_anon_binder ? $(r_anon_binder,NULL) 
+                            : $(r_binder_nonterm,new $(binder_nonterm_name,r_named_binder)));
 }
 
 grammar_t grammar2bindgrammar(grammar_t<`H> g) {
@@ -654,12 +654,16 @@ grammar_t grammar2bindgrammar(grammar_t<`H> g) {
       r_orig->v = fresh_name();
       r_orig->a = aprintf("return %s;",r_orig->v);
 
-      let $(r_b, b_name, b_rule) = mk_bnfgen_binder(n);
+      let $(r_b, named_opt) = mk_bnfgen_binder(n);
 
-      res = new List(new $(b_name, b_rule, b_attr),
-		     new List(new $(n_orig, r, a), 
-			      new List(new $(n, ALT(r_b,r_orig), a), 
-				       res)));
+      res =  new List(new $(n_orig, r, a), 
+                      new List(new $(n, ALT(r_b,r_orig), a), 
+                               res));
+
+      if (named_opt){
+        let &$(b_name, b_rule) = named_opt;
+        res = new List(new $(b_name, b_rule, b_attr), res);
+      } 
     } else      
       res = new List(new $(n,r,a), res);
   }
