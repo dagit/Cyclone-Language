@@ -80,4 +80,3 @@ abnf-dfa.txt: examples/abnf-echo.bnf yakker
 #abnf-trunc-flat-dfa.dot: testing/abnf-trunc.bnf yakker
 #	./yakker -flatten-full -earley-gen-dot rulelist $< > $@
 
-	

@@ -5,12 +5,12 @@ include ../../Makefile.inc
 # How to deal with nullable symbols:
 # Plan A: short circuit them and they are lost during reconstruction.
 # Use -DNULL_PLAN_A
-# Plan B: don't short circuit them. Instead, at beginning of DFA and at calls, 
-# check whether call target is a final state and do an immediate return, 
+# Plan B: don't short circuit them. Instead, at beginning of DFA and at calls,
+# check whether call target is a final state and do an immediate return,
 # if so. RETURN closure is modified to allow returns on epsilon.
 # Use -DNULL_PLAN_B
-# Plan C: Short circuit nullable symbols by marking their start state as final 
-# *and*, at beginning of DFA and at calls, 
+# Plan C: Short circuit nullable symbols by marking their start state as final
+# *and*, at beginning of DFA and at calls,
 # check whether call target is a final state and, if so, do an immediate return.
 # Use -DNULL_PLAN_C
 CYCFLAGS=--novcgen -DNULL_PLAN_B
@@ -34,7 +34,7 @@ BINDIR=$(CYCDIR)/bin
 # examples directory. Use full path to avoid ambiguity.
 EXDIR=$(CURDIR)/examples
 CYC_LIB_PATH = $(BINDIR)/lib
-CYCLONE=$(BINDIR)/cyclone -I../../include -B$(BINDIR)/lib/cyc-lib
+CYCLONE=$(BINDIR)/cyclone -I../../include -B$(BINDIR)/lib/cyc-lib -L$(CYC_LIB_PATH)
 CYCBISON=$(BINDIR)/cycbison
 CYCLEX=$(BINDIR)/cyclex
 STRINGIFY=$(BINDIR)/stringify
@@ -45,7 +45,6 @@ YAKKER_FILES = analyze axarray cs bnf extract semiring fa dfa-core nfa_lazy nfa_
   string_dfa_engine2_1 corerules corerules_grm \
   util namespaces earley-common earley earley-dispatch \
   yakker
-  
 
 # OBJS:=$(foreach yfile,$(YAKKER_FILES),build/$(yfile).o)
 OBJS:=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
@@ -55,7 +54,7 @@ OBJS_PA=$(foreach yfile,$(YAKKER_FILES),$(yfile)_a.o)
 PROG_PA=$(PROG)_a
 
 FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
- 
+
 DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
 
 define ARCHIVE
@@ -70,13 +69,13 @@ endef
 # Earley-backend files.
 EBE_FILES = axarray semiring earley-parsetree fsm-dfa util \
             dfa-core earley-common earley-backend ext-any-dfa
-EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o) 
+EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o)
 
 #######################################
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable $(EBE_FILES)  
+LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable $(EBE_FILES)
 
 LIB_YAKKER_OBJS := $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
@@ -86,6 +85,8 @@ DEPENDS += $(foreach file,$(LY_ONLY_FILES),build/$(file).d)
 # Targets
 ###############################################################################
 
+# Don't include $(LIB_YAKKER) in 'all' b/c it requires SSL and we
+# don't want to require this for the main Cyclone build
 all: $(BTS-PROG) $(PROG)
 
 cyclone-install: $(BINDIR)/$(PROG)
@@ -94,13 +95,13 @@ $(BINDIR)/$(PROG): $(PROG)
 	cp $< $@
 
 $(PROG): $(OBJS)
-	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@ -lm	
+	$(CYCLONE) $(CYCFLAGS) $^ -o $@ -lm
 
 # $(BTS_PROG): $(BTS_OBJS)
-#	$(CYCLONE) $(CYCFLAGS) -L$(CYC_LIB_PATH) $^ -o $@ -lm	
+#	$(CYCLONE) $(CYCFLAGS) $^ -o $@ -lm
 
 $(PROG_PA): $(OBJS_PA)
-	$(CYCLONE) $(CYCFLAGS) -pa -L$(CYC_LIB_PATH) $^ -o $@ -lm
+	$(CYCLONE) $(CYCFLAGS) -pa $^ -o $@ -lm
 
 testindexer: indexer 1rfc_index
 	./indexer < 1rfc_index
@@ -120,7 +121,7 @@ indexer.cyc: examples/indexer.yk $(PROG_DEP)
 
 $(LIB_YAKKER) : $(LIB_YAKKER_OBJS)
 	$(ARCHIVE)
-    
+
 include examples/abnf-echo.mk
 include examples/calc.mk
 include examples/xpath.mk
@@ -214,11 +215,11 @@ small_imap.h: examples/small_imap.bnf $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen-header $< > $@
 
 small_imap_genpm: small_imap_genpm.o ykbuf.o ssl.o ast_main.o funtable.o pm_bnf.o small_imap.o\
-	bnf.o lex.o parse_tab.o pr.o util.o 
+	bnf.o lex.o parse_tab.o pr.o util.o
 	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
 
 #	./yakker $(YAKFLAGS) -all-start -eof 10 -gen command_pm -no-main $< > $@
-# Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
+# Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular,
 # the charset optimization loses necessary semantic actions).
 small_imap_genpm.cyc: small_imap_genpm.bnf $(PROG_DEP)
 	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -all-start -no-minus-elim -gen command -no-main $< > $@
@@ -235,7 +236,7 @@ small_imap_genpm.bnf: examples/small_imap.bnf $(PROG_DEP)
 # imap_genpm.cyc: imap_genpm.bnf $(PROG_DEP)_a
 # 	./yakker_a $(YAKFLAGS) -all-start -no-minus-elim -gen command -no-main $< > $@
 
-# Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular, 
+# Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular,
 # the charset optimization loses necessary semantic actions, and flattening can be undone).
 imap_genpm.cyc: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen-crawl command \
@@ -297,10 +298,10 @@ $(GENDIR)/imap_flat.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 # small_imap_pm.cyc: small_imap_pm.bnf $(PROG_DEP)
 # 	./yakker -no-close-defs -gen my-command $< > $@
 
-# small_imap_pm.bnf: examples/test_genparse small_imap_genpm 
+# small_imap_pm.bnf: examples/test_genparse small_imap_genpm
 # 	./small_imap_genpm -unescape-pat "\\" -scan -name my-command < $< > $@
 
-# small_imap_print.cyc: examples/test_genprint.txt small_imap_genpm 
+# small_imap_print.cyc: examples/test_genprint.txt small_imap_genpm
 # 	./small_imap_genpm -unescape-pat "\\" -print -name my-command -args 7 < $< > $@
 
 # %_pm: %_pm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
@@ -414,7 +415,7 @@ $(BNFDIR)/imap-ext%.bnf: $(BNFDIR)/rfc%.bnf $(PROG_DEP)
 $(BNFDIR)/imap_revised.bnf: $(BNFDIR)/rfc3501.bnf \
   $(BNFDIR)/imap-ext2088.bnf  \
   $(BNFDIR)/imap-ext3502.bnf $(BNFDIR)/imap-ext3516.bnf \
-  $(BNFDIR)/imap-ext4466.bnf 
+  $(BNFDIR)/imap-ext4466.bnf
 	./yakker $(BNFDIR)/rfc3501.bnf -tsort -unnamespace > $@
 	./yakker $@ -omit `./yakker -list-defs $(BNFDIR)/imap-ext2088.bnf` > $@.tmp
 	cat $(BNFDIR)/imap-ext2088.bnf >> $@.tmp
@@ -465,7 +466,7 @@ clean:
 	$(RM) in out errs parse.output
 	$(RM) http.bnf http.p message-header.bnf message-header.p
 	$(RM) imap.bnf imap.h imap.cyc rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
-	$(RM) imap_genpm.cyc 
+	$(RM) imap_genpm.cyc
 	$(RM) small_imap.h small_imap.cyc small_imap_genpm.h small_imap_genpm.cyc
 	$(RM) imap.h imap.cyc imap_genpm.h imap_genpm.cyc
 	$(RM) indexer.h indexer.cyc indexer_genpm.h indexer_genpm.cyc
@@ -496,7 +497,7 @@ clean:
 
 # .o dependency forces the _a.o to depend on the same files as the .o.
 # However, the .o is not really needed.
-$(OBJS_PA): %_a.o: %.cyc %.o 
+$(OBJS_PA): %_a.o: %.cyc %.o
 	$(CYCLONE) $(CYCFLAGS) -pa -c $< -o $@
 
 %.o: %.cyc
@@ -542,7 +543,7 @@ $(BNFDIR)/rfc3501.bnf: rfc3501.txt $(PROG_DEP)
 	$(RM) $@.tmp
 
 # IMAP extension: non-synchronizing literals
-# First command line should be: ./yakker -extract $< > $@.tmp, 
+# First command line should be: ./yakker -extract $< > $@.tmp,
 # but results in empty bnf because defined with ::= instead of =.
 $(BNFDIR)/rfc2088.bnf: rfc2088.txt $(PROG_DEP)
 	echo "literal = \"{\" number [\"+\"] \"}\" CRLF *CHAR8." > $@.tmp

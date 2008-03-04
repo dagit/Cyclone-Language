@@ -240,7 +240,7 @@ void ykreserve(ykbuf_t @s,unsigned int TO_READ) {
 }
 
 void ykfill(ykbuf_t @s,unsigned int n) {
-  if (s->eof || n < (s->lim - s->cur)) return;
+  if (s->eof || n <= (s->lim - s->cur)) return;
   int TO_READ = n - (s->lim - s->cur);
   if (TO_READ < BSIZE) TO_READ = BSIZE; // Don't read little chunks
   // We want to read in TO_READ chars.  Resize the buffer if not enough space.
@@ -252,7 +252,7 @@ void ykfill(ykbuf_t @s,unsigned int n) {
     cnt = ykread(s->prod, s->lim, TO_READ);
     if (cnt > 0) {
       s->lim += cnt;
-      if (n < (s->lim - s->cur)) return; // TO_READ was larger than n
+      if (n <= (s->lim - s->cur)) return; // Enough, don't care if TO_READ>n.
       TO_READ -= cnt;
       if (TO_READ == 0) return;
       continue;

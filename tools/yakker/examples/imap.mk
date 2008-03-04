@@ -14,9 +14,6 @@ $(GrammarPrefix)_OBJS:=$(foreach yfile,$($(GrammarPrefix)_FILES),$(yfile).o)
 $(GrammarName)-earley: $($(GrammarPrefix)_OBJS) $(LIB_YAKKER)
 	$(CYCLONE) -o $@ $($(GrammarPrefix)_OBJS)  -lssl -lm $(LIB_YAKKER)
 
-$(GrammarName)-flat-dfa.txt: examples/$(GrammarName).bnf yakker
-	./yakker -flatten-full -earley-gen-fsm $(GrammarStart) examples/$(GrammarName).bnf > $@
-
 $(GrammarName)-flat-dfa.cyc: examples/$(GrammarName).bnf yakker
 	./yakker -flatten-full -earley-gen-cyc $(GrammarStart) $< > $@
 
@@ -117,7 +114,11 @@ gen/$(GrammarName)-tg-dfa.dot: gen/$(GrammarName)-tg.bnf yakker
 	./yakker -flatten-full -no-minus-elim -earley-gen-dot $(GrammarStart) $< > $@
 
 gen/$(GrammarName)-flat-grm-dfa.txt: examples/$(GrammarName).bnf yakker
-	./yakker -flatten-full -earley-gen-grm-fsm examples/$(GrammarName).bnf > $@
+	./yakker -flatten-full -earley-gen-grm-fsm $< > $@
 
 gen/$(GrammarName)-flat-grm-dfa.dot: examples/$(GrammarName).bnf yakker
-	./yakker -flatten-full -earley-gen-grm-dot examples/$(GrammarName).bnf > $@
+	./yakker -flatten-full -earley-gen-grm-dot $< > $@
+
+$(GrammarName)-flat-dfa.txt: examples/$(GrammarName).bnf yakker
+	./yakker -flatten-full -earley-gen-fsm $(GrammarStart) $< > $@
+
