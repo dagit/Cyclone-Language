@@ -21,50 +21,33 @@
 #include <errno.h>
 #include <string.h>
 
-#define BSIZE 8192
-
 #include "ykbuf.h"
 
 ykbuf_t @fd2ykbuf(int fd) {
-  let buf = malloc(BSIZE*sizeof(unsigned char));
-  let result = new ykbuf{
+  let buf = malloc(YKBSIZE*sizeof(unsigned char));
+  let result = new ykbuf {
     .prod=new ykp_fd(fd),
     .bot=buf,
     .save=NULL,
     .mark=NULL,
     .cur=buf,
     .lim=buf,
-    .top=buf+BSIZE,
+    .top=buf+YKBSIZE,
     .eof=0,
     .save_count=0,
     .discarded=0};
   return result;
 }
-ykbuf_t @ssl2ykbuf(SSL @`H ssl) {
-  let buf = malloc(BSIZE*sizeof(unsigned char));
-  let result = new ykbuf{
-    .prod=new ykp_ssl(ssl),
+ykbuf_t @p2ykbuf(Fn::fn_t<$(unsigned char ?@nozeroterm `H,int)@`H,int,`H> f) {
+  let buf = malloc(YKBSIZE*sizeof(unsigned char));
+  let result = new ykbuf {
+    .prod=new ykp_p(f),
     .bot=buf,
     .save=NULL,
     .mark=NULL,
     .cur=buf,
     .lim=buf,
-    .top=buf+BSIZE,
-    .eof=0,
-    .save_count=0,
-    .discarded=0};
-  return result;
-}
-ykbuf_t @p2ykbuf(int (@`H p)(ykbuf_t @`H),ykbuf_t @`H ykb) {
-  let buf = malloc(BSIZE*sizeof(unsigned char));
-  let result = new ykbuf{
-    .prod=new ykp_p(p,ykb),
-    .bot=buf,
-    .save=NULL,
-    .mark=NULL,
-    .cur=buf,
-    .lim=buf,
-    .top=buf+BSIZE,
+    .top=buf+YKBSIZE,
     .eof=0,
     .save_count=0,
     .discarded=0};
@@ -79,14 +62,14 @@ ykbuf_t @string2ykbuf(const char ?s) {
   let buf = malloc((len+1)*sizeof(char));
   memcpy(buf,s,len);
   buf[len] = '\0';
-  let result = new ykbuf{
+  let result = new ykbuf {
     .prod=NULL,
     .bot=buf,
     .save=NULL,
     .mark=NULL,
     .cur=buf,
     .lim=buf,
-    .top=buf+BSIZE,
+    .top=buf+YKBSIZE,
     .eof=1,
     .save_count=0,
     .discarded=0};
@@ -97,14 +80,14 @@ ykbuf_t @data2ykbuf(const char ?@nozeroterm s) {
   let buf = malloc((len+1)*sizeof(char));
   memcpy(buf,s,len);
   buf[len] = '\0';
-  let result = new ykbuf{
+  let result = new ykbuf {
     .prod=NULL,
     .bot=buf,
     .save=NULL,
     .mark=NULL,
     .cur=buf,
     .lim=buf,
-    .top=buf+BSIZE,
+    .top=buf+YKBSIZE,
     .eof=1,
     .save_count=0,
     .discarded=0};
@@ -182,27 +165,18 @@ void ykdumpbuf(ykbuf_t @y) {
   fprintf(stderr,"\n");
 }
 
-// FIX: make p first-class polymorphic on `r?
-int ykreadp(int (@p)(ykbuf_t @`r), ykbuf_t @`r ykb,
-            unsigned char? @nozeroterm b, int n) {
-  for (int i = 0; i < n; i++) {
-    int r = p(ykb);
-    if (r < 0 || r > 255) return i;
-    *b = (unsigned char)r;
-  }
-  return n;
-}
-
-int ykread(datatype ykproducer *p, unsigned char? @nozeroterm b, int n) {
+static int ykread(datatype ykproducer *p, unsigned char? @nozeroterm`H b, int n) {
   switch (p) {
   case NULL:          return 0;
   case &ykp_fd(fd):   return read(fd,b,n);
-  case &ykp_ssl(ssl): return SSL_read(ssl,b,n);
-  case &ykp_p(p,ykb): return ykreadp(p,ykb,b,n);
+  //  case &ykp_ssl(ssl): return SSL_read(ssl,b,n);
+  case &ykp_p(f):
+    let x = new $(b,n); // TODO: don't heap-allocate this
+    return Fn::apply(f,x);
  }
 }
 
-void ykdiscard(ykbuf_t @s) {
+static void ykdiscard(ykbuf_t @s) {
   // @ensures(s->save == NULL || s->save == s->bot)
   int cnt;
   if (s->save) {
@@ -219,7 +193,7 @@ void ykdiscard(ykbuf_t @s) {
   }
 }
 
-void ykreserve(ykbuf_t @s,unsigned int TO_READ) {
+static void ykreserve(ykbuf_t @s,unsigned int TO_READ) {
   if ((s->top - s->lim) < TO_READ)
     ykdiscard(s);
   if ((s->top - s->lim) < TO_READ) {
@@ -242,7 +216,7 @@ void ykreserve(ykbuf_t @s,unsigned int TO_READ) {
 void ykfill(ykbuf_t @s,unsigned int n) {
   if (s->eof || n <= (s->lim - s->cur)) return;
   int TO_READ = n - (s->lim - s->cur);
-  if (TO_READ < BSIZE) TO_READ = BSIZE; // Don't read little chunks
+  if (TO_READ < YKBSIZE) TO_READ = YKBSIZE; // Don't read little chunks
   // We want to read in TO_READ chars.  Resize the buffer if not enough space.
   ykreserve(s,TO_READ);
 

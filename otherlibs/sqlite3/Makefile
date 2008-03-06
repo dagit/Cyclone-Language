@@ -5,7 +5,9 @@ override CYCFLAGS += -I$(CYCDIR)/include $(LC_FLAG)
 BUILDLIB=$(BINDIR)/buildlib -B$(CYC_LIB_PATH)/cyc-lib
 CYCC=$(BINDIR)/$(CYCCOMP) -B$(CYC_LIB_PATH)/cyc-lib
 
-LIBSQLITE3=$(shell $(CC) -print-file-name=libsqlite3.a)
+ifeq ($LIBSQLITE3,"")
+  LIBSQLITE3=$(shell $(CC) -print-file-name=libsqlite3.a)
+endif
 
 libsqlite3.a: libsqlite3.cys cycstubs.o cstubs.o
 	cp $(LIBSQLITE3) $@

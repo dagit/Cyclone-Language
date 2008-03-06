@@ -8,7 +8,6 @@
 #include <graph.h>
 #include "fa.h"
 #include "axarray.h"
-#include "pm_bnf.h"
 #include "semiring.h"
 
 #include "earley.h"
@@ -88,7 +87,7 @@ static act_t new_action(symb_info_t si) {
 string_t act2symb(act_t act, Hashtable::table_t<act_t,str_t> as_table) {
 ////////////////////////////////////////////////////////////////////////
 // CAUSES COMPILER EXCEPTION:
-//   let as_table = 
+//   let as_table =
 //     Hashtable::create(11,st_cmp,st_hash);
 //   Hashtable::insert(as_table,callout_action(),new "CALL");
 //   Hashtable::insert(as_table,repeat_action(),new "REPEAT");

@@ -18,12 +18,12 @@
 
 #ifndef YKBUF_H
 #define YKBUF_H
-#include "ssl.h"
+#include "fn.h"
+#define YKBSIZE 8192
 typedef struct ykbuf ykbuf_t;
 datatype ykproducer {
-  ykp_fd(int);
-  ykp_ssl(SSL@);
-  ykp_p(int (@p)(ykbuf_t @), ykbuf_t @ykb);
+  ykp_p(Fn::fn_t<$(unsigned char ?@nozeroterm,int)@,int>); // general case
+  ykp_fd(int);                                             // special (common) case
 };
 struct ykbuf {
   datatype ykproducer *prod;
@@ -39,8 +39,9 @@ struct ykbuf {
   unsigned int    discarded;
 };
 extern ykbuf_t @fd2ykbuf(int fd);
-extern ykbuf_t @ssl2ykbuf(SSL@`H);
-extern ykbuf_t @p2ykbuf(int (@`H p)(ykbuf_t @`H),ykbuf_t @`H ykb);
+
+extern ykbuf_t @p2ykbuf(Fn::fn_t<$(unsigned char ?@nozeroterm`H,int)@`H,int,`H> f);
+
 extern ykbuf_t @string2ykbuf(const char ?s);
 extern ykbuf_t @data2ykbuf(const char ?@nozeroterm s);
 

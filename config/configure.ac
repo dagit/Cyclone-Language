@@ -163,22 +163,43 @@ fi
 AC_SUBST(HAVE_PTHREAD)
 
 # pcre -- Perl Compatible Regular Expressions
-AC_CHECK_HEADERS([pcre.h],[ac_cv_pcre=pcre],[ac_cv_pcre=no])
-if [[ "$ac_cv_pcre" = "pcre" ]]; then
+#AC_CHECK_HEADERS([pcre.h],[ac_cv_pcre=pcre],[ac_cv_pcre=no])
+AC_CHECK_FILE(/usr/lib/libpcre.a,[LIBPCRE=/usr/lib/libpcre.a],[])
+AC_CHECK_FILE(/usr/local/lib/libpcre.a,[LIBPCRE=/usr/local/lib/libpcre.a],[])
+#if [[ "$ac_cv_pcre" = "pcre" && "$LIBPCRE" != "" ]]; then
+if [[ "$LIBPCRE" != "" ]]; then
   HAVE_PCRE=yes
 else
   HAVE_PCRE=no
 fi
 AC_SUBST(HAVE_PCRE)
+AC_SUBST(LIBPCRE)
 
 # sqlite3
-AC_CHECK_HEADERS([sqlite3.h],[ac_cv_sqlite3=sqlite3],[ac_cv_sqlite3=no])
-if [[ "$ac_cv_sqlite3" = "sqlite3" ]]; then
+#AC_CHECK_HEADERS([sqlite3.h],[ac_cv_sqlite3=sqlite3],[ac_cv_sqlite3=no])
+AC_CHECK_FILE(/usr/lib/libsqlite3.a,[LIBSQLITE3=/usr/lib/libsqlite3.a],[])
+AC_CHECK_FILE(/usr/local/lib/libsqlite3.a,[LIBSQLITE3=/usr/local/lib/libsqlite3.a],[])
+#if [[ "$ac_cv_sqlite3" = "sqlite3" && "$LIBSQLITE3" != "" ]]; then
+if [[ "$LIBSQLITE3" != "" ]]; then
   HAVE_SQLITE3=yes
 else
   HAVE_SQLITE3=no
 fi
 AC_SUBST(HAVE_SQLITE3)
+AC_SUBST(LIBSQLITE3)
+
+# ssl
+#AC_CHECK_HEADERS([ssl.h],[ac_cv_ssl=ssl],[ac_cv_ssl=no])
+AC_CHECK_FILE(/usr/lib/libssl.a,[LIBSSL=/usr/lib/libssl.a],[])
+AC_CHECK_FILE(/usr/local/lib/libssl.a,[LIBSSL=/usr/local/lib/libssl.a],[])
+#if [[ "$ac_cv_ssl" = "ssl" && "$LIBSSL" != "" ]]; then
+if [[ "$LIBSSL" != "" ]]; then
+  HAVE_SSL=yes
+else
+  HAVE_SSL=no
+fi
+AC_SUBST(HAVE_SSL)
+AC_SUBST(LIBSSL)
 
 # The rest...
 AC_SET_MAKE

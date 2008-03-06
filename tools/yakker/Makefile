@@ -22,6 +22,7 @@ CURDIR=$(shell pwd)
 PROG=yakker$(EXE)
 
 LIB_YAKKER=libyakker.a
+LIB_YAKKER_SSL=libyakker-ssl.a
 
 # Set this to yakker to make all targets generated with yakker depend
 # on yakker.  Useful to turn off when simultenously modifying yakker
@@ -46,22 +47,13 @@ YAKKER_FILES = analyze axarray cs bnf extract semiring fa dfa-core nfa_lazy nfa_
   util namespaces earley-common earley earley-dispatch \
   yakker
 
-# OBJS:=$(foreach yfile,$(YAKKER_FILES),build/$(yfile).o)
-OBJS:=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
+DEPENDS += $(foreach file,$(YAKKER_FILES),build/$(file).d)
+
+OBJS=$(foreach yfile,$(YAKKER_FILES),$(yfile).o)
 
 # OBJS compiled for allocation profiling.
 OBJS_PA=$(foreach yfile,$(YAKKER_FILES),$(yfile)_a.o)
 PROG_PA=$(PROG)_a
-
-FILES=$(YAKKER_FILES) ast_main pm_bnf imap_scanf funtable
-
-DEPENDS:=$(foreach file,$(FILES),build/$(file).d)
-
-define ARCHIVE
-	-$(RM) $@
-	$(AR) rc $@ $^
-	$(RANLIB) $@
-endef
 
 #######################################
 ## Earley-related variables
@@ -69,25 +61,29 @@ endef
 # Earley-backend files.
 EBE_FILES = axarray semiring earley-parsetree fsm-dfa util \
             dfa-core earley-common earley-backend ext-any-dfa
-EBE_OBJS := $(foreach file,$(EBE_FILES),$(file).o)
 
 #######################################
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf ssl tge-scanf pm_bnf funtable $(EBE_FILES)
+LIB_YAKKER_FILES = ykbuf tge-scanf pm_bnf funtable $(EBE_FILES)
 
-LIB_YAKKER_OBJS := $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
+LIB_YAKKER_OBJS = $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
-LY_ONLY_FILES:=$(filter-out $(YAKKER_FILES), $(LIB_YAKKER_FILES))
+LY_ONLY_FILES = $(filter-out $(YAKKER_FILES), $(LIB_YAKKER_FILES))
 DEPENDS += $(foreach file,$(LY_ONLY_FILES),build/$(file).d)
+
+define ARCHIVE
+	-$(RM) $@
+	$(AR) rc $@ $^
+	$(RANLIB) $@
+endef
+
 ###############################################################################
 # Targets
 ###############################################################################
 
-# Don't include $(LIB_YAKKER) in 'all' b/c it requires SSL and we
-# don't want to require this for the main Cyclone build
-all: $(BTS-PROG) $(PROG)
+all: $(PROG) $(LIB_YAKKER)
 
 cyclone-install: $(BINDIR)/$(PROG)
 
@@ -97,17 +93,14 @@ $(BINDIR)/$(PROG): $(PROG)
 $(PROG): $(OBJS)
 	$(CYCLONE) $(CYCFLAGS) $^ -o $@ -lm
 
-# $(BTS_PROG): $(BTS_OBJS)
-#	$(CYCLONE) $(CYCFLAGS) $^ -o $@ -lm
-
 $(PROG_PA): $(OBJS_PA)
 	$(CYCLONE) $(CYCFLAGS) -pa $^ -o $@ -lm
 
 testindexer: indexer 1rfc_index
 	./indexer < 1rfc_index
 
-indexer: indexer.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o cs.o
-	$(CYCLONE) $^ -o $@ -lssl -lcrypto
+indexer: indexer.o ykbuf.o bnf.o extract.o pr.o parse_tab.o util.o lex.o cs.o
+	$(CYCLONE) $^ -o $@
 
 # --novcgen is temporary until a bug is fixed
 indexer.o: indexer.cyc
@@ -122,6 +115,9 @@ indexer.cyc: examples/indexer.yk $(PROG_DEP)
 $(LIB_YAKKER) : $(LIB_YAKKER_OBJS)
 	$(ARCHIVE)
 
+$(LIB_YAKKER_SSL) : ssl.o
+	$(ARCHIVE)
+
 include examples/abnf-echo.mk
 include examples/calc.mk
 include examples/xpath.mk
@@ -131,8 +127,8 @@ include examples/xpath.mk
 
 #####################################
 
-wf: wf.o ykbuf.o ssl.o
-	$(CYCLONE) $^ -o $@ -lssl -lcrypto
+wf: wf.o ykbuf.o
+	$(CYCLONE) $^ -o $@
 
 wf.cyc: examples/wf.yk $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen file $< > $@
@@ -170,19 +166,21 @@ echop.o: examples/echop.cyc
 echop: echop.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
-#	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
-#	$(CYCLONE) $^ -o build/$@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
+
+# non-Earley IMAP server
+LIBSQLITE=-lsqlite3
+#LIBSQLITE=/Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a
 imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
-	$(CYCLONE) $^ -o $@ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
-
-# Earley-based IMAP server
-imapserver-e: imapserver.o imap-scanf-e.o  cs.o imap-tg-dfa.o imap-grm-dfa.o $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $^ /Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a -lpthread -lssl -lcrypto
-
-include examples/imap.mk
+	$(CYCLONE) $^ -o $@ $(LIBSQLITE) -lpthread -lssl -lcrypto
 
 imapserver.o: $(EXDIR)/imapserver.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
+
+# Earley-based IMAP server
+imapserver-e: imapserver.o imap-scanf-e.o cs.o imap-tg-dfa.o imap-grm-dfa.o $(LIB_YAKKER) ssl.o
+	$(CYCLONE) -o $@ $^ $(LIBSQLITE) -lpthread -lssl -lcrypto -lm
+
+include examples/imap.mk
 
 # Earley-based scanf
 imap-scanf-e.cyc: gen/imap-tg.bnf yakker
@@ -323,14 +321,8 @@ pm_bnf.o : pm_bnf.cyc pm_bnf.h pads.h bnf.h
 	$(CYCLONE) -c $< -o $@ -I.
 ###############################################################################
 
-markdown: markdown.o ykbuf.o ssl.o bnf.o extract.o pr.o parse_tab.o util.o lex.o axarray.o
-	$(CYCLONE) $^ -o $@ -lssl -lcrypto
-
-markdown.cyc: examples/markdown.yk $(PROG_DEP)
-	./yakker $(YAKFLAGS) -no-main -gen elim-cr-line -d $< > $@
-
-boxextract: boxextract.o ykbuf.o ssl.o
-	$(CYCLONE) $^ -o $@ -lssl -lcrypto
+boxextract: boxextract.o ykbuf.o
+	$(CYCLONE) $^ -o $@
 
 boxextract.cyc: boxextract.yk $(PROG_DEP)
 	./yakker $(YAKFLAGS) -gen lines $< > $@
@@ -352,7 +344,6 @@ corerules_grm.cyc: corerules_grm.bnf
 ###############################################################################
 
 build/%.d: %.cyc
-# 	echo -n "build/" > $@
 	$(CYCLONE) -M -MG $< > $@
 
 .PHONY: depend
@@ -666,6 +657,15 @@ parseviz.swf: Dfa.hx Earley.hx Parseviz.hx
 
 .PHONY: cyclone-install
 
+#######################################
+## miscellaneous dependencies
+#######################################
+
+DEPENDS += build/ast_main.d
+DEPENDS += build/imap_scanf.d
+lex.o: parse_tab.h
+
 ifneq ($(MAKECMDGOALS),clean)
   -include $(DEPENDS)
 endif
+

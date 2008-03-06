@@ -16,10 +16,14 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
+/*
+   Interface to SSL library for Yakker
+ */
 #ifndef SSL_H
 #define SSL_H
 #include <stdio.h>
 #include <core.h>
+#include "ykbuf.h"
 
 struct ssl_st;
 typedef struct ssl_st SSL;
@@ -82,5 +86,7 @@ extern "C" void SSL_set_bio(SSL *s, BIO *rbio,BIO *wbio);
 extern "C" int SSL_CTX_use_certificate_file(SSL_CTX @ctx, const char @file, int type);
 extern "C" int SSL_CTX_use_PrivateKey_file(SSL_CTX @ctx, const char @file, int type);
 extern "C" int SSL_CTX_check_private_key(SSL_CTX @ctx);
+
+extern ykbuf_t @ssl2ykbuf(SSL@`H);
 
 #endif

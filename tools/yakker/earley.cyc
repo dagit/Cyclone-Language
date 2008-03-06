@@ -11,7 +11,6 @@
 #include "axarray.h"
 #include "cs.h"
 #include "analyze.h"
-#include "pm_bnf.h"
 
 #include "nfa_eager.h"
 #include "semiring.h"
@@ -58,7 +57,7 @@ static void symbol_table_cyclone(FILE @f, symb_info_t si) {
     fprintf(f,",\n  $(\"%s\", %d)",act2symb(a,si->action_symb_table),a);
   }
   fprintf(f,"};\n");
-  
+
   fprintf(f,
       "act_t get_symb_action(CycDFA::grammar_edfa_t self, string_t<`H> symb){\n"
       "  for (int i=0; i<numelts(symbol_table); i++)\n"
@@ -68,9 +67,9 @@ static void symbol_table_cyclone(FILE @f, symb_info_t si) {
 
 }
 static void print_repeat_info($(dfa_t,FILE @) @env, st_t state){
-  let $(rpter_act, rptee_act, rptee_start, repeat_follow) = 
+  let $(rpter_act, rptee_act, rptee_start, repeat_follow) =
     dfa_get_repeat_info(env->f0, state,callout_action());
-  fprintf(env->f1, "  case %d: return $(%d,%d,%d,%d);\n", 
+  fprintf(env->f1, "  case %d: return $(%d,%d,%d,%d);\n",
       state, rpter_act, rptee_act, rptee_start, repeat_follow);
 }
 static void repeat_table_cyclone(FILE @f, dfa_t dfa){
@@ -80,19 +79,19 @@ static void repeat_table_cyclone(FILE @f, dfa_t dfa){
   Set::set_t repeats = Set::empty(st_cmp);
   for (let i = 1; i < len; i++) {
     let t = target(dfa,i,repeat_action());
-    if (t) 
+    if (t)
       repeats = Set::insert(repeats, t);
   }
-  
+
   /* Print get_repeat_info function. */
   let env = $(dfa,f);
   fprintf(f,"$(act_t, act_t, st_t, st_t) get_repeat_info(CycDFA::edfa_t self, st_t state){\n  switch (state) {\n");
   Set::iter_c(print_repeat_info, &env, repeats);
   fprintf(f,"  default: throw new Core::Not_found;\n  }\n}\n");
-  
+
   /* Print construct_repeat_dfa stub -- just throws an exception, b/c its not supported. */
   fprintf(f,
-      "st_t construct_repeat_dfa(CycDFA::edfa_t self, act_t next,\n" 
+      "st_t construct_repeat_dfa(CycDFA::edfa_t self, act_t next,\n"
       "       st_t target_s, st_t final){\n"
       "  throw new Core::Failure(\"construct_repeat_dfa unimplemented.\");\n"
       "}\n");
@@ -105,7 +104,7 @@ static void mkobj_cyclone(FILE @f){
       "trans,trans_w,in_final,is_final,final_weight,final_attrs,get_start,act_2_symb,\n"
       " get_repeat_info,construct_repeat_dfa\n};\n");
 }
-    
+
 static void grm2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info){
 
   /* Print the get_symb_action function.*/
@@ -115,14 +114,14 @@ static void grm2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info){
   fprintf(f,
       "st_t get_symb_start(CycDFA::grammar_edfa_t gdfa, act_t symb_act){\n  switch(symb_act){\n");
   act_t a = MIN_ACTION;
-  for(st_t t = target(dfa,1,a); 
-      t != 0; 
+  for(st_t t = target(dfa,1,a);
+      t != 0;
       t = target(dfa,1,++a))
   {
     fprintf(f,"  case %d: return %d;\n",a,t);
   }
   fprintf(f,
-      "  default: throw new Core::Not_found;\n  }\n}\n");  
+      "  default: throw new Core::Not_found;\n  }\n}\n");
 
   /* Print the get_dfa function. */
   fprintf(f,
@@ -130,7 +129,7 @@ static void grm2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info){
       "return new EarleyAnyBackend::DFA::edfa(start,\n"
       "trans,trans_w,in_final,is_final,final_weight,final_attrs,get_start,act_2_symb,\n"
       " get_repeat_info,construct_repeat_dfa);\n"
-      "}\n");  
+      "}\n");
 
   /* Print the grammar object. */
   fprintf(f,
@@ -138,7 +137,7 @@ static void grm2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info){
       "0,\n"
       "get_symb_action, get_symb_start, get_num_states, get_dfa\n};\n");
 }
-    
+
 void dfa2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info, string_t dfa_namespace, int is_grm){
   fprintf(f,
       "#include <core.h>\n"
@@ -540,7 +539,7 @@ merge_wfsm(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
 static st_t add_symb_nfa_wfsm(FILE@f_fsm,
     Hashtable::table_t<str_t,st_t> symb_st, grammar_t grm, string_t<`H> symb,
     symb_info_t symb_info) {
-  
+
   let symb_ptr = new symb;
   st_t symb_start; /* start state of the NFA for the symbol */
   if (Hashtable::try_lookup(symb_st,symb_ptr,&symb_start)) {
@@ -558,10 +557,10 @@ static st_t add_symb_nfa_wfsm(FILE@f_fsm,
   let f = nfa_fresh_state();
   Hashtable::insert(symb_st, symb_ptr, s);
   let $(s_body, f_body, e_body) = merge_wfsm(f_fsm,symb_st,grm,symb_rule,symb_info);
-  // 1. need e_body too??? Yes, in case symb is nullable.      
+  // 1. need e_body too??? Yes, in case symb is nullable.
   // 2. only marked final in FSM because this is a symbol.
   if (empty_rule(SYMB(symb))) {
-#if defined(NULL_PLAN_B)        
+#if defined(NULL_PLAN_B)
     final_fsm(f_fsm, s, e_body,symb); // merge_wfsm does not do this
 #elif defined(NULL_PLAN_C)
     let s2 = nfa_fresh_state();
@@ -584,7 +583,7 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
     st_t x_start;
     try {
       x_start = add_symb_nfa_wfsm(f_fsm, symb_st, grm, x, symb_info);
-    } 
+    }
     catch {
     case &Core::Invalid_argument(msg):
       warn("%s",msg);
@@ -607,8 +606,8 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
       etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
       etrans_fsm(f_fsm, s2,f,Semiring::from_inv_prob(2));
       single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-    } else 
-#endif    	
+    } else
+#endif
     {
       single_action_fsm(f_fsm, s,callout_action(),"CALL",x_start, Semiring::zero_weight);
       etrans_fsm(f_fsm, s,s2,                   Semiring::one_weight);
@@ -625,7 +624,7 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
     }
     return mkact_fsm(f_fsm, cs_range(low,high+1));
   case &Opt(r2):
-    let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info); 
+    let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info);
     return mkopt_fsm(f_fsm, s2);
   case &Seq(r2,r3):
     let s2 = rule2wfsm0(f_fsm,symb_st,grm,r2,symb_info); let s3 = rule2wfsm0(f_fsm,symb_st,grm,r3,symb_info);
@@ -747,7 +746,7 @@ $(st_t,st_t,st_t)
     st_t x_start;
     try {
       x_start = add_symb_nfa_wfsm(f_fsm, symb_st, grm, x, symb_info);
-    } 
+    }
     catch {
     case &Core::Invalid_argument(msg):
       warn("%s",msg);
@@ -758,7 +757,7 @@ $(st_t,st_t,st_t)
     let e = nfa_fresh_state();
     let f = nfa_fresh_state();
 
-#ifdef NULL_PLAN_A  
+#ifdef NULL_PLAN_A
     if (empty_rule(SYMB(x))){
     /* If the symbol can derive the empty string make sure this gets
        reflected into the automaton --- effectively doing a RETURN in
@@ -768,8 +767,8 @@ $(st_t,st_t,st_t)
       etrans_fsm(f_fsm, s, s2,Semiring::one_weight);
       etrans_fsm(f_fsm, s2,e,Semiring::from_inv_prob(2));
       single_action_fsm(f_fsm, s2,symb2act(x,symb_info),x,f,Semiring::from_inv_prob(2));
-    } else 
-#endif    	
+    } else
+#endif
     {
       etrans_fsm(f_fsm, s,x_start,Semiring::one_weight);
       single_action_fsm(f_fsm, s,symb2act(x,symb_info),x,f,Semiring::one_weight);
@@ -919,7 +918,7 @@ void rule_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm, rule_t r
   let symb_info = new_symb_info();
 
   FILE *f = fopen(fsm_file,"w");
-  if (f) { 
+  if (f) {
     // N.B. MUST ensure that start state is printed first.
     // Print transition to dummy state. weight doesn't matter b/c
     // determinization will eliminate this transition.
@@ -933,7 +932,7 @@ void rule_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm, rule_t r
     etrans_fsm(f,e_s,final_state, Semiring::one_weight);
     final_fsm(f, r_start_state,final_state, NULL);
 
-    fclose(f); 
+    fclose(f);
   }
 
 
@@ -986,7 +985,7 @@ void grammar_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm) {
   let symb_info = new_symb_info();
 
   FILE *f = fopen(fsm_file,"w");
-  if (f) { 
+  if (f) {
     let start_s = nfa_fresh_state();
     // N.B. MUST ensure that start state is printed first.
     // Print transition to dummy state. weight doesn't matter b/c
@@ -999,7 +998,7 @@ void grammar_fsm(const char ?fsm_file,const char ?sym_file, grammar_t grm) {
       single_action_fsm(f, start_s, symb2act(n,symb_info), n,
           n_start, Semiring::zero_weight);
     }
-    fclose(f); 
+    fclose(f);
   }
   else fprintf(stderr, "Failed to open file %s.\n",fsm_file);
 
@@ -1022,10 +1021,10 @@ const char ?fa_act2symb(act_t a){
 
 void dfa2dot(dfa_t dfa, symb_info_t symb_info, const char ?dot_file){
   FILE *f = fopen(dot_file,"w");
-  if (f) { 
+  if (f) {
     fa_dot_as_table = symb_info->action_symb_table;
-    dfa_dot(f,dfa,fa_act2symb); 
-    fclose(f); 
+    dfa_dot(f,dfa,fa_act2symb);
+    fclose(f);
   }
   else fprintf(stderr, "Failed to open file %s.\n",dot_file);
 }
@@ -1278,7 +1277,7 @@ $(dfa_t,Set::set_t<st_t>,symb_info_t) rule2earley(grammar_t grm, rule_t r) {
 //                 ,forward,Semiring::one_weight //PROB
 ////                  ,mult(w, forward),Semiring::one_weight //PROB
 //                 );
-//  } 
+//  }
 //
 //  /* Close under REPEAT-DECR (special type of call). */
 //  let t = target(rs->dfa,s,repeat_decr_action());
@@ -1303,7 +1302,7 @@ $(dfa_t,Set::set_t<st_t>,symb_info_t) rule2earley(grammar_t grm, rule_t r) {
 //                 );
 //  }
 //
-//  /* Close under REPEATS. Only works if target has *one* non-call target. */  
+//  /* Close under REPEATS. Only works if target has *one* non-call target. */
 //  let t = target(rs->dfa,s,repeat_action());
 //  if (t != 0) {
 //    /* 1. Retrieve the number from the Earley parse trail.*/
@@ -1695,7 +1694,7 @@ $(dfa_t,Set::set_t<st_t>,symb_info_t) rule2earley(grammar_t grm, rule_t r) {
 //  return $(dfa,dfa_final,symb_info);
 //}
 //
-//$(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_final, 
+//$(int,int) recognize(dfa_t dfa, symb_info_t symb_info, Set::set_t<st_t> dfa_final,
 //		     const char ?input, int show_progress) {
 //
 //  show_prog = show_progress;

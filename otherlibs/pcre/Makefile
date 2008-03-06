@@ -5,7 +5,9 @@ override CYCFLAGS += -I$(CYCDIR)/include $(LC_FLAG)
 BUILDLIB=$(BINDIR)/buildlib -B$(CYC_LIB_PATH)/cyc-lib
 CYCC=$(BINDIR)/$(CYCCOMP) -B$(CYC_LIB_PATH)/cyc-lib
 
-LIBPCRE=$(shell $(CC) -print-file-name=libpcre.a)
+ifeq ($LIBPCRE,"")
+  LIBPCRE=$(shell $(CC) -print-file-name=libpcre.a)
+endif
 
 libpcre.a: libpcre.cys cycstubs.o cstubs.o
 	cp $(LIBPCRE) $@
