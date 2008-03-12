@@ -1,0 +1,62 @@
+{
+/*
+   Template instantiation library.
+
+   A template is a string containing instances of names like %(foo).
+   Instantiate a template with a hashtable mapping names to strings;
+   each name is replaced by the string.
+
+   Example:
+
+        #include "instantiate.h"
+        const char ?template =
+          "Hello mr %(foo), what the %(bar)?";
+
+        let table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+        Hashtable::insert(table,new "foo",new "FOO");
+        Hashtable::insert(table,new "bar",new "BAR");
+
+        instantiate(template,table);
+
+   This prints out, "Hello mr FOO what the BAR?".
+
+   If a name appears with no corresponding string, the default string "" is used.
+
+*/
+#include "instantiate.h"
+extern void do_chunk(const char ?`H);
+extern void do_name(const char ?`H);
+}
+
+CHARS = %d1-255.
+NOTPERCENT = (CHARS - "%").
+NOTRPAREN = (CHARS - ")").
+
+name = "%(" (1*NOTRPAREN)$x ")" {do_name(x);}.
+chunk = (1*NOTPERCENT)$x {do_chunk(x);}
+  | ("%" (NOTPERCENT - ")"))$x { do_chunk(x); }
+  | "%%" { do_chunk("%"); }.
+sequence = *(chunk|name).
+
+{
+#include <stdio.h>
+#include <hashtable.h>
+struct Hashtable::Table<stringptr_t,stringptr_t> *names;
+void do_chunk(const char ?`H x) {
+  printf("%s",x);
+}
+void do_name(const char ?`H x) {
+  try {
+    do_chunk(*(_@)Hashtable::lookup((_@)names, new x));
+  }
+  catch {
+  default: break;
+  }
+}
+
+void instantiate(const char ?template,
+		 Hashtable::table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>,`H> table) {
+  names = table;
+  let ykb = string2ykbuf(template);
+  p_sequence(ykb);
+}

@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 Yitzhak Mandelbaum, AT&T.
+/* Copyright (C) 2005 Greg Morrisett, AT&T.
    This file is part of the Cyclone project.
 
    Cyclone is free software; you can redistribute it
@@ -16,11 +16,11 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#ifndef EARLEYDISPATCH_H_
-#define EARLEYDISPATCH_H_
+#ifndef TEMPLATE_H
+#define TEMPLATE_H
 
-#include <core.h>
-#include "bnf.h"
+#include <hashtable.h>
+extern void instantiate(const char ?template,
+			Hashtable::table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>,`H> table);
 
-extern void dispatch_earley(int earley_mode, string_t<`H> earley_regexp, grammar_t ds);
-#endif /*EARLEYDISPATCH_H_*/
+#endif

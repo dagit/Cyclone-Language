@@ -15,7 +15,7 @@ indexer_BNF = examples/indexer.yk
 indexer_START = entry-list
 # Function corresponding to start symbol
 indexer_START_F = entry-list
-	
+
 indexer-cyc-eb: $(indexer_CYC_OBJS)
 	cyclone -o $@ $^  -lssl -lm
 
@@ -42,9 +42,9 @@ indexer-flat-dfa.txt: $(indexer_BNF) yakker
 
 indexercrawl-cyc.o: indexercrawl.cyc
 	cyclone $(CYCFLAGS) -o $@ -c -DUSE_COMPILED_DFA $<
-	
+
 indexercrawl-dfa.o: indexercrawl.o
-	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $< 
+	cyclone $(CYCFLAGS) -o $@ -c -DUSE_FSM_DFA $<
 
 indexercrawl.cyc: $(indexer_BNF) yakker crawl-main.cyc
 	./yakker -flatten-full -gen-crawl $(indexer_START) $< > $@

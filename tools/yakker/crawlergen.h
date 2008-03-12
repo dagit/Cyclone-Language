@@ -21,20 +21,13 @@
 #include "bnf.h"
 
 namespace Crawlergen {
-//  typedef enum {
-//    Earley_Cyc_Backend;
-//    Earley_Fsm_Backend;
-////    Earley_Ext_Backend;
-//  }earley_backend_t;
-  
   extern void gen_crawl(grammar_t<`H> grm, const char ?`H symb,
       List::list_t<const char ?@>textblobs,
       int all_start, unsigned int eof_val);
-  /* Print forward definitions of parsing functions in grammar grm. */
-  extern void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs);
+  /* Print forward definitions of parsing functions in grammar */
+  extern void gen_header(grammar_t<`H> grm,
+			 List::list_t<const char ?@>textblobs);
   extern const char ?cyc_namespace;
   extern int gen_fun_table;
-
 }
-
 #endif

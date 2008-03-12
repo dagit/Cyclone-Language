@@ -31,22 +31,20 @@
 #include "corerules.h"
 #include "namespaces.h"
 #include "earley.h"
-#include "earley-dispatch.h"
-
-//#include "dfa.h"
-//#include "earley-backend.h"
+#include "instantiate.h"
 
 #include <stdio.h>
 #include <string.h>
-#include <buffer.h>
-#include <list.h>
 #include <stdlib.h>
+#include <list.h>
 using List;
 
-extern List::list_t<const char ?@> nowslist;
-extern List::list_t<const char ?@> wslist;
-extern List::list_t<const char ?@> norelist;
-extern List::list_t<const char ?@> relist;
+extern const char ?crawl_main; // from strings_yakker.cyc
+
+extern list_t<const char ?@> nowslist;
+extern list_t<const char ?@> wslist;
+extern list_t<const char ?@> norelist;
+extern list_t<const char ?@> relist;
 
 #define FILE_MODE 0
 #define ROOT_MODE 1
@@ -61,9 +59,8 @@ extern int ws_on;
 extern int re_on;
 
 extern int lazyfill; // parsergen.cyc
-
-extern grammar_t parse_file(FILE @`H f);      // parse.y
-extern List::list_t<const char ?@> textblobs; // parse.y
+extern grammar_t parse_file(FILE @`H f); // parse.y
+extern list_t<const char ?@> textblobs;  // parse.y
 
 static int do_graph = 0;
 
@@ -103,75 +100,73 @@ static int check_any() {
     check_glush;
 }
 
-static List::list_t<$(const char ?,const char ?)@> renamings = NULL;
+static list_t<$(const char ?,const char ?)@> renamings = NULL;
 static int unnamespace = 0;
 static const char ?add_namespace = NULL;
 
-#define USAGE \
-"Usage: yakker [OPTIONS] [FILES]\n"\
-"Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"\
-"           -local                 use only local lookahead (without FOLLOW)\n"\
-"           -no-expand             don't expand recursive symbols, share them instead\n"\
-"         -gen-header          generate a header file for the parsing functions\n"\
-"         -gen-crawl <sym>     generate a parse-tree crawler using <sym> as the start symbol\n"\
-"         -gen-crawl-header    generate a header file for the crawling functions\n"\
-"         -extract               extract EBNF from the input, assumed to be in RFC format\n"\
-"           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"\
-"         -list-defs             print the names of the definitions defined in the BNF\n"\
-"         -check                 perform all sanity checks on the input grammar\n"\
-"           -check-undefined       check for undefined symbols\n"\
-"           -check-multiple        check for multiply defined symbols\n"\
-"           -check-empty           check for symbols that might be empty\n"\
-"           -check-left-recursion  check for left recursive symbols\n"\
-"           -check-firstfollow     check the FIRST and FOLLOW sets\n"\
-"           -check-conflicts       check for conflicts\n"\
-"           -check-whitespace      check whitespace\n"\
-"         -cyc-namespace <sym>    use <sym> as the cyclone namespace for the generated cyclone code\n"\
-"         -namespace <sym>       use <sym> as the namespace for the grammar\n"\
-"         -unnamespace           remove any namespaces from the grammar\n"\
-"         -compare               compare two grammars\n"\
-"         -pads                  generate a PADS specification\n"\
-"         -sort                  sort the input grammar by name (case sensitive)\n"\
-"         -isort                 sort the input grammar by name (case insensitive)\n"\
-"         -tsort                 sort the input grammar topologically\n"\
-"         -rename <sym1> <sym2>  rename <sym1> to <sym2>\n"\
-"         -subset <syms>         use only the subset of the input grammar with roots <syms>\n"\
-"         -omit <syms>           omit the definitions of <syms>\n"\
-"         -re-on                 use regular expressions by default\n"\
-"         -ws-on                 do whitespace elimination by default\n"\
-"         -nows <syms>           don't perform whitespace elimination on the definitions of <syms>\n"\
-"         -ws <syms>             do perform whitespace elimination on the definitions of <syms>\n"\
-"         -nore <syms>           don't handle <syms> as regular expressions\n"\
-"         -re <syms>             do handle <syms> as regular expressions\n"\
-"         -escape <chars>        escape special characters <chars> in the input grammar. The first char in <chars> is used for escaping.\n"\
-"         -bindgrammar           produce a grammar with binding capability for the input grammar\n"\
-"           -termgrammar_bnf        add term forms to the bindgrammar\n"\
-"           -no-anon-bind           do not include anonymous binders, only named ones\n"\
-"           -no-named-bind          do not include named binders, only anonymous ones\n"\
-"         -flatten               flatten the input grammar so that all nested sequences and alternatives become symbol defintions\n"\
-"         -flatten-full          flatten the input grammar so that all nested sequences and alternative-sets become symbol \n"\
-"                                definitions, and all alternatives within an alt-set becomes symbol definitions.\n"\
-"           -flatten-prefix <p>  prepend string <p> to new nonterminal names when flattening grammar\n"\
-"         -no-minus-elim         turn off minus elimination.\n"\
-"         -all-start             allow any symbol to be used as a start symbol.\n"\
-"         -eof <val>             treat <val> as the eof character. <val> can be any value between 0 and 255.\n"\
-"         -no-main               don't output a default main procedure\n"\
-"         -no-globals            don't output assorted globals\n"\
-"         -no-close-defs         don't fill in definitions of missing core symbols\n"\
-"         -lazyfill              use lazy filling (for interactive connections)\n"\
-"         -eagernfa              use eager nfa construction (default is lazy)\n"\
-"         -depend                produce a dependency graph of symbols in DOT format\n"\
-"         -earley <regexp>       Earley parse stdin according to regexp and grammar\n"\
-"         -earley-shell <regexp> Earley parse files specified interactively on command line, according to regexp and grammar\n"\
-"         -earley-fsm <regexp>   Earley parse stdin according to regexp and grammar, using FSM for weighted parsing\n"\
-"         -earley-gen-dot <regexp>   Generate a dot-encoded DFA of the regexp.\n"\
-"         -earley-gen-cyc <regexp>   Generate a cyclone-encoded DFA of the regexp.\n"\
-"         -earley-gen-haxe <regexp>   Generate a haxe-encoded DFA of the regexp.\n"\
-"         -earley-gen-fsm <regexp>   Generate an FSM-encoded DFA of the regexp.\n"\
-"         -earley-gen-grm-fsm    Generate an FSM-encoded DFA of the grammar.\n"\
-"         -earley-gen-grm-cyc    Generate an cyclone-encoded DFA of the grammar.\n"\
-"         -earley-gen-grm-dot    Generate an dot-encoded DFA of the grammar.\n"\
-"         -help                  print this message\n"
+const char ?USAGE =
+  "Usage: yakker [OPTIONS] [FILES]\n"					
+  "Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"	
+  "           -local                 use only local lookahead (without FOLLOW)\n"
+  "           -no-expand             don't expand recursive symbols, share them instead\n"
+  "         -gen-header          generate a header file for the parsing functions\n"
+  "         -gen-crawl <sym>     generate a parse-tree crawler using <sym> as the start symbol\n"
+  "         -gen-crawl-header    generate a header file for the crawling functions\n"
+  "         -extract               extract EBNF from the input, assumed to be in RFC format\n"
+  "           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"
+  "         -list-defs             print the names of the definitions defined in the BNF\n"
+  "         -check                 perform all sanity checks on the input grammar\n"
+  "           -check-undefined       check for undefined symbols\n"
+  "           -check-multiple        check for multiply defined symbols\n"
+  "           -check-empty           check for symbols that might be empty\n"
+  "           -check-left-recursion  check for left recursive symbols\n"
+  "           -check-firstfollow     check the FIRST and FOLLOW sets\n"
+  "           -check-conflicts       check for conflicts\n"
+  "           -check-whitespace      check whitespace\n"
+  "         -cyc-namespace <sym>    use <sym> as the cyclone namespace for the generated cyclone code\n"
+  "         -namespace <sym>       use <sym> as the namespace for the grammar\n"
+  "         -unnamespace           remove any namespaces from the grammar\n"
+  "         -compare               compare two grammars\n"
+  "         -pads                  generate a PADS specification\n"
+  "         -sort                  sort the input grammar by name (case sensitive)\n"
+  "         -isort                 sort the input grammar by name (case insensitive)\n"
+  "         -tsort                 sort the input grammar topologically\n"
+  "         -rename <sym1> <sym2>  rename <sym1> to <sym2>\n"
+  "         -subset <syms>         use only the subset of the input grammar with roots <syms>\n"
+  "         -omit <syms>           omit the definitions of <syms>\n"
+  "         -re-on                 use regular expressions by default\n"
+  "         -ws-on                 do whitespace elimination by default\n"
+  "         -nows <syms>           don't perform whitespace elimination on the definitions of <syms>\n"
+  "         -ws <syms>             do perform whitespace elimination on the definitions of <syms>\n"
+  "         -nore <syms>           don't handle <syms> as regular expressions\n"
+  "         -re <syms>             do handle <syms> as regular expressions\n"
+  "         -escape <chars>        escape special characters <chars> in the input grammar. The first char in <chars> is used for escaping\n"
+  "         -bindgrammar           produce a grammar with binding capability for the input grammar\n"
+  "           -termgrammar_bnf        add term forms to the bindgrammar\n"
+  "           -no-anon-bind           do not include anonymous binders, only named ones\n"
+  "           -no-named-bind          do not include named binders, only anonymous ones\n"
+  "         -flatten               flatten the input grammar so that all nested sequences and alternatives become symbol defintions\n"
+  "         -flatten-full          flatten the input grammar so that all nested sequences and alternative-sets become symbol \n"
+  "                                definitions, and all alternatives within an alt-set becomes symbol definitions\n"
+  "           -flatten-prefix <p>  prepend string <p> to new nonterminal names when flattening grammar\n"
+  "         -no-minus-elim         turn off minus elimination\n"
+  "         -all-start             allow any symbol to be used as a start symbol\n"
+  "         -eof <val>             treat <val> as the eof character. <val> can be any value between 0 and 255\n"
+  "         -no-main               don't output a default main procedure\n"
+  "         -no-globals            don't output assorted globals\n"
+  "         -no-close-defs         don't fill in definitions of missing core symbols\n"
+  "         -lazyfill              use lazy filling (for interactive connections)\n"
+  "         -eagernfa              use eager nfa construction (default is lazy)\n"
+  "         -depend                produce a dependency graph of symbols in DOT format\n"
+  "         -earley <regexp>       Earley parse stdin according to regexp and grammar\n"
+  "         -earley-gen-dot <regexp>   generate a dot-encoded DFA of the regexp\n"
+  "         -earley-gen-cyc <regexp>   generate a Cyclone-encoded DFA of the regexp\n"
+  "         -earley-gen-haxe <regexp>  generate a haxe-encoded DFA of the regexp\n"
+  "         -earley-gen-fsm <regexp>   generate an FSM-encoded DFA of the regexp\n"
+  "         -earley-gen-grm-fsm    generate an FSM-encoded DFA of the grammar\n"
+  "         -earley-gen-grm-cyc    generate a Cyclone-encoded DFA of the grammar\n"
+  "         -earley-gen-grm-dot    generate a dot-encoded DFA of the grammar\n"
+  "         -help                  print this message\n";
 
 static void die() {
   fprintf(stderr,USAGE);
@@ -188,13 +183,83 @@ void mkTemp(char @pattern) {
 
 enum earley_grm_gen {
   EARLEY_GEN_GRM_NONE = 0,
-  EARLEY_GEN_GRM_FSM,  
-  EARLEY_GEN_GRM_CYC,  
-  EARLEY_GEN_GRM_DOT  
+  EARLEY_GEN_GRM_FSM,
+  EARLEY_GEN_GRM_CYC,
+  EARLEY_GEN_GRM_DOT
 };
 
 typedef enum earley_grm_gen earley_grm_gen_t;
 
+/* Earley utility functions */
+
+static
+void earley_gen_fsm(string_t<`H> earley_regexp, grammar_t ds) {
+  /* Convert grammar to weighted NFA */
+  char f1[]@zeroterm = "f1-XXXXXX";
+  char f2[]@zeroterm = "f2-XXXXXX";
+  mkTemp(f1);
+  mkTemp(f2);
+
+  // TODO: assume regexp is a symbol for now
+  Earley::rule_fsm(f1,f2,ds,SYMB(earley_regexp));
+
+  /* Run FSM */
+  let cmd = aprintf("fsmcompile -i %s %s | "
+                    "fsmrmepsilon | "
+                    "fsmdeterminize | "
+                    "fsmprint -i %s",
+                    f2,f1,f2);
+  if (system(cmd) != 0) {
+    fprintf(stderr,"Error: fsm failed\n");
+    remove(f1); remove(f2);
+    exit(1);
+  }
+}
+
+static int
+earley_mk_dfa(string_t<`H> earley_regexp, grammar_t ds,
+	      dfa_t *`H ? pp_dfa, Earley::symb_info_t *`H ? pp_si) {
+  /* Convert grammar to weighted NFA */
+  char f1[]@zeroterm = "f1-XXXXXX";
+  char f2[]@zeroterm = "f2-XXXXXX";
+  char f3[]@zeroterm = "f3-XXXXXX";
+  mkTemp(f1);
+  mkTemp(f2);
+  mkTemp(f3);
+
+  debugprint(1,"starting rule_fsm(%s,%s)...",f1,f2);
+  // TODO: assume regexp is a symbol for now
+  Earley::rule_fsm(f1,f2,ds,SYMB(earley_regexp));
+  debugprint(1,"done\n");
+
+  /* Run FSM */
+  debugprint(1,"starting fsm > %s ...",f3);
+  let cmd = aprintf("fsmcompile -i %s %s | "
+                    "fsmrmepsilon | "
+                    "fsmdeterminize | "
+                    "fsmprint -i %s > %s",
+                    f2,f1,f2,f3);
+  if (system(cmd) != 0) {
+    fprintf(stderr,"Error: fsm failed\n");
+    remove(f1); remove(f2); remove(f3);
+    exit(1);
+  }
+  debugprint(1,"done\n");
+
+  let r = Earley::fsm2dfa(f3);
+  remove(f1); remove(f2); remove(f3);
+  if (!r) {
+    fprintf(stderr,"Failed to reconstruct DFA.\n");
+    return -1;
+  }
+
+  let $(dfa,_,symb_info) = *r;
+  *pp_dfa = new dfa;
+  *pp_si = new symb_info;
+  return 0;
+}
+
+/* Go! */
 int main(int argc, const char ?`H?argv) {
   list_t<const char ?@> files = NULL;
   list_t<const char ?@> roots = NULL;
@@ -224,14 +289,14 @@ int main(int argc, const char ?`H?argv) {
   int mode = FILE_MODE;
   const char ?escape_chars = NULL;
   const char ?earley_regexp = NULL;
-  
+
   earley_grm_gen_t earley_grmp = EARLEY_GEN_GRM_NONE;
 
   // 0 (default) = is to parse entire stdin, non-weighted
   // 1 = parse line-by-line, non-weighted
   // 2 = treat each line as a file name and parse entire specified file.
   // 3 = parse stdin, non-weighted
-  int earley_mode = 0; 
+  int earley_mode = 0;
 
   let omitset = Set::empty(strptrcmp);
 
@@ -257,11 +322,11 @@ int main(int argc, const char ?`H?argv) {
       if (i+1 >= argc) die();
       int e;
       let res = sscanf(argv[i+1],"%d",&e);
-      if (res != 1){
+      if (res != 1) {
 	fprintf(stderr,"Invalid eof value: %s. Eof must be an integer between 0 and 255.",argv[i+1]);
 	exit(1);
       }
-      if (e < 0 || e > 255){
+      if (e < 0 || e > 255) {
 	fprintf(stderr,"Invalid eof value: %d. Eof must be between 0 and 255.",e);
 	exit(1);
       }
@@ -287,18 +352,6 @@ int main(int argc, const char ?`H?argv) {
     }
     else if (strcmp("-earley",argv[i]) == 0) {
       if (i+1 >= argc) die();
-      earley_regexp = argv[i+1];
-      i += 1;
-    }
-    else if (strcmp("-earley-shell",argv[i]) == 0) {
-      if (i+1 >= argc) die();
-      earley_mode = 2;
-      earley_regexp = argv[i+1];      
-      i += 1;
-    }
-    else if (strcmp("-earley-fsm",argv[i]) == 0) {
-      if (i+1 >= argc) die();
-      earley_mode = 3;
       earley_regexp = argv[i+1];
       i += 1;
     }
@@ -395,8 +448,8 @@ int main(int argc, const char ?`H?argv) {
     else files = new List(new (const char ?)strdup(argv[i]),files);
   }
 
-  files = List::imp_rev(files);
-  let len = List::length(files);
+  files = imp_rev(files);
+  let len = length(files);
 
   /* Compare two grammars and exit */
   if (compare) {
@@ -494,10 +547,10 @@ int main(int argc, const char ?`H?argv) {
     for (; ds; ds = ds->tl) {
       let &$(name,_,_) = ds->hd;
       if (Set::member(omitset,new name)) continue;
-      filtered = new List::List(ds->hd,filtered);
+      filtered = new List(ds->hd,filtered);
     }
     ds = filtered;
-    ds = List::imp_rev(ds);
+    ds = imp_rev(ds);
     debugprint(1,"done\n");
   }
 
@@ -534,11 +587,11 @@ int main(int argc, const char ?`H?argv) {
         fprintf(stderr,"Cannot open file %s\n",*x->hd);
         exit(1);
       }
-      e = new List::List(parse_file(g),e);
+      e = new List(parse_file(g),e);
       fclose(g);
     }
-    e = List::imp_rev(e);
-    e = new List::List(core_rules(),e);
+    e = imp_rev(e);
+    e = new List(core_rules(),e);
     ds = close_definitions(ds,e);
     debugprint(1,"done\n");
   }
@@ -604,7 +657,7 @@ int main(int argc, const char ?`H?argv) {
     if (minus_elimp)
       minus_elim(gr); // also marks character sets, needed for the conversion
 
-    if (escape_chars){
+    if (escape_chars) {
       debugprint(1,"Escaping special characters in grammar ... ");
       gr = escape_grammar(gr, escape_chars);
     }
@@ -625,7 +678,7 @@ int main(int argc, const char ?`H?argv) {
     r->a = "return ast2string(p);";
     let d = new $((const char ?)"ast2string",r,
 		  Attr{.ws=0,.re=0,.paramtype="rule_pat_t p",.rettype="const char ?"});
-    gr = new List::List(d,gr);
+    gr = new List(d,gr);
 
     if (termgrammar_bnfp) {
       debugprint(1,"Adding term forms ... ");
@@ -636,13 +689,11 @@ int main(int argc, const char ?`H?argv) {
     gr = grammar2bindgrammar(gr);
     pr_definitions(stdout, gr);
     fprintf(stdout, "{#include \"pm_bnf.h\"}\n");
-//     fprintf(stdout, "{extern const char ?fresh_name();}\n");
-//     fprintf(stdout, "{extern int branch_id;}\n");
     debugprint(1,"done\n");
     return 0;
   }
 
-  if (escape_chars){
+  if (escape_chars) {
     debugprint(1,"Escaping special characters in grammar ... ");
     if (minus_elimp)
       minus_elim(ds); // also marks character sets, needed for the conversion
@@ -651,31 +702,62 @@ int main(int argc, const char ?`H?argv) {
 
   /* Flatten the grammar */
   if (flattenp) {
-  	debugprint(1,"Flattenning grammar ... ");
+  	debugprint(1,"Flattening grammar ... ");
     if (minus_elimp)
       minus_elim(ds); // also marks character sets, needed for the conversion
     minus_elimp = 0; // prevents it from being redone.
-    
+
     if (flattenp == 2)
       Flatten::fully_flatten_alts = 1;
     ds = Flatten::flatten_grammar(ds);
     debugprint(1,"done\n");
   }
-  
-///////////////////////////////////////////////
-//// BEGIN EARLEY
-//////////////////
+
   if (earley_regexp != NULL) {
     use_lazy_nfa = 0;
 
     if (minus_elimp)
       minus_elim(ds); // also marks character sets, needed for the conversion
-    
-    dispatch_earley(earley_mode, earley_regexp, ds);
+
+    if (earley_mode == 8) {
+      earley_gen_fsm(earley_regexp, ds);
+      return;
+    }
+    dfa_t *p_dfa = NULL;
+    Earley::symb_info_t *p_symb_info = NULL;
+    let err = earley_mk_dfa(earley_regexp, ds, &p_dfa, &p_symb_info);
+    if (err) exit(1);
+
+    switch (earley_mode) {
+      // Use FSM to generate dfa
+    case 5: // in dot
+      Earley::dfa2dot(*p_dfa,*p_symb_info,aprintf("/dev/stdout"));
+      break;
+    case 6: // in cyclone
+      Earley::dfa2cyclone(stdout,*p_dfa,*p_symb_info,cyc_namespace,0);
+      Crawlergen::gen_crawl(ds,earley_regexp,textblobs,all_startp,eof_val);
+
+      Hashtable::table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>,`H> table =
+	Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+      Hashtable::insert(table,new "CRAWLERFUN",
+			new (const char?)aprintf("p_%s",earley_regexp));
+      Hashtable::insert(table,new "CYC_DFA_NS",
+			new (const char?)cyc_namespace);
+      instantiate(crawl_main,table);
+
+      break;
+    case 7: // in haxe
+      Earley::act2symb_haxe(stdout,*p_symb_info);
+      dfa_haxe(stdout,*p_dfa);
+      break;
+    default:
+      fprintf(stderr,"Internal error: invalid value for variable earley_mode.\n");
+      break;
+    }
     return 0;
   }
-  
-  if (earley_grmp != EARLEY_GEN_GRM_NONE){
+
+  if (earley_grmp != EARLEY_GEN_GRM_NONE) {
     switch (earley_grmp) {
     case EARLEY_GEN_GRM_NONE:
       break; // do nothing.
@@ -686,7 +768,7 @@ int main(int argc, const char ?`H?argv) {
       mkTemp(f1);
       mkTemp(f2);
       Earley::grammar_fsm(f1,f2,ds);
-  
+
       /* Run FSM */
       let cmd = aprintf("fsmcompile -i %s %s | "
           "fsmrmepsilon | "
@@ -703,7 +785,7 @@ int main(int argc, const char ?`H?argv) {
       dfa_t *p_dfa = NULL;
       Earley::symb_info_t *p_symb_info = NULL;
       Set::set_t<st_t> *p_dfa_final = NULL;
-  
+
       /* Convert grammar to weighted NFA */
       char f1[]@zeroterm = "f1-XXXXXX";
       char f2[]@zeroterm = "f2-XXXXXX";
@@ -711,11 +793,11 @@ int main(int argc, const char ?`H?argv) {
       mkTemp(f1);
       mkTemp(f2);
       mkTemp(f3);
-  
+
       debugprint(1,"starting grammar_fsm(%s,%s)...",f1,f2);
       Earley::grammar_fsm(f1,f2,ds);
       debugprint(1,"done\n");
-  
+
       /* Run FSM */
       debugprint(1,"starting fsm > %s ...",f3);
       let cmd = aprintf("fsmcompile -i %s %s | "
@@ -729,14 +811,14 @@ int main(int argc, const char ?`H?argv) {
         exit(1);
       }
       debugprint(1,"done\n");
-  
+
       let r = Earley::fsm2dfa(f3);
       if (!r) {
         fprintf(stderr,"Failed to reconstruct DFA.\n");
         remove(f1); remove(f2); remove(f3);
         exit(1);
       }
-  
+
       remove(f1); remove(f2); remove(f3);
       let $(dfa,_,symb_info) = *r;
       let filename = aprintf("/dev/stdout");
@@ -746,7 +828,7 @@ int main(int argc, const char ?`H?argv) {
       dfa_t *p_dfa = NULL;
       Earley::symb_info_t *p_symb_info = NULL;
       Set::set_t<st_t> *p_dfa_final = NULL;
-  
+
       /* Convert grammar to weighted NFA */
       char f1[]@zeroterm = "f1-XXXXXX";
       char f2[]@zeroterm = "f2-XXXXXX";
@@ -754,11 +836,11 @@ int main(int argc, const char ?`H?argv) {
       mkTemp(f1);
       mkTemp(f2);
       mkTemp(f3);
-  
+
       debugprint(1,"starting grammar_fsm(%s,%s)...",f1,f2);
       Earley::grammar_fsm(f1,f2,ds);
       debugprint(1,"done\n");
-  
+
       /* Run FSM */
       debugprint(1,"starting fsm > %s ...",f3);
       let cmd = aprintf("fsmcompile -i %s %s | "
@@ -772,15 +854,14 @@ int main(int argc, const char ?`H?argv) {
         exit(1);
       }
       debugprint(1,"done\n");
-  
+
       let r = Earley::fsm2dfa(f3);
+      remove(f1); remove(f2); remove(f3);
       if (!r) {
         fprintf(stderr,"Failed to reconstruct DFA.\n");
-        remove(f1); remove(f2); remove(f3);
         exit(1);
       }
-  
-      remove(f1); remove(f2); remove(f3);
+
       let $(dfa,_,symb_info) = *r;
       Earley::dfa2cyclone(stdout,dfa,symb_info,cyc_namespace,1);
       break;
@@ -788,24 +869,18 @@ int main(int argc, const char ?`H?argv) {
       fprintf(stderr,"Error: grammar DFA output format not supported.\n");
       return 1;
     }
-    
+
     return 0;
   }
-  
-/////////////////////////////////
-//// END EARLEY  
-/////////////////////////////////
-  
+
   if (check_any()) {
     if (check_whitespace) report_whitespace(ds);
-    //    ds = ws_definitions(ds); // NB: report_whitespace must come before this
     if (check_undefined) report_undefined(ds);
     if (check_multiple) report_multiple(ds);
     if (check_empty) report_empty_nonterminals(ds);
     if (check_left_recursion) report_left_recursion(ds);
     if (check_right_recursion) report_right_recursion(ds);
-    if (minus_elimp)
-      minus_elim(ds);
+    if (minus_elimp) minus_elim(ds);
     if (check_white_edges) report_white_edges(ds);
     if (check_firstfollow) report_first_follow(ds);
     if (check_conflicts) report_conflicts(ds);
@@ -814,15 +889,14 @@ int main(int argc, const char ?`H?argv) {
   else if (pads) {
     if (minus_elimp)
       minus_elim(ds);
-    //    ds = ws_definitions(ds);
     pads_definitions(ds);
   }
-  else if (generate_header){
+  else if (generate_header) {
     if (!ds) {
       fprintf(stderr,"Error: no definitions in input\n");
       exit(1);
     }
-    if (minus_elimp){
+    if (minus_elimp) {
       debugprint(1,"Minus elimination... ");
       minus_elim(ds);
       debugprint(1,"done\n");
@@ -836,26 +910,22 @@ int main(int argc, const char ?`H?argv) {
       fprintf(stderr,"Error: no definitions in input\n");
       exit(1);
     }
-    if (minus_elimp){
+    if (minus_elimp) {
       debugprint(1,"Minus elimination... ");
       minus_elim(ds);
       debugprint(1,"done\n");
     }
-    //    debugprint(1,"Processing whitespace... ");
-    //    ds = ws_definitions(ds);
-    //    debugprint(1,"done\n");
     if (!start_symbol) die();
-    //    pgen(ds,start_symbol);
     debugprint(1,"Generating... ");
     gen(ds,start_symbol,textblobs,all_startp, eof_val);
     debugprint(1,"done\n");
   }
-  else if (crawl_header){
+  else if (crawl_header) {
     if (!ds) {
       fprintf(stderr,"Error: no definitions in input\n");
       exit(1);
     }
-    if (minus_elimp){
+    if (minus_elimp) {
       debugprint(1,"Minus elimination... ");
       minus_elim(ds);
       debugprint(1,"done\n");
@@ -869,48 +939,42 @@ int main(int argc, const char ?`H?argv) {
       fprintf(stderr,"Error: no definitions in input\n");
       exit(1);
     }
-    if (minus_elimp){
+    if (minus_elimp) {
       debugprint(1,"Minus elimination... ");
       minus_elim(ds);
       debugprint(1,"done\n");
     }
-    //    debugprint(1,"Processing whitespace... ");
-    //    ds = ws_definitions(ds);
-    //    debugprint(1,"done\n");
     if (!start_symbol) die();
-    //    pgen(ds,start_symbol);
     debugprint(1,"Generating crawler... ");
     Crawlergen::gen_crawl(ds,start_symbol,textblobs,all_startp, eof_val);
     debugprint(1,"done\n");
   }
-  else if(list_nonterms) {
+  else if (list_nonterms) {
     if (!ds) {
       fprintf(stderr,"Error: no definitions in input\n");
       exit(1);
     }
     pr_definition_names(stdout,ds);
-  } 
+  }
   else {
-  	let tbs = textblobs;
-  	if (tbs) {
-  		printf("{\n%s\n}\n",*tbs->hd);
-  		tbs = tbs->tl;
-  	}
+    let tbs = textblobs;
+    if (tbs) {
+      printf("{\n%s\n}\n",*tbs->hd);
+      tbs = tbs->tl;
+    }
 
-  	if (minus_elimp){
+    if (minus_elimp) {
       debugprint(1,"Minus elimination... ");
       minus_elim(ds);
       debugprint(1,"done\n");
     }
     pr_definitions(stdout,ds);
-  	
+
     printf("{\n");
     for (let x = tbs; x; x = x->tl) {
-  		printf("%s\n",*x->hd);
-  	}
+      printf("%s\n",*x->hd);
+    }
     printf("}\n");
-    
-    
-  } 
+  }
   return 0;
 }

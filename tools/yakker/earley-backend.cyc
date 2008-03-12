@@ -612,7 +612,7 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
     ,rcounts
   };
   
-  // Save the input form the beginning so that we have access to it later.
+  // Save the input from the beginning so that we have access to it later.
   let input_save = YKSAVE;
   
   push_closure(rs,

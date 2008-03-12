@@ -511,9 +511,7 @@ void gen_header(grammar_t<`H> grm, List::list_t<const char ?@>textblobs){
 	 "#include <stdio.h>\n"
 	 "#include <stdlib.h>\n"
 	 "#include <string.h>\n");
-#ifndef STRINGINPUT
   printf("#include \"ykbuf.h\"\n");
-#endif
 
   if (gen_fun_table){
     printf("#include \"funtable.h\"\n");
@@ -595,16 +593,6 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
     printf("#include \"funtable.h\"\n");
   }
 
-#ifdef STRINGINPUT
-  printf("unsigned char ?@nozeroterm YKSTART;\n"
-         "unsigned char ?@nozeroterm YKCURSOR;\n"
-         "unsigned char ?@nozeroterm YKMARKER;\n"
-         "unsigned char ?@nozeroterm YKLIMIT;\n"
-         "#define YKFILL(i) 0\n"
-         "#define YKPOSN (YKCURSOR-YKSTART)\n"
-         "#define YKSAVE (YKCURSOR-YKSTART)\n"
-         "#define YKRESTORE(x) (YKSTART+(x))\n");
-#else
   printf("#include \"ykbuf.h\"\n"
          "#define YKLIMIT ykb->lim\n"
          "#define YKCURSOR ykb->cur\n"
@@ -613,7 +601,6 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
          "#define YKMARKER ykb->mark\n"
          "#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })\n"
          "#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })\n");
-#endif
 
   if (print_globals){
     printf("int ykdebug = 0;\n"
@@ -699,29 +686,10 @@ void gen(grammar_t<`H> grm, const char ?`H start_symbol,
            "  while ((argc--)>1) {\n"
            "    if (strcmp(*(++argv),\"-d\") == 0) ykdebug++;\n"
            "    else { fprintf(stderr,\"Unrecognized option: %%s\\n\",*argv); exit(1); }\n"
-           "  }\n");
-#ifdef STRINGINPUT
-    printf("  fprintf(stderr,\"Getting input... \");\n"
-           "  Buffer::T buf = Buffer::create(1024);\n"
-           "  int c;\n"
-           "  while ( (c = getchar()) != -1) Buffer::add_char(buf,(char)c);\n"
-           "  let len = Buffer::length(buf);\n"
-           "  let buf = Buffer::extract(buf);\n"
-           "  unsigned char ?@nozeroterm input = malloc((len+1)*sizeof(unsigned char));\n"
-           "  for (let i = 0; i < len; i++) input[i] = buf[i];\n"
-           "  input[len] = '\\0';\n"
-           "  fprintf(stderr,\"done\\n\");\n"
-           "  // fprintf(stderr,\"%%s\",input);\n"
-           "  fprintf(stderr,\"Trying to parse...\\n\");\n"
-           "  YKCURSOR = input;\n"
-           "  YKSTART = input;\n"
-           "  YKMARKER = input;\n"
-           "  YKLIMIT = input+numelts(input);\n");
-#else
-    printf("  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin\n");
-#endif
-    printf("  try {\n");
-    printf("    ");
+           "  }\n"
+	   "  ykbuf_t @ykb = fd2ykbuf(0); // read from stdin\n"
+	   "  try {\n"
+	   "    ");
     if (cyc_namespace){
       printf("%s::",cyc_namespace);
     }

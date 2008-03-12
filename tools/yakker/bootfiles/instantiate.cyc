@@ -1,0 +1,419 @@
+#include <buffer.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "ykbuf.h"
+#define YKLIMIT ykb->lim
+#define YKCURSOR ykb->cur
+#define YKFILL(n) (ykfill(ykb,(n)))
+#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+#define YKMARKER ykb->mark
+#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })
+#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
+int ykdebug = 0;
+datatype exn { Parse_error };
+datatype exn.Parse_error Parse_error_val = Parse_error;
+
+/*
+   Template instantiation library.
+
+   A template is a string containing instances of names like %(foo).
+   Instantiate a template with a hashtable mapping names to strings;
+   each name is replaced by the string.
+
+   Example:
+
+        #include "instantiate.h"
+        const char ?template =
+          "Hello mr %(foo), what the %(bar)?";
+
+        let table = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+        Hashtable::insert(table,new "foo",new "FOO");
+        Hashtable::insert(table,new "bar",new "BAR");
+
+        instantiate(template,table);
+
+   This prints out, "Hello mr FOO what the BAR?".
+
+   If a name appears with no corresponding string, the default string "" is used.
+
+*/
+#include "instantiate.h"
+extern void do_chunk(const char ?`H);
+extern void do_name(const char ?`H);
+
+void p_CHARS(ykbuf_t @ykb);
+void p_NOTPERCENT(ykbuf_t @ykb);
+void p_NOTRPAREN(ykbuf_t @ykb);
+void p_chunk(ykbuf_t @ykb);
+void p_name(ykbuf_t @ykb);
+void p_sequence(ykbuf_t @ykb);
+
+#include <stdio.h>
+#include <hashtable.h>
+struct Hashtable::Table<stringptr_t,stringptr_t> *names;
+void do_chunk(const char ?`H x) {
+  printf("%s",x);
+}
+void do_name(const char ?`H x) {
+  try {
+    do_chunk(*(_@)Hashtable::lookup((_@)names, new x));
+  }
+  catch {
+  default: break;
+  }
+}
+
+void instantiate(const char ?template,
+		 Hashtable::table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>,`H> table) {
+  names = table;
+  let ykb = string2ykbuf(template);
+  p_sequence(ykb);
+}
+
+void p_CHARS(ykbuf_t @ykb) {
+let YKq = YKPOSN;
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+{ int c = *YKCURSOR++;
+  if (!(1 <= c && c <= 255)) throw &Parse_error_val;
+}
+  if (ykdebug) printf("[%x,%x):CHARS\n",YKq,YKPOSN);
+}
+void p_NOTPERCENT(ykbuf_t @ykb) {
+let YKq = YKPOSN;
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+{
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+int c = *YKCURSOR;
+if (0||(1<=c&&c<'%')) {
+{ int c = *YKCURSOR++;
+  if (!(1 <= c && c <= 36)) throw &Parse_error_val;
+}
+}
+else
+if (0||('&'<=c&&c<256)) {
+{ int c = *YKCURSOR++;
+  if (!(38 <= c && c <= 255)) throw &Parse_error_val;
+}
+}
+else
+throw &Parse_error_val;
+}
+  if (ykdebug) printf("[%x,%x):NOTPERCENT\n",YKq,YKPOSN);
+}
+void p_NOTRPAREN(ykbuf_t @ykb) {
+let YKq = YKPOSN;
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+{
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+int c = *YKCURSOR;
+if (0||(1<=c&&c<')')) {
+{ int c = *YKCURSOR++;
+  if (!(1 <= c && c <= 40)) throw &Parse_error_val;
+}
+}
+else
+if (0||('*'<=c&&c<256)) {
+{ int c = *YKCURSOR++;
+  if (!(42 <= c && c <= 255)) throw &Parse_error_val;
+}
+}
+else
+throw &Parse_error_val;
+}
+  if (ykdebug) printf("[%x,%x):NOTRPAREN\n",YKq,YKPOSN);
+}
+void p_chunk(ykbuf_t @ykb) {
+let YKq = YKPOSN;
+  if ((YKLIMIT - YKCURSOR) < 2) YKFILL(2);
+{ int ykaccept = 0;
+{ let save = YKSAVE;
+{
+goto M1_1;
+fin1: YKCURSOR = YKMARKER;
+goto theend1;
+L1_1:
+  ++YKCURSOR;
+M1_1:
+  if ((YKLIMIT - YKCURSOR) < 2) YKFILL(2);
+{ int c = *YKCURSOR;
+  if (1<=c&&c<'%') goto L1_4;
+  if ('%'==c) goto L1_5;
+  if ('&'<=c&&c<256) goto L1_4;
+  goto fin1;
+}
+L1_2:
+  ++YKCURSOR;
+  ykaccept = 2;
+  YKMARKER = YKCURSOR;
+  goto fin1;
+L1_3:
+  ++YKCURSOR;
+  ykaccept = 3;
+  YKMARKER = YKCURSOR;
+  goto fin1;
+L1_4:
+  ++YKCURSOR;
+  ykaccept = 1;
+  YKMARKER = YKCURSOR;
+  goto fin1;
+L1_5:
+  ++YKCURSOR;
+M1_5:
+{ int c = *YKCURSOR;
+  if (1<=c&&c<'%') goto L1_2;
+  if ('%'==c) goto L1_3;
+  if ('&'<=c&&c<')') goto L1_2;
+  if ('*'<=c&&c<256) goto L1_2;
+  goto fin1;
+}
+}
+theend1: 0;
+YKCURSOR = YKRESTORE(save);
+}
+switch (ykaccept) {
+case 1:
+let save0 = YKSAVE;
+p_NOTPERCENT(ykb);
+A1: 0;
+{ int ykaccept = 0;
+{ let save = YKSAVE;
+{
+goto M2_1;
+fin2: YKCURSOR = YKMARKER;
+goto theend2;
+L2_1:
+  ++YKCURSOR;
+  ykaccept = 2;
+  YKMARKER = YKCURSOR;
+M2_1:
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+{ int c = *YKCURSOR;
+  if (0==c) goto L2_3;
+  if (1<=c&&c<'%') goto L2_2;
+  if ('%'==c) goto L2_3;
+  if ('&'<=c&&c<256) goto L2_2;
+  goto fin2;
+}
+L2_2:
+  ++YKCURSOR;
+  ykaccept = 1;
+  YKMARKER = YKCURSOR;
+  goto fin2;
+L2_3:
+  ++YKCURSOR;
+  ykaccept = 2;
+  YKMARKER = YKCURSOR;
+  goto fin2;
+}
+theend2: 0;
+YKCURSOR = YKRESTORE(save);
+}
+switch (ykaccept) {
+case 1:
+p_NOTPERCENT(ykb);
+  goto A1;
+case 2:
+  goto A2;
+default: throw &Parse_error_val;
+}
+}
+A2: 0;
+unsigned char ?@nozeroterm ykr0 = YKRESTORE(save0);
+let x = substring((const char ?@nozeroterm)ykr0,0,YKCURSOR-ykr0);
+do_chunk(x);
+break;
+case 2:
+let save3 = YKSAVE;
+{ int c;
+  c = *YKCURSOR++;
+  if (c!=37) throw &Parse_error_val;
+}
+{
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+int c = *YKCURSOR;
+if (0||(1<=c&&c<'%')) {
+{ int c = *YKCURSOR++;
+  if (!(1 <= c && c <= 36)) throw &Parse_error_val;
+}
+}
+else
+if (0||('&'<=c&&c<')')) {
+{ int c = *YKCURSOR++;
+  if (!(38 <= c && c <= 40)) throw &Parse_error_val;
+}
+}
+else
+if (0||('*'<=c&&c<256)) {
+{ int c = *YKCURSOR++;
+  if (!(42 <= c && c <= 255)) throw &Parse_error_val;
+}
+}
+else
+throw &Parse_error_val;
+}
+unsigned char ?@nozeroterm ykr3 = YKRESTORE(save3);
+let x = substring((const char ?@nozeroterm)ykr3,0,YKCURSOR-ykr3);
+ do_chunk(x); 
+break;
+case 3:
+{ int c;
+  c = *YKCURSOR++;
+  if (c!=37) throw &Parse_error_val;
+  c = *YKCURSOR++;
+  if (c!=37) throw &Parse_error_val;
+}
+ do_chunk("%"); 
+break;
+default: throw &Parse_error_val;
+}
+}
+  if (ykdebug) printf("[%x,%x):chunk\n",YKq,YKPOSN);
+}
+void p_name(ykbuf_t @ykb) {
+let YKq = YKPOSN;
+  if ((YKLIMIT - YKCURSOR) < 3) YKFILL(3);
+{ int c;
+  c = *YKCURSOR++;
+  if (c!=37) throw &Parse_error_val;
+  c = *YKCURSOR++;
+  if (c!=40) throw &Parse_error_val;
+}
+let save4 = YKSAVE;
+p_NOTRPAREN(ykb);
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+A5: 0;
+{
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+int c = *YKCURSOR;
+if (0||(1<=c&&c<')')||('*'<=c&&c<256)) {
+p_NOTRPAREN(ykb);
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+  goto A5;
+}
+else if (0||')'==c) {
+  goto A6;
+}
+else throw &Parse_error_val;
+}
+A6: 0;
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+unsigned char ?@nozeroterm ykr4 = YKRESTORE(save4);
+let x = substring((const char ?@nozeroterm)ykr4,0,YKCURSOR-ykr4);
+{ int c;
+  c = *YKCURSOR++;
+  if (c!=41) throw &Parse_error_val;
+}
+do_name(x);
+  if (ykdebug) printf("[%x,%x):name\n",YKq,YKPOSN);
+}
+void p_sequence(ykbuf_t @ykb) {
+let YKq = YKPOSN;
+A7: 0;
+{
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+int c = *YKCURSOR;
+if (0||(1<=c&&c<256)) {
+{ int ykaccept = 0;
+{ let save = YKSAVE;
+{
+goto M3_1;
+fin3: YKCURSOR = YKMARKER;
+goto theend3;
+L3_1:
+  ++YKCURSOR;
+M3_1:
+  if ((YKLIMIT - YKCURSOR) < 3) YKFILL(3);
+{ int c = *YKCURSOR;
+  if (1<=c&&c<'%') goto L3_7;
+  if ('%'==c) goto L3_3;
+  if ('&'<=c&&c<256) goto L3_7;
+  goto fin3;
+}
+L3_2:
+  ++YKCURSOR;
+  ykaccept = 2;
+  YKMARKER = YKCURSOR;
+  goto fin3;
+L3_3:
+  ++YKCURSOR;
+M3_3:
+{ int c = *YKCURSOR;
+  if (1<=c&&c<'%') goto L3_7;
+  if ('%'==c) goto L3_7;
+  if ('&'<=c&&c<'(') goto L3_7;
+  if ('('==c) goto L3_4;
+  if ('*'<=c&&c<256) goto L3_7;
+  goto fin3;
+}
+L3_4:
+  ++YKCURSOR;
+  ykaccept = 1;
+  YKMARKER = YKCURSOR;
+M3_4:
+{ int c = *YKCURSOR;
+  if (0==c) goto L3_7;
+  if (1<=c&&c<'%') goto L3_6;
+  if ('%'==c) goto L3_5;
+  if ('&'<=c&&c<')') goto L3_6;
+  if (')'==c) goto L3_7;
+  if ('*'<=c&&c<256) goto L3_6;
+  goto fin3;
+}
+L3_5:
+  ++YKCURSOR;
+M3_5:
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+{ int c = *YKCURSOR;
+  if (1<=c&&c<'%') goto L3_6;
+  if ('%'==c) goto L3_6;
+  if ('&'<=c&&c<'(') goto L3_6;
+  if ('('==c) goto L3_6;
+  if (')'==c) goto L3_2;
+  if ('*'<=c&&c<256) goto L3_6;
+  goto fin3;
+}
+L3_6:
+  ++YKCURSOR;
+  ykaccept = 1;
+  YKMARKER = YKCURSOR;
+M3_6:
+  if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
+{ int c = *YKCURSOR;
+  if (0==c) goto L3_7;
+  if (1<=c&&c<'%') goto L3_6;
+  if ('%'==c) goto L3_5;
+  if ('&'<=c&&c<')') goto L3_6;
+  if (')'==c) goto L3_2;
+  if ('*'<=c&&c<256) goto L3_6;
+  goto fin3;
+}
+L3_7:
+  ++YKCURSOR;
+  ykaccept = 1;
+  YKMARKER = YKCURSOR;
+  goto fin3;
+}
+theend3: 0;
+YKCURSOR = YKRESTORE(save);
+}
+switch (ykaccept) {
+case 1:
+p_chunk(ykb);
+break;
+case 2:
+p_name(ykb);
+break;
+default: throw &Parse_error_val;
+}
+}
+  goto A7;
+}
+else if (0||0==c) {
+  goto A8;
+}
+else throw &Parse_error_val;
+}
+A8: 0;
+  if (ykdebug) printf("[%x,%x):sequence\n",YKq,YKPOSN);
+}
