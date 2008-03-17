@@ -146,9 +146,9 @@ void dfa2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info, string_t dfa_namespa
       "#include \"fa.h\"\n"
       "#include \"dfa.h\"\n\n");
   if (dfa_namespace)
-    fprintf(f,"namespace %s;\n\n",dfa_namespace);
+    fprintf(f,"namespace %s {\n\n",dfa_namespace);
   else
-    fprintf(f,"namespace CycDFA;\n\n");
+    fprintf(f,"namespace CycDFA {\n\n");
   act2symb_cyclone(f,symb_info);
   dfa_cyclone(f,dfa);
   repeat_table_cyclone(f,dfa);
@@ -156,6 +156,7 @@ void dfa2cyclone(FILE @f, dfa_t dfa, symb_info_t symb_info, string_t dfa_namespa
     grm2cyclone(f,dfa,symb_info);
   else
     mkobj_cyclone(f);
+  fprintf(f,"}\n"); // end of namespace scope
 }
 
 void act2symb_haxe(FILE @f, symb_info_t si) {

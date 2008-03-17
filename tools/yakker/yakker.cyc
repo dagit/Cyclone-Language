@@ -739,7 +739,7 @@ int main(int argc, const char ?`H?argv) {
 
       Hashtable::table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>,`H> table =
 	Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-      Hashtable::insert(table,new "CRAWLERFUN",
+      Hashtable::insert(table,new "CRAWLFUN",
 			new (const char?)aprintf("p_%s",earley_regexp));
       Hashtable::insert(table,new "CYC_DFA_NS",
 			new (const char?)cyc_namespace);
