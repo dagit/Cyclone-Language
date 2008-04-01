@@ -20,10 +20,7 @@
 #define PM_BNF_H
 #include <core.h>
 #include <list.h>
-#include "bnf.h"
-#include "ykbuf.h"
 #include "funtable.h"
-#include "fn.h"
 #include "earley-parsetree.h"
 
 typedef datatype Rule_pattern *Rule_pat_t;
@@ -33,21 +30,23 @@ datatype Rule_pattern {
   CharPat(unsigned int); // single character from a character range.
   LitPat(const char ?);
   SeqPat(rule_pat_t,rule_pat_t);
-/*   RepeatPat(int,rule_pat_t); */
-/*   DepSeqPat(rule_pat_t,fn_t<const char ?,rule_pat_t,`H>); // Dependent sequence pattern. */
   BinderPat(const char ?); // symbol for which this is a binder.
 };
 
-extern datatype exn{
+extern datatype exn {
   extern Pat_exception;
 };
 
 extern rule_pat_t pats2seq(List::list_t<rule_pat_t>);
 
 extern const char ?pat2string(rule_pat_t);
+extern const char ?pat2print_code(rule_pat_t p, char ?? args);
+
+#ifdef BNF_H
+// only visible if bnf.h is included before pm_bnf.h
 extern rule_t pat2parse_rule(rule_pat_t p);
 extern rule_t pat2print_rule(rule_pat_t p);
-extern const char ?pat2print_code(rule_pat_t p, char ?? args);
+#endif
 
 
 // Treat a pattern as an AST and translate back into source

@@ -1,3 +1,10 @@
+#include "tge-scanf.h"
+#include "ykbuf.h"
+
+rule_pat_t p_login(EarleyParsetree::parse_tree_t t, const char? ykinput);
+rule_pat_t p_command(EarleyParsetree::parse_tree_t t, const char? ykinput);
+rule_pat_t p_authenticate(EarleyParsetree::parse_tree_t t, const char? ykinput);
+
 namespace IMAPTGCycDFA{
   extern struct EarleyAnyBackend::DFA::edfa dfa_obj;
 }

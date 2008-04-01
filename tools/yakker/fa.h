@@ -22,9 +22,13 @@
 #include "bnf.h"
 #include "semiring.h"
 
+#ifndef YK_TYPES
+#define YK_TYPES
 typedef unsigned int st_t; // States.  Sometimes, 0 is reserved to mark no transition
-typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
 typedef unsigned int act_t;
+#endif
+
+typedef Graph::graph_t<st_t> stgraph_t; // State graphs.
 
 #define NOTRANSITION 0
 #define EPSILON NULL // the empty action

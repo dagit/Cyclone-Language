@@ -737,14 +737,15 @@ int main(int argc, const char ?`H?argv) {
       Earley::dfa2cyclone(stdout,*p_dfa,*p_symb_info,cyc_namespace,0);
       Crawlergen::gen_crawl(ds,earley_regexp,textblobs,all_startp,eof_val);
 
-      Hashtable::table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>,`H> table =
-	Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
-      Hashtable::insert(table,new "CRAWLFUN",
-			new (const char?)aprintf("p_%s",earley_regexp));
-      Hashtable::insert(table,new "CYC_DFA_NS",
-			new (const char?)cyc_namespace);
-      instantiate(crawl_main,table);
-
+      if (print_main) {
+	Hashtable::table_t<stringptr_t<`H,`H>,stringptr_t<`H,`H>,`H> table =
+	  Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
+	Hashtable::insert(table,new "CRAWLFUN",
+			  new (const char?)aprintf("p_%s",earley_regexp));
+	Hashtable::insert(table,new "CYC_DFA_NS",
+			  new (const char?)cyc_namespace);
+	instantiate(crawl_main,table);
+      }
       break;
     case 7: // in haxe
       Earley::act2symb_haxe(stdout,*p_symb_info);
@@ -771,10 +772,10 @@ int main(int argc, const char ?`H?argv) {
 
       /* Run FSM */
       let cmd = aprintf("fsmcompile -i %s %s | "
-          "fsmrmepsilon | "
-          "fsmdeterminize | "
-          "fsmprint -i %s",
-          f2,f1,f2);
+			"fsmrmepsilon | "
+			"fsmdeterminize | "
+			"fsmprint -i %s",
+			f2,f1,f2);
       if (system(cmd) != 0) {
         fprintf(stderr,"Error: fsm failed\n");
         remove(f1); remove(f2);
@@ -801,10 +802,10 @@ int main(int argc, const char ?`H?argv) {
       /* Run FSM */
       debugprint(1,"starting fsm > %s ...",f3);
       let cmd = aprintf("fsmcompile -i %s %s | "
-          "fsmrmepsilon | "
-          "fsmdeterminize | "
-          "fsmprint -i %s > %s",
-          f2,f1,f2,f3);
+			"fsmrmepsilon | "
+			"fsmdeterminize | "
+			"fsmprint -i %s > %s",
+			f2,f1,f2,f3);
       if (system(cmd) != 0) {
         fprintf(stderr,"Error: fsm failed\n");
         remove(f1); remove(f2); remove(f3);
@@ -844,10 +845,10 @@ int main(int argc, const char ?`H?argv) {
       /* Run FSM */
       debugprint(1,"starting fsm > %s ...",f3);
       let cmd = aprintf("fsmcompile -i %s %s | "
-          "fsmrmepsilon | "
-          "fsmdeterminize | "
-          "fsmprint -i %s > %s",
-          f2,f1,f2,f3);
+			"fsmrmepsilon | "
+			"fsmdeterminize | "
+			"fsmprint -i %s > %s",
+			f2,f1,f2,f3);
       if (system(cmd) != 0) {
         fprintf(stderr,"Error: fsm failed\n");
         remove(f1); remove(f2); remove(f3);

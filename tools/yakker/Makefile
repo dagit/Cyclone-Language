@@ -74,13 +74,13 @@ PROG_PA=$(PROG)_a
 #######################################
 # Earley-backend files.
 EBE_FILES = axarray semiring dfa-core earley-common util \
-	    earley-parsetree fsm-dfa earley-backend ext-any-dfa
+	    earley-parsetree earley-backend ext-any-dfa
 
 #######################################
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf tge-scanf pm_bnf funtable $(EBE_FILES)
+LIB_YAKKER_FILES = ykbuf pm_bnf funtable $(EBE_FILES)
 
 LIB_YAKKER_OBJS = $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
@@ -197,33 +197,16 @@ echop: echop.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
 
-# non-Earley IMAP server
 LIBSQLITE=-lsqlite3
 #LIBSQLITE=/Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a
-imapserver: imapserver.o imap_scanf.o pm_bnf.o bnf.o lex.o parse_tab.o util.o funtable.o imap_genpm.o ykbuf.o ssl.o imap.o
-	$(CYCLONE) $^ -o $@ $(LIBSQLITE) -lpthread -lssl -lcrypto
-
 imapserver.o: $(EXDIR)/imapserver.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
 
 # Earley-based IMAP server
-imapserver-e: imapserver.o imap-scanf-e.o cs.o imap-tg-dfa.o imap-grm-dfa.o $(LIB_YAKKER) $(LIB_YAKKER_SSL)
+imapserver: imapserver.o imap-scanf.o tge-scanf.o cs.o imap-tg-dfa.o imap-grm-dfa.o $(LIB_YAKKER) $(LIB_YAKKER_SSL)
 	$(CYCLONE) -o $@ $^ $(LIBSQLITE) -lpthread -lssl -lcrypto -lm
 
 include examples/imap.mk
-
-# Earley-based scanf
-imap-scanf-e.cyc: gen/imap-tg.bnf yakker
-	./yakker $(YAKFLAGS) -gen-crawl command \
-			     -flatten-full -flatten-prefix TG000\
-			     -no-minus-elim \
-			     -no-globals \
-			     $< > $@
-	echo '#include "tge-scanf.h"' >> $@
-	echo '#include "ykbuf.h"' >> $@
-	echo '#include "imap-scanf-incl.cyc"' >> $@
-
-imap-scanf-e.o: imap-scanf-incl.cyc
 
 # Targets for testing pattern match parsers-generators.	 Generates
 # BNF that can parse a pattern-match and produce a new BNF specialized

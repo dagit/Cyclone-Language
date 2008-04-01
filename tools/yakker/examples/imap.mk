@@ -39,7 +39,7 @@ $(GrammarName)-tg-run: $($(GrammarPrefix)_TG_RUN_OBJS) $(LIB_YAKKER)
 	$(CYCLONE) -o $@ $($(GrammarPrefix)_TG_RUN_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
 
 $(GrammarName)-tg-dfa.cyc: gen/$(GrammarName)-tg.bnf yakker
-	./yakker -flatten-full -flatten-prefix TG000 -no-minus-elim -cyc-namespace $(GrammarNSPrefix)TGCycDFA -earley-gen-cyc $(GrammarStart) $< > $@
+	./yakker -flatten-full -flatten-prefix TG000 -no-minus-elim -cyc-namespace $(GrammarNSPrefix)TGCycDFA -earley-gen-cyc $(GrammarStart) -no-main $< > $@
 
 $(GrammarName)-grm-dfa.cyc: examples/$(GrammarName).bnf yakker
 	./yakker -flatten-full -cyc-namespace $(GrammarNSPrefix)CycDFA -earley-gen-grm-cyc examples/$(GrammarName).bnf > $@
