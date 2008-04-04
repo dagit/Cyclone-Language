@@ -5,25 +5,25 @@ rule_pat_t p_login(EarleyParsetree::parse_tree_t t, const char? ykinput);
 rule_pat_t p_command(EarleyParsetree::parse_tree_t t, const char? ykinput);
 rule_pat_t p_authenticate(EarleyParsetree::parse_tree_t t, const char? ykinput);
 
-namespace IMAPTGCycDFA{
+namespace IMAPTGCycDFA {
   extern struct EarleyAnyBackend::DFA::edfa dfa_obj;
 }
-namespace IMAPCycDFA{
+
+namespace IMAPCycDFA {
   extern struct EarleyAnyBackend::DFA::grammar_edfa grm_dfa_obj;
 }
 
-int command_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args){
+int command_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args) {
   return internal_ykb_scanf(&IMAPTGCycDFA::dfa_obj, p_command<>,
                             &IMAPCycDFA::grm_dfa_obj,ykb,fmt,args);
 }
 
-int login_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args){
+int login_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args) {
   return internal_ykb_scanf(&IMAPTGCycDFA::dfa_obj, p_login<>,
                             &IMAPCycDFA::grm_dfa_obj,ykb,fmt,args);
 }
 
-
-int authenticate_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args){
+int authenticate_scanf(ykbuf_t @ykb, const char ?fmt, ...const char?`H @ args) {
   return internal_ykb_scanf(&IMAPTGCycDFA::dfa_obj, p_authenticate<>,
                             &IMAPCycDFA::grm_dfa_obj,ykb,fmt,args);
 }

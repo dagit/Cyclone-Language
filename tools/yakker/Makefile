@@ -74,13 +74,13 @@ PROG_PA=$(PROG)_a
 #######################################
 # Earley-backend files.
 EBE_FILES = axarray semiring dfa-core earley-common util \
-	    earley-parsetree earley-backend ext-any-dfa
+	    earley-backend
 
 #######################################
 ## libyakker-related variables
 #######################################
 
-LIB_YAKKER_FILES = ykbuf pm_bnf funtable $(EBE_FILES)
+LIB_YAKKER_FILES = ykbuf funtable $(EBE_FILES)
 
 LIB_YAKKER_OBJS = $(foreach file,$(LIB_YAKKER_FILES),$(file).o)
 
@@ -203,43 +203,10 @@ imapserver.o: $(EXDIR)/imapserver.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
 
 # Earley-based IMAP server
-imapserver: imapserver.o imap-scanf.o tge-scanf.o cs.o imap-tg-dfa.o imap-grm-dfa.o $(LIB_YAKKER) $(LIB_YAKKER_SSL)
+imapserver: imapserver.o imap-scanf.o cs.o imap-tg-dfa.o imap-grm-dfa.o $(LIB_YAKKER) $(LIB_YAKKER_SSL)
 	$(CYCLONE) -o $@ $^ $(LIBSQLITE) -lpthread -lssl -lcrypto -lm
 
 include examples/imap.mk
-
-# Targets for testing pattern match parsers-generators.	 Generates
-# BNF that can parse a pattern-match and produce a new BNF specialized
-# to that pattern-match. Note that the new BNF is intended to augment
-# the original.
-
-# small_imap_genpm: small_imap_genpm.cyc ykbuf.o ssl.o tg_stack.o tgmain.o util.o
-#	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
-
-small_imap.o: small_imap.cyc
-	$(CYCLONE) $(CYCFLAGS) -c $< -o $@ --novcgen
-
-small_imap.cyc: examples/small_imap.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -gen command -no-main -no-globals $< > $@
-
-small_imap.h: examples/small_imap.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -gen-header $< > $@
-
-small_imap_genpm: small_imap_genpm.o ykbuf.o ssl.o ast_main.o funtable.o pm_bnf.o small_imap.o\
-	bnf.o lex.o parse_tab.o pr.o util.o
-	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
-
-#	./yakker $(YAKFLAGS) -all-start -eof 10 -gen command_pm -no-main $< > $@
-# Use -no-minus-elim as minus elimination was already done, and redoing it causes problems (in particular,
-# the charset optimization loses necessary semantic actions).
-small_imap_genpm.cyc: small_imap_genpm.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -all-start -no-minus-elim -gen command -no-main $< > $@
-
-small_imap_genpm.h: small_imap_genpm.bnf $(PROG_DEP)
-	./yakker $(YAKFLAGS) -cyc-namespace SmallImapFormat -gen-crawl-header $< > $@
-
-small_imap_genpm.bnf: examples/small_imap.bnf $(PROG_DEP)
-	./yakker -escape "\\%()" -flatten -bindgrammar -no-anon-bind $< > $@
 
 ###############################################################################
 # Rules for full imap grammar with pattern-matching support.
@@ -267,32 +234,8 @@ imap_genpm.h: $(GENDIR)/imap_genpm.bnf $(PROG_DEP)
 $(GENDIR)/imap_genpm.bnf: $(BNFDIR)/imap_revised_fixed.bnf $(PROG_DEP)
 	./yakker -escape "\\%()" -flatten-full -bindgrammar -termgrammar_bnf $< > $@
 
-# $(GENDIR)/imap.cyc: $(BNFDIR)/imap.bnf $(PROG_DEP)
-#	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
-
-# $(GENDIR)/imap.h: $(BNFDIR)/imap.bnf $(PROG_DEP)
-#	./yakker $(YAKFLAGS) -gen-header $< > $@
-
-# imap_genpm.bnf: imap_flat.bnf $(PROG_DEP)
-#	./yakker -no-minus-elim -bindgrammar -no-anon-bind -termgrammar_bnf $< > $@
-
 $(GENDIR)/imap_bind.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 	./yakker -escape "\\%()" -flatten -bindgrammar -no-anon-bind $< > $@
-
-# imap_bind.bnf: imap_flat.bnf $(PROG_DEP)
-#	./yakker -no-minus-elim -bindgrammar -no-anon-bind $< > $@
-
-# imap_esc.bnf: imap.bnf $(PROG_DEP)
-#	./yakker -escape "\\%()" $< > $@
-
-# imap_none.bnf: imap.bnf $(PROG_DEP)
-#	./yakker $< > $@
-
-# $(GENDIR)/imap_lf.cyc: $(BNFDIR)/imap_lf.bnf $(PROG_DEP)
-#	./yakker $(YAKFLAGS) -gen command -no-main -lazyfill $< > $@
-
-# $(GENDIR)/imap_lf.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
-#	./yakker -left-factor $< > $@
 
 $(GENDIR)/imap_flat.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 	./yakker -escape "\\%()" -flatten $< > $@
@@ -301,37 +244,9 @@ $(GENDIR)/imap_flat.bnf: $(BNFDIR)/imap.bnf $(PROG_DEP)
 # Pattern matching BNF examples.
 ###############################################################################
 
-# small_imap_pm: small_imap_pm.o ykbuf.o ssl.o tg_stack.o util.o small_imap.o
-#	$(CYCLONE) $(CYCFLAGS) $^ -o $@ --novcgen -lssl -lcrypto
-
-# small_imap_pm.o: small_imap_pm.cyc small_imap.h
-
-# small_imap_pm.cyc: small_imap_pm.bnf $(PROG_DEP)
-#	./yakker -no-close-defs -gen my-command $< > $@
-
-# small_imap_pm.bnf: examples/test_genparse small_imap_genpm
-#	./small_imap_genpm -unescape-pat "\\" -scan -name my-command < $< > $@
-
-# small_imap_print.cyc: examples/test_genprint.txt small_imap_genpm
-#	./small_imap_genpm -unescape-pat "\\" -print -name my-command -args 7 < $< > $@
-
-# %_pm: %_pm.cyc ykbuf.o ssl.o tg_stack.o pm_main.o util.o
-#	$(CYCLONE) $^ -o $@ --novcgen -lssl -lcrypto
-
-# %_pm.cyc: %_pm.bnf $(PROG_DEP)
-#	./yakker $(YAKFLAGS) -gen command-pm -no-main $< > $@
-
-# tg_stack.o : tg_stack.cyc util.h
-#	$(CYCLONE) -c $< -o $@ -I.
-
-# tgmain.o : tgmain.cyc tg_stack.h
-#	$(CYCLONE) -c $< -o $@ -I.
-
-ast_main.o : ast_main.cyc gen_ast_main.cyc pm_bnf.h $(GENDIR)/small_imap_genpm.h
-	$(CYCLONE) -c $< -o $@ -I.
-
 pm_bnf.o : pm_bnf.cyc pm_bnf.h pads.h bnf.h
 	$(CYCLONE) -c $< -o $@ -I.
+
 ###############################################################################
 
 boxextract: boxextract.o ykbuf.o
@@ -464,7 +379,6 @@ clean:
 	$(RM) http.bnf http.p message-header.bnf message-header.p
 	$(RM) imap.bnf imap.h imap.cyc rfc3501.bnf rfc2234.bnf rfc3501.txt rfc2234.txt
 	$(RM) imap_genpm.cyc
-	$(RM) small_imap.h small_imap.cyc small_imap_genpm.h small_imap_genpm.cyc
 	$(RM) imap.h imap.cyc imap_genpm.h imap_genpm.cyc
 	$(RM) indexer.h indexer.cyc indexer_genpm.h indexer_genpm.cyc
 	$(RM) strings_yakker.*
@@ -664,7 +578,6 @@ parseviz.swf: Dfa.hx Earley.hx Parseviz.hx
 ## miscellaneous dependencies
 #######################################
 
-DEPENDS += build/ast_main.d
 DEPENDS += build/imap_scanf.d
 lex.o: parse_tab.h
 

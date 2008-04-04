@@ -12,7 +12,7 @@ $(GrammarPrefix)_FILES = $(GrammarName)-flat-dfa $(GrammarName)crawl
 $(GrammarPrefix)_OBJS:=$(foreach yfile,$($(GrammarPrefix)_FILES),$(yfile).o)
 
 $(GrammarName)-earley: $($(GrammarPrefix)_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $($(GrammarPrefix)_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
+	$(CYCLONE) -o $@ $($(GrammarPrefix)_OBJS) -lssl -lm $(LIB_YAKKER) -lcrypto
 
 $(GrammarName)-flat-dfa.cyc: examples/$(GrammarName).bnf yakker
 	./yakker -flatten-full -earley-gen-cyc $(GrammarStart) $< > $@
@@ -30,13 +30,13 @@ $(GrammarPrefix)_TG_FILES = $(GrammarName)-tg-dfa $(GrammarName)-tg-crawl parse_
 $(GrammarPrefix)_TG_OBJS:=$(foreach yfile,$($(GrammarPrefix)_TG_FILES),$(yfile).o)
 
 $(GrammarName)-tg-earley: $($(GrammarPrefix)_TG_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $($(GrammarPrefix)_TG_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
+	$(CYCLONE) -o $@ $($(GrammarPrefix)_TG_OBJS) -lssl -lm $(LIB_YAKKER) -lcrypto
 
 $(GrammarPrefix)_TG_RUN_FILES = $(GrammarName)-tg-dfa $(GrammarName)-grm-dfa $(GrammarName)-tg-run parse_tab
 $(GrammarPrefix)_TG_RUN_OBJS:=$(foreach yfile,$($(GrammarPrefix)_TG_RUN_FILES),$(yfile).o)
 
 $(GrammarName)-tg-run: $($(GrammarPrefix)_TG_RUN_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $($(GrammarPrefix)_TG_RUN_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
+	$(CYCLONE) -o $@ $($(GrammarPrefix)_TG_RUN_OBJS) -lssl -lm $(LIB_YAKKER) -lcrypto
 
 $(GrammarName)-tg-dfa.cyc: gen/$(GrammarName)-tg.bnf yakker
 	./yakker -flatten-full -flatten-prefix TG000 -no-minus-elim -cyc-namespace $(GrammarNSPrefix)TGCycDFA -earley-gen-cyc $(GrammarStart) -no-main $< > $@
@@ -84,7 +84,7 @@ $(GrammarName)-F-sc: examples/$(GrammarName).bnf yakker
 	./yakker -no-minus-elim -earley-gen-cyc $(GrammarStart) $@.bnf | grep "num_dfa_states"
 
 $(GrammarName)-NB-sc: examples/$(GrammarName).bnf yakker
-	./yakker -flatten-full -bindgrammar -no-anon-bind  $< > $@.bnf
+	./yakker -flatten-full -bindgrammar -no-anon-bind $< > $@.bnf
 	wc -l $@.bnf
 	./yakker -no-minus-elim -earley-gen-cyc $(GrammarStart) $@.bnf | grep "num_dfa_states"
 

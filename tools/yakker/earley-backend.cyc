@@ -12,6 +12,9 @@
 #include "earley-parsetree.h"
 #include "semiring.h"
 #include "earley-backend.h"
+#include "dfa.h"
+#include "dfa-impl.h"
+#include "pm_bnf.h"
 
 #include "ykbuf.h"
 #define YKLIMIT ykb->lim
@@ -21,18 +24,522 @@
 #define YKMARKER ykb->mark
 #define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })
 #define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
-//int ykdebug = 0;
-//datatype exn { Parse_error };
-//datatype exn.Parse_error Parse_error_val = Parse_error;
 
 using List;
 using Semiring;
 
-#include "dfa.h"
-#include "dfa-impl.h"
+namespace EarleyParsetree {
+
+void print_LT_parse_forest(shared_parse_forest_t pf, int depth);
+
+void print_LT(datatype SharedParseTree @pt, int depth) {
+  switch (pt) {
+  case &NonTerm(name,l,r,w,children):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
+  print_LT_parse_forest(children, depth);
+    printf("</t>");
+    break;
+  case &SharedNonTerm(name,l,r,w,children_list):
+    printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
+  print_LT_parse_forest(children_list->hd,depth);
+    printf("</t>");
+    break;
+  }
+}
+
+void print_LT_parse_forest(shared_parse_forest_t pf, int depth) {
+  if (depth > 0) {
+    let d = depth - 1;
+    for(let ts = (_*)List::rev(pf); ts; ts = ts->tl)
+      print_LT(ts->hd, d);
+  } else if(depth == -1) {
+    for(let ts = (_*)List::rev(pf); ts; ts = ts->tl)
+      print_LT(ts->hd, -1);
+  }
+}
+
+void print_tree(parse_tree_t pt, int depth) {
+  let &parse_tree(name,l,r,w,children) = pt;
+  printf("<t s=\"%s(%s)\" l=\"%d\" r=\"%d\">",name,Semiring::print_weight(w),l,r);
+
+  if (depth > 0) {
+          let n = numelts(children);
+          for (int i = 0; i < n; i++) {
+                print_tree(children[i],depth-1);
+          }
+  } else if(depth == -1) {
+          let n = numelts(children);
+          for (int i = 0; i < n; i++) {
+                print_tree(children[i],-1);
+          }
+  }
+
+  printf("</t>");
+}
+
+/**
+ * returns whether ambiguity was found.
+ */
+void print_forest(spf_t spf, string_t indent) {
+  let &shared_parse_forest(name,l,r,w,trees) = spf;
+
+  let n = numelts(trees);
+
+  //printf("%sProcessing non terminal %s @[%d,%d] with %d children.\n",indent, name,l,r,n);
+
+  for (let i=0; i<n; i++) {
+    printf("%sPath %d: ",indent, i+1);
+    for (let xs = trees[i]; xs; xs = xs->tl) {
+      let &shared_parse_forest(nt,l,r,_,_) = xs->hd;
+      printf("%s[%d,%d] ",nt,l,r);
+    }
+    printf("\n");
+    for (let xs = trees[i]; xs; xs = xs->tl) {
+      print_forest(xs->hd, aprintf("%s  ",indent));
+    }
+  }
+}
+
+/**
+ * returns whether ambiguity was found.
+ */
+int print_first_ambiguity(spf_t spf) {
+  let &shared_parse_forest(name,l,r,w,trees) = spf;
+
+  let n = numelts(trees);
+
+  printf("Processing non terminal %s @[%d,%d] with %d children.\n",name,l,r,n);
+
+  if (n == 1) {
+    // No ambiguities at this level of the parse forest, check next level.
+    for (let xs = trees[0]; xs; xs = xs->tl) {
+      if (print_first_ambiguity(xs->hd))
+        return 1;
+    }
+
+    return 0;
+  }
+
+  for (let i=0; i<n; i++) {
+    printf("Path %d: ",i+1);
+    for (let xs = trees[i]; xs; xs = xs->tl) {
+      let &shared_parse_forest(nt,l,r,_,_) = xs->hd;
+      printf("%s[%d,%d] ",nt,l,r);
+    }
+    printf("\n");
+  }
+  printf("\n");
+  return 1;
+}
+}
+
+/**********************************************************************/
+/*                              pm_bnf                                */
+/**********************************************************************/
+
+#include "funtable.h"
+
+datatype exn {
+  Pat_exception;
+};
+
+rule_pat_t pats2seq(list_t<rule_pat_t> pats) {
+  if (!pats)
+    return new LitPat("");
+
+  let res = pats->hd;
+  pats = pats->tl;
+  for (;pats; pats = pats->tl) {
+    res = new SeqPat(res,pats->hd);
+  }
+  return res;
+}
+
+typedef List::list_t<const char ?`H@`H,`H> ps_list;
+
+ps_list pat2string0(ps_list ps, rule_pat_t p) {
+  switch (p) {
+  case &SymbPat(x):
+    return new List(new x, ps);
+  case &LitPat(x):
+    return new List(new (const char ?)aprintf("\"%s\"",string_escape(x)), ps);
+  case &CharPat(x):
+    return new List(new (const char ?)aprintf("%%d%u",x), ps);
+  case &SeqPat(p1,p2):
+    let ps1 = pat2string0(ps,p1);
+    let ps_sp = new List(new " ",ps1);
+    let ps2 = pat2string0(ps_sp,p2);
+    return ps2;
+  case &BinderPat(x):
+    ps = new List(new "%r(",ps);
+    ps = new List(new x, ps);
+    ps = new List(new ")",ps);
+    return ps;
+  }
+}
+
+const char ?pat2string(rule_pat_t p) {
+  let ps = pat2string0(NULL, p);
+  return strconcat_l(List::imp_rev(ps));
+}
+
+ps_list ast2string0(ps_list ps, rule_pat_t p) {
+  switch (p) {
+  case &SymbPat(x):
+    // SymbPats are deprecated
+    throw new Pat_exception;
+  case &LitPat(x):
+    return new List(new x, ps);
+  case &CharPat(x):
+    char ? s = calloc(2,sizeof(char));
+    s[0] = x;
+    return new List(new (string_t)s, ps);
+  case &SeqPat(p1,p2):
+    let ps1 = pat2string0(ps,p1);
+    let ps_sp = new List(new " ",ps1);
+    let ps2 = pat2string0(ps_sp,p2);
+    return ps2;
+  case &BinderPat(x):
+    throw new Pat_exception;
+  }
+}
+
+// Treat a pattern as an AST and translate back into source
+// string. Raises exception Pat_exception if cannot be translated
+// (e.g. contains binders).
+const char ?ast2string(rule_pat_t p) {
+  let ps = ast2string0(NULL, p);
+  return strconcat_l(List::imp_rev(ps));
+}
+
+bool is_special_char(unsigned int i) {
+  char c = (char)i;
+  return (c<' ' || c>'~' || c=='\042' || c=='\\');
+}
+
+typedef List::list_t<const char ?@> arg_list;
+typedef $(char ?`r1 ?`r2, arg_list)@ pc_args<`r1,`r2>;
+
+$(ps_list, pc_args<`r1,`r2>)@
+pat2print_code0(rule_pat_t p, ps_list ps, pc_args<`r1,`r2> args) {
+  switch (p) {
+
+  case &SymbPat(x):
+    return new $(new List(new x, ps), args);
+
+  case &LitPat(x):
+    return new $(new List(new string_escape(x), ps), args);
+
+  case &CharPat(x):
+    if (!is_special_char(x)) {
+      ps = new List(new (const char ?)aprintf("%c",x), ps);
+      return new $(ps,args);
+    }
+
+    // as x is a special char, we don't put it in the format string.
+    // instead, we add %c to the format string and add x to the argument
+    // list.
+    ps = new List(new "%c", ps);
+    let &$(args_in,args_out) = args;
+    args_out = new List(new (const char ?)aprintf("%u",x), args_out);
+
+    return new $(ps, new $(args_in,args_out));
+
+  case &SeqPat(p1,p2):
+    let &$(ps1, args1) = pat2print_code0(p1, ps, args);
+    return pat2print_code0(p2, ps1, args1);
+
+  case &BinderPat(_):
+    // we can ignore the underlying symbol, for now, as we do no extra checking.
+
+    ps = new List(new "%s",ps);
+    let &$(args_in,args_out) = args;
+    // transfer an argument from args_in to args_out
+    // FIX: should check for too few args in args_in.
+    args_out = new List(new (const char ?)strdup(args_in[0]), args_out);
+    args_in++;
+
+    return new $(ps, new $(args_in, args_out));
+  }
+}
+
+const char ?pat2print_code(rule_pat_t p, char ?? args) {
+  let &$(ps, &$(args_in, args_out)) =
+    pat2print_code0(p, list(new "printf(\""), new $(args, NULL));
+  ps = new List(new (args_out ? "\"," : "\""), ps);
+  let args_s = str_sepstr(imp_rev(args_out), ",");
+  ps = new List(new (const char ?)args_s, ps);
+  ps = new List(new ")", ps);
+  ps = imp_rev(ps);
+  return strconcat_l(ps);
+}
+
+static const char ?escape_str = "%";
+static char escape_char = '%';
+
+static void init_esc_char(char c) {
+  escape_str = aprintf("%c",c);
+  escape_char = c;
+}
+
+static bool is_escape_lit(rule_pat_t p) {
+  switch(p) {
+  case &LitPat(x): return strcmp(x,escape_str) == 0;
+  case &CharPat(x): return x == escape_char;
+  default: return false;
+  }
+}
+
+static rule_pat_t unescape_char(rule_pat_t p) {
+  switch(p) {
+  case &CharPat(x): return p;
+  default:
+    internal_err("Escape character not followed by CharPat.\n");
+    return p;
+  }
+}
+
+static const char ?unescape_lit(const char ?`H s) {
+  let n = strlen(s); // use strlen instead of numelts, as the latter can include padding.
+
+  // at most, we'll need n+1 chars for the unescaped string.
+  char ?@notnull s_un = calloc(n + 1, sizeof(char));
+  int i,j;
+  for (i = 0, j = 0; i < n; i++, j++) {
+    if (s[i] == escape_char) {
+      i++; // just skip the escape char.
+      if (i == n-1)
+        internal_err("Found escape character %c at end of string.\n",escape_char);
+    }
+    s_un[j] = s[i];
+  }
+  s_un[j] = '\0';
+  return s_un;
+}
+
+rule_pat_t unescape_pat0(rule_pat_t p) {
+  switch (p) {
+  case &LitPat(x):
+    return new LitPat(unescape_lit(x));
+  case &SeqPat(p1,p2):
+    if (is_escape_lit(p1))
+      return unescape_char(p2);
+    return new SeqPat(unescape_pat0(p1), unescape_pat0(p2));
+  case &SymbPat(_):
+  case &CharPat(_):
+  case &BinderPat(_):
+    return p;
+  }
+}
+
+rule_pat_t unescape_pat(rule_pat_t p, char esc_char) {
+  init_esc_char(esc_char);
+  return unescape_pat0(p);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Taken from generated code.
+//////////////////////////////////////////////////////////////////////
+
+#define YKLIMIT ykb->lim
+#define YKCURSOR ykb->cur
+#define YKFILL(n) (ykfill(ykb,(n)))
+#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
+#define YKMARKER ykb->mark
+#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })
+#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
+
+extern datatype exn {extern Parse_error };
+extern datatype exn.Parse_error Parse_error_val;
+
+//////////////////////////////////////////////////////////////////////
+
+// We use lazyfill to simplify the fill process and to avoid having to
+// eagerly compute the fill amount.  However, it should not matter
+// whether any parsing functions that we link to uses lazy or eager
+// fill.
+static void lazyfill(ykbuf_t @ykb, unsigned int fa) {
+  if (fa && ((YKLIMIT - YKCURSOR) < fa))
+      YKFILL(fa);
+}
+
+static void parse_lit(ykbuf_t @ykb, const char ?x) {
+  int c; // PHASE
+  int len = strlen(x);
+  for (int k = 0; k < len; k++) {
+    lazyfill(ykb, 1);
+    c = *YKCURSOR++; //PHASE
+    let orig = x[k];
+    let l = tolower(orig);
+    let u = toupper(orig);
+    if (c!=l && c!=u) throw &Parse_error_val; // PHASE
+  }
+}
+
+static void parse_char(ykbuf_t @ykb, unsigned int x) {
+  int c; // PHASE
+  lazyfill(ykb,1);
+  c = *YKCURSOR++; //PHASE
+  let l = tolower(x);
+  let u = toupper(x);
+  if (c!=l && c!=u) throw &Parse_error_val; // PHASE
+}
+
+static void parse_sym(ykbuf_t @`r ykb, Funtable::table_t parse_funs, const char ?`H x) {
+  try {
+    let parse_x = Funtable::lookup(parse_funs, x);
+    parse_x(ykb);
+  } catch {
+  case &Core::Not_found:
+    eprintf("Failed to find definition of symbol %s. Skipping...\n", x);
+    break;
+  }
+}
+
+strptr_array<`r1,`r2>
+parse_with_pat0(ykbuf_t @`r ykb, Funtable::table_t parse_funs,
+               rule_pat_t p, strptr_array<`r1,`r2> args) {
+  switch (p) {
+  case &SymbPat(x):
+    parse_sym(ykb,parse_funs,x);
+    return args;
+  case &LitPat(x):
+    parse_lit(ykb,x);
+    return args;
+  case &CharPat(c):
+    parse_char(ykb,c);
+    return args;
+  case &SeqPat(p1,p2):
+    args = parse_with_pat0(ykb,parse_funs,p1,args);
+    args = parse_with_pat0(ykb,parse_funs,p2,args);
+    return args;
+  case &BinderPat(x):
+    let save = YKSAVE;
+    parse_sym(ykb,parse_funs,x);
+    unsigned char ?@nozeroterm ykr = YKRESTORE(save);
+    let x_str = substring((const char ?@nozeroterm)ykr,0,YKCURSOR-ykr);
+    **args = x_str;
+    return ++args;
+  }
+}
+
+void
+parse_with_pat(ykbuf_t @`r ykb, Funtable::table_t parse_funs,
+               rule_pat_t p, strptr_array<`r1,`r2> args) {
+  parse_with_pat0(ykb,parse_funs,p,args);
+}
+
+int
+crawl_with_pat0(rule_pat_t p, EarleyParsetree::parse_tree_t ? children,
+    unsigned char ? @nozeroterm ykinput,
+    strptr_array<`r1,`r2> args) {
+  int num_scanned = 0;
+
+  let pats = List::list(p);
+  while (pats) {
+    switch (pats->hd) {
+    case &SymbPat(x):
+      children++;
+      pats = pats->tl;
+      break;
+    case &BinderPat(x):
+      let x_str = substring(ykinput, children[0]->left, children[0]->right - children[0]->left);
+      **args = x_str;
+      args++;
+      children++;
+      pats = pats->tl;
+      num_scanned++;
+      break;
+    case &LitPat(_):
+    case &CharPat(_):
+      // do nothing -- just advance pats. literals don't show up in parse tree;
+      pats = pats->tl;
+      break;
+    case &SeqPat(p1,p2):
+      // replace the hd with p1 and p2.
+      pats = new List::List(p1, new List::List(p2, pats->tl));
+      break;
+    }
+
+  }
+
+  return num_scanned;
+}
+
+int
+crawl_with_pat(rule_pat_t p, EarleyParsetree::parse_tree_t pt,
+    unsigned char ? @nozeroterm ykinput,
+    strptr_array<`r1,`r2> args) {
+  let &EarleyParsetree::parse_tree(name,i,j,w,children) = pt;
+  return crawl_with_pat0(p,children,ykinput,args);
+}
+
+/**********************************************************************/
+/*                           end pm_bnf                               */
+/**********************************************************************/
+
+/**********************************************************************/
+/*                           tge-scanf                                */
+/**********************************************************************/
+
+#include "tge-scanf.h"
+
+int internal_ykb_scanf(EarleyAnyBackend::DFA::edfa_t fs_dfa_obj, fmt_crawl_fun fmt_crawl,
+                       EarleyAnyBackend::DFA::grammar_edfa_t gr_edfa,
+                       ykbuf_t @ykb, string_t format_string, string_t<`H> @ ?args) {
+
+  // Parse the format string
+  let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(fs_dfa_obj,format_string);
+  if (!valid) {
+    return -1;
+  }
+
+  // "tree" encodes top-level regexp, but we want to crawl starting from symbol
+  // with regexp.
+  let child_tree = trees->hd->f0->children[0];
+  let rule_pat = fmt_crawl(child_tree, format_string);
+
+//  fprintf(stderr,"Parsed pattern %s.\n",pat2string(rule_pat));
+
+  let input_ext_dfa_obj = ExtAnyDFA::pat2dfa(rule_pat, gr_edfa);
+
+//  ExtDFA::dfa_dot(ext_edfa);
+
+//  fprintf(stderr,"Parsing input.\n");
+  let input_dfa_obj = ExtAnyDFA::mk_any_eb(input_ext_dfa_obj); // "upcast" to plain edfa.
+
+  let ykb_save = YKSAVE;
+  // Parse the actual input
+  fprintf(stderr,"Parsing actual input.\n");
+  let $(input_trees, input_valid, input_valid_prefix) =
+    EarleyAnyBackend::ykb_parse(input_dfa_obj,ykb,0);
+  fprintf(stderr,"Done parsing actual input.\n");
+
+  if (!input_valid) {
+    YKCURSOR = YKRESTORE(ykb_save);
+    return -1;
+  }
+
+  let res = crawl_with_pat(rule_pat, input_trees->hd->f0, ykb->save + ykb_save, args);
+  YKRESTORE(ykb_save); // commit: don't set YKCURSOR, because we don't want to rewind the input.
+                       // the purpose of the save was only to prevent discarding.
+  return res;
+}
+
+int internal_scanf(EarleyAnyBackend::DFA::edfa_t fs_dfa_obj, fmt_crawl_fun fmt_crawl,
+                   EarleyAnyBackend::DFA::grammar_edfa_t gr_edfa,
+                   string_t input, string_t format_string, string_t<`H> @ ?args) {
+  let ykinput = string2ykbuf(input);
+  return internal_ykb_scanf(fs_dfa_obj, fmt_crawl<>, gr_edfa, ykinput, format_string, args);
+}
 
 
-namespace EarleyAnyBackend;
+
+/**********************************************************************/
+/*                         end tge-scanf                              */
+/**********************************************************************/
+
+namespace EarleyAnyBackend {
 
 #define DFA_IS_DFA_FINAL(dfa,s) \
   ({let as = DFA_FINAL_ATTRS(dfa,s); as && numelts(as) == 0;})
@@ -143,7 +650,7 @@ get_bounds(Hashtable::table_t<earley_node_t, list_t<elink_t>,`H> links,
      earley_node_t en, act_t nt){
 
   let maybe_links = Hashtable::lookup_opt(links,en);
-  if (maybe_links == NULL) 
+  if (maybe_links == NULL)
     return NULL;
   else {
     // OPTIMIZATION: we could use a loop instead of recursion if there
@@ -219,9 +726,9 @@ push_closure(rstate_t rs,
   Axarray::set(rs->estates,i,Set::insert(es,ei));
 
   /* Close under CALLS. We don't use the weight here. */
-  let t = DFA_TRANS(rs->dfa,s,callout_action()); 
+  let t = DFA_TRANS(rs->dfa,s,callout_action());
   if (t != 0) {
-#if defined(NULL_PLAN_B) || defined(NULL_PLAN_C)    
+#if defined(NULL_PLAN_B) || defined(NULL_PLAN_C)
     // Check for RETURN of nullable symbols
     // TODO: do the same for REPEAT calls.
     if (DFA_IS_FINAL(rs->dfa,t)) {
@@ -245,7 +752,7 @@ push_closure(rstate_t rs,
               mult( w_m, node_inner) //PROB
           );
         }
-        
+
         let ttarget = DFA_TRANS(rs->dfa,t,symb_act);
         if (ttarget != 0) {
           // Earley node that completed nullable RHS.
@@ -258,17 +765,17 @@ push_closure(rstate_t rs,
               mult( w_m, node_inner) //PROB
           );
         }
-      
+
         // Sanity check:
 #ifdef NULL_PLAN_B
         if (ttarget == 0 && starget == 0) {
           fprintf(stderr,"Error: target for %d not found in call source state %d or target state %d.\n",symb_act,s,t);
-        } 
+        }
 #endif
       }
     }
 #endif
-    
+
     push_closure(rs,input,i,new $(t,i),NULL,NULL, /* bogus action: */ 0
         ,forward,Semiring::one_weight //PROB
     );
@@ -296,16 +803,16 @@ push_closure(rstate_t rs,
                  );
   }
 
-  /* Close under REPEATS. Only works if target has *one* non-call target. */  
+  /* Close under REPEATS. Only works if target has *one* non-call target. */
   let t = DFA_TRANS(rs->dfa,s,repeat_action());
   if (t != 0) {
-    /* 0. Get the parameters of the repeat: repeater, repeatee, repeatee start state, and 
+    /* 0. Get the parameters of the repeat: repeater, repeatee, repeatee start state, and
      *    follow state of the repeat. */
     let $(rpter_act,rptee_act, rptee_start, repeat_follow) = DFA_GET_REPEAT_INFO(rs->dfa,t);
-    
+
     /* 1. Retrieve the number from the Earley graph.*/
 
-    // get the bounds (inclusive) of parsed repeater non-terminal (with action rpter_act) 
+    // get the bounds (inclusive) of parsed repeater non-terminal (with action rpter_act)
     // from the Earley graph.
     let bounds_opt = get_bounds(rs->links, rs->dfa, node,rpter_act);
     if (!bounds_opt){
@@ -329,10 +836,10 @@ push_closure(rstate_t rs,
   /* Close under RETURNS.  Use else, because a REPEAT state can't
      also be a final state. */
   else if (
-      // TODO: commenting-out the following line is only a short-term solution to dealing with 
+      // TODO: commenting-out the following line is only a short-term solution to dealing with
       // nullable elements. It is inefficient -- we should look for another way to do
       // this.
-#if defined(NULL_PLAN_A) || defined(NULL_PLAN_C)      
+#if defined(NULL_PLAN_A) || defined(NULL_PLAN_C)
        i != backptr && // we parsed the empty string, RETURN handled by dfa already
 #endif
        DFA_IS_FINAL(rs->dfa,s)) {
@@ -358,10 +865,10 @@ push_closure(rstate_t rs,
         if (ttarget != 0) {
           // Earley node w/ dot before symb.
           let backnode = new $(t,tbackptr,backptr);
-          let &$(backnode_forward,backnode_inner) = 
+          let &$(backnode_forward,backnode_inner) =
             Hashtable::lookup(rs->weights,backnode); //PROB
           let w_m = mult(inner, final_w);
-          push_closure(rs,input,i,new $(ttarget,tbackptr), 
+          push_closure(rs,input,i,new $(ttarget,tbackptr),
           backnode, node, symb_act
           ,mult( w_m, backnode_forward), //PROB
           mult( w_m, backnode_inner) //PROB
@@ -384,7 +891,7 @@ mk_parse_forest(rstate_t rs,
      act_t resp_act) {
   // map: early_node_t -> parse_tree_t
   let trees = Hashtable::create(11,earley_node_cmp,earley_node_hash);
-  
+
   let &$(x,i,j) = en;
 
   // Handle case of top-level call, for which there will be no responsible action.
@@ -392,7 +899,7 @@ mk_parse_forest(rstate_t rs,
   if (!completed){ // Sanity check
     throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
   }
-  
+
   string_t name;
   if (numelts(completed) == 0) {
     // We're in a top-level call ...
@@ -414,11 +921,11 @@ mk_parse_forest(rstate_t rs,
   if (debug){
     fprintf(stderr, "Building forest for %s[%d,%d].\n",name,i,j);
   }
-  
+
   /**
-   * A list of RHSs-under-construction, which are themselves lists, paired with 
+   * A list of RHSs-under-construction, which are themselves lists, paired with
    * the (optional) Earley link that indicates the head of the path (or NULL if the path is complete).
-   * So, its a list of of pairs of Earley link and lists. It tracks all the possible 
+   * So, its a list of of pairs of Earley link and lists. It tracks all the possible
    * alternative parses of the original nonterminal.
    */
   let live_paths = List::list(new $(Hashtable::lookup_opt(rs->links,en), NULL));
@@ -432,7 +939,7 @@ mk_parse_forest(rstate_t rs,
     // pop first live path;
     let &$(maybe_links, partial_rhs) = live_paths->hd;
     live_paths = live_paths->tl;
-    
+
     if (!maybe_links){
       // The path is complete. Add a forest to forests.
       // let spfs = List::to_array( partial_rhs );
@@ -454,20 +961,20 @@ mk_parse_forest(rstate_t rs,
           } else
             retn_tree = *retn_tree_opt;
 
-          // we can build the list backwards because we are starting at the end of 
+          // we can build the list backwards because we are starting at the end of
           // the RHS and traversing pred links towards the beginning.
           ext_partial_rhs = new List::List(retn_tree,
               partial_rhs);
         }
-        
+
         let maybe_links = Hashtable::lookup_opt(rs->links,pred_link);
         live_paths = new List::List( new $(maybe_links, ext_partial_rhs), live_paths );
-      }   
+      }
     }
   }
 
   // Invariant: live_paths is NULL, and forests contains all completed RHSs.
-  
+
   // Used later when completing a forest.
   let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
   return new shared_parse_forest(name,i,j,w_forward, List::to_array( forests ));
@@ -484,13 +991,13 @@ mk_parse_forest(rstate_t rs,
 
 // Check for ambiguities and resolve as necessary.
 static
-elink_t resolve_ambs(rstate_t rs, string_t<`H> name, int start, int end, 
+elink_t resolve_ambs(rstate_t rs, string_t<`H> name, int start, int end,
       List::list_t<struct elink @`H,`H> links){
   // Check for ambiguities.
-  if (links->tl == NULL) 
+  if (links->tl == NULL)
     // no ambiguities
     return links->hd;
-  
+
 //   throw new Core::Invalid_argument(aprintf("Earley graph is ambiguous for symbol <%s> at substring [%d,%d).",name,i,j));
   if (debug){
     fprintf(stderr,
@@ -498,15 +1005,15 @@ elink_t resolve_ambs(rstate_t rs, string_t<`H> name, int start, int end,
         "Choosing first derivation.\nPath weights:\n", name,start,end);
     for (let xs = links; xs; xs = xs->tl){
       fprintf(stderr,
-          "   %s: %s\n", DFA_ACT2SYMB(rs->dfa,xs->hd->resp_act), Semiring::print_weight(xs->hd->p_weight));      
+          "   %s: %s\n", DFA_ACT2SYMB(rs->dfa,xs->hd->resp_act), Semiring::print_weight(xs->hd->p_weight));
     }
-    fprintf(stderr,"\n");      
+    fprintf(stderr,"\n");
   }
-  
+
   return links->hd;
 }
 
-// Reconstruct a parse tree. 
+// Reconstruct a parse tree.
 parse_tree_t
 mk_parse_tree(rstate_t rs,
      string_t<`H> top_level_name,
@@ -514,15 +1021,15 @@ mk_parse_tree(rstate_t rs,
      act_t resp_act) {
   // map: early_node_t -> parse_tree_t
   let trees = Hashtable::create(11,earley_node_cmp,earley_node_hash);
-  
+
   let &$(x,i,j) = en;
-  
+
   // Handle case of top-level call, for which there will be no responsible action.
   let completed = DFA_FINAL_ATTRS(rs->dfa,x);
   if (!completed){ // Sanity check
     throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
   }
-  
+
   string_t name;
   if (numelts(completed) == 0) {
     // We're in a top-level call ...
@@ -557,14 +1064,14 @@ mk_parse_tree(rstate_t rs,
       } else
         retn_tree = *retn_tree_opt;
 
-      // we can build the list backwards because we are starting at the end of 
+      // we can build the list backwards because we are starting at the end of
       // the RHS and traversing pred links towards the beginning.
       children_trees = new List::List(retn_tree,
                                    children_trees);
     }
     maybe_links = Hashtable::lookup_opt(rs->links,pred_link);
   }
-  
+
   let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
   return new parse_tree(name,i,j,w_forward, List::to_array( children_trees ));
 }
@@ -628,10 +1135,10 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
     ,weights //PROB
     ,rcounts
   };
-  
+
   // Save the input from the beginning so that we have access to it later.
   let input_save = YKSAVE;
-  
+
   push_closure(rs,
       ykb->save + input_save,
       0,
@@ -639,10 +1146,10 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
       NULL,NULL, /* bogus action: */ 0
       ,Semiring::one_weight,Semiring::one_weight //PROB
   );
-  
+
   let t = DFA_GET_START(dfa);
   let i = 0;
-#if defined(NULL_PLAN_B) || defined(NULL_PLAN_C)    
+#if defined(NULL_PLAN_B) || defined(NULL_PLAN_C)
   /* Check for RETURN of nullable symbols */
   if (DFA_IS_FINAL(rs->dfa,t)) {
     let final_w = DFA_FINAL_WEIGHT(rs->dfa,t);
@@ -662,11 +1169,11 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
             causal_node, causal_node, symb_act
             ,w_m, w_m //PROB
         );
-      } 
+      }
 #ifdef NULL_PLAN_C
       else {// Sanity check:
         fprintf(stderr,"Error: target for %d not found in initial state.\n",symb_act);
-      } 
+      }
 #endif
     }
   }
@@ -688,28 +1195,28 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
       }
     }
   }
-  
+
   if (!hit_final) {
     /* Scan the input */
     YKFILL(1); // Make sure we have at least one element in the buffer.
-    int c = *YKCURSOR; 
+    int c = *YKCURSOR;
 
-    
+
     for (; no_error && !(*YKCURSOR == 0 && ykb->eof); i++) {
       //YKCURSOR++; forgetting to set c results in bus error. Why?
       c = *YKCURSOR++; // consume current element.
 
       // reset for this round.
-      // will be set to one if there is at least one transition on 
+      // will be set to one if there is at least one transition on
       // input character c.
       no_error = 0;
-      
-      // Process character c. 
+
+      // Process character c.
       //fprintf(stderr,"input[%d]==%s\n",i,cs_char_escape(c));fflush(stderr);
       for (let si_list = Set::to_list(Axarray::get(estates,i));
           si_list != NULL;
           si_list = si_list->tl) {
-  
+
         let &$(state,parent) = si_list->hd;
         //fprintf(stderr,"Considering (%d,%d) for %c. ",state,parent,input[i]);
         let $(k,w) = DFA_TRANS_W(dfa,state,c); //PROB
@@ -723,14 +1230,14 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
           );
         }
       }
-      
+
       if (!parse_until_eof){
         // Check whether we've reached a final state
         hit_final = 0;
         for (let si_list = Set::to_list(Axarray::get(estates,i+1));
             si_list != NULL;
             si_list = si_list->tl) {
-    
+
           let &$(state,parent) = si_list->hd;
           if (parent == 0 && DFA_IS_DFA_FINAL(dfa,state)){
               hit_final = 1;
@@ -746,7 +1253,7 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
       if ((YKLIMIT - YKCURSOR) < 1) YKFILL(1);
     }
   }
-  
+
   if (no_error){
     if (debug)
       fprintf(stderr, "No parse errors detected. Searching for final states at position %d.\n", i);
@@ -782,7 +1289,7 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
           } catch {
             case &Core::Invalid_argument(msg):
               fprintf(stderr,"Ambiguous tree at early node (%d,0,%d):\n\t%s\n",state,i,msg);
-            break;  
+            break;
           }
         }
     }
@@ -790,12 +1297,235 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
 
   YKRESTORE(input_save); // commit: don't set YKCURSOR, because we don't want to rewind the input.
                          // the purpose of the save was only to prevent discarding.
-  
-  return $(trees,complete_parses,partial_parses);  
+
+  return $(trees,complete_parses,partial_parses);
 }
 
-$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int) 
+$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int)
 parse(DFA::edfa_t dfa, const char? input) {
   let ykinput = string2ykbuf(input);
   return ykb_parse(dfa, ykinput,1);
 }
+}
+
+#define USE_ANY_DFA
+#define EXT_DFA_NAMESPACE ExtAnyDFA
+#define EB_NAMESPACE EarleyAnyBackend
+#define EB_EXT_NAMESPACE EarleyExtAnyBackend
+
+/*
+ * "Functor" implementing an extensible DFA. Parameters are checked below.
+ */
+
+#if !defined(EXT_DFA_NAMESPACE) || !defined(EB_NAMESPACE) || !defined(EB_EXT_NAMESPACE)
+#error "Missing parameters to ext-dfa-impl.cyc"
+#endif
+
+namespace EXT_DFA_NAMESPACE;
+
+using EB_EXT_NAMESPACE;
+
+//////////////////////////////////
+// Internally-visible functions //
+//////////////////////////////////
+
+// Simplest strucuture needed for extending a DFA.
+// DFA::edfa_t extends this structure with some more states used for executing DFA.
+struct ext_edfa {
+  // Extensions to the transition function
+  Hashtable::table_t<$(st_t,act_t) @`H, $(st_t,Semiring::weight_t) @`H> trans_exts;
+  unsigned int number_of_states;
+};
+
+typedef struct ext_edfa @ext_edfa_t;
+
+// Extension functions
+extern ext_edfa_t create_ext_edfa(EB_NAMESPACE::DFA::grammar_edfa_t gd);
+
+extern void add_trans(ext_edfa_t ed, st_t s, act_t a, st_t f,
+    Semiring::weight_t w);
+extern st_t fresh_state(ext_edfa_t ed);
+
+////////
+// Convenience functions for extending the dfa in various ways.
+////////
+
+extern st_t mk_call(ext_edfa_t ed, EB_NAMESPACE::DFA::grammar_edfa_t gd, string_t<`H> symb, st_t final);
+extern st_t mk_lit(ext_edfa_t ed, string_t lit, st_t final);
+extern st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final);
+
+static int st_act_cmp($(st_t,act_t) @sa1,$(st_t,act_t) @sa2) {
+  let c_st = st_cmp(sa1->f0,sa2->f0);
+  if (c_st) return c_st;
+  return act_cmp(sa1->f1,sa2->f1);
+}
+
+static int st_act_hash($(st_t,act_t) @sa) {
+  return st_hash(sa->f0) ^ act_hash(sa->f1);
+}
+
+static ext_edfa_t create_ext_edfa(EB_NAMESPACE::DFA::grammar_edfa_t gd) {
+  return new ext_edfa(Hashtable::create(50,st_act_cmp,st_act_hash),
+      GRM_DFA_GET_NUM_STATES(gd));
+}
+
+static void add_trans(ext_edfa_t ed, st_t s, act_t a, st_t f, Semiring::weight_t w) {
+  Hashtable::insert(ed->trans_exts, new $(s,a), new $(f,w));
+}
+
+static st_t fresh_state(ext_edfa_t ed) {
+  return ed->number_of_states++;
+}
+
+#define CASE_INSENSITIVE 1
+
+static st_t mk_call(ext_edfa_t ed, EB_NAMESPACE::DFA::grammar_edfa_t gd, string_t<`H> symb, st_t final) {
+  // get symbol action
+  let s_a = GRM_DFA_GET_SYMB_ACTION(gd, symb);
+  // get symbol start state
+  let start = GRM_DFA_GET_SYMB_START(gd, s_a);
+  let s = fresh_state(ed);
+  add_trans(ed, s, Earley::callout_action(), start, Semiring::zero_weight);
+  add_trans(ed, s,s_a,final,Semiring::one_weight);
+  return s;
+}
+
+static st_t mk_lit(ext_edfa_t ed, string_t lit, st_t final) {
+  assert (lit[0] != '\0');
+  int n = strlen(lit);
+  st_t dst = final;
+  for (int i=n-1; i >= 0; i--) {
+    let s = fresh_state(ed);
+    if (CASE_INSENSITIVE && tolower(lit[i]) != toupper(lit[i])) {
+      let w = Semiring::from_inv_prob(2);
+      add_trans(ed, s,tolower(lit[i]),dst,w);
+      add_trans(ed, s,toupper(lit[i]),dst,w);
+    }
+    else
+    add_trans(ed, s,lit[i],dst,Semiring::one_weight);
+    dst = s;
+  }
+  return dst;
+}
+
+static st_t mk_char(ext_edfa_t ed, unsigned int c, st_t final) {
+  let s = fresh_state(ed);
+  if (CASE_INSENSITIVE && tolower(c) != toupper(c)) {
+    let w = Semiring::from_inv_prob(2);
+    add_trans(ed, s,tolower(c),final,w);
+    add_trans(ed, s,toupper(c),final,w);
+  }
+  else
+  add_trans(ed, s,c,final,Semiring::one_weight);
+  return s;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Externally-visible functions
+/////////////////////////////////
+
+st_t trans(DFA::edfa_t ed, st_t s, act_t a){
+  let t = DFA_TRANS(ed->d,s,a);
+  if (t) return t;
+  let p_tw_opt = Hashtable::lookup_opt(ed->trans_exts,new $(s,a));
+  if (!p_tw_opt)
+    return t;
+  return (*p_tw_opt)->f0;
+}
+
+$(st_t,Semiring::weight_t) trans_w(DFA::edfa_t ed, st_t s, act_t a){
+  let tw = DFA_TRANS_W(ed->d,s,a);
+  if (tw.f0) return tw;
+  let p_tw_opt = Hashtable::lookup_opt(ed->trans_exts,new $(s,a));
+  if (!p_tw_opt)
+    return tw;
+  return **p_tw_opt;
+}
+
+int in_final(DFA::edfa_t ed, act_t a, st_t s){
+  return DFA_IN_FINAL(ed->d,a,s);
+}
+
+int is_final(DFA::edfa_t ed, st_t s){
+  return DFA_IS_FINAL(ed->d,s) || s == ed->final;
+}
+
+Semiring::weight_t final_weight(DFA::edfa_t ed, st_t s){
+  if (s == ed->final)
+    return Semiring::one_weight;
+  return DFA_FINAL_WEIGHT(ed->d,s);
+}
+
+act_t ?final_attrs(DFA::edfa_t ed, st_t s){
+  if (s == ed->final) return new {};
+
+  return DFA_FINAL_ATTRS(ed->d,s);
+}
+
+st_t get_start(DFA::edfa_t ed){
+  return DFA_GET_START(ed->d);
+}
+
+string_t act_2_symb(DFA::edfa_t ed, act_t a){
+  return DFA_ACT2SYMB(ed->d, a);
+}
+
+$(act_t, act_t, st_t, st_t) get_repeat_info(DFA::edfa_t ed, st_t state){
+  return DFA_GET_REPEAT_INFO(ed->d, state);
+}
+
+// Construct a repeat dfa: ...
+// The new  state is connected to the specified final state "final".
+st_t construct_repeat_dfa(DFA::edfa_t ed, act_t next, st_t target_s, st_t final){
+  let s = fresh_state( (ext_edfa_t)ed );
+  // Transitions don't sum to one b/c we've really compacted many states into one.
+  add_trans( (ext_edfa_t)ed, s, Earley::repeat_decr_action(),  target_s, Semiring::from_inv_prob(2));
+  add_trans( (ext_edfa_t)ed, s, Earley::repeat_final_action(), final,    Semiring::one_weight );
+  add_trans( (ext_edfa_t)ed, s, next,                  s,        Semiring::from_inv_prob(2));
+  return s;
+}
+
+static void dot_trans_iter($(st_t,act_t) @`H src,
+    $(st_t,Semiring::weight_t) @`H tgt,
+    DFA::edfa_t ed){
+  let &$(s,a) = src;
+  let &$(t,_) = tgt;
+  let act = a > 255 ? DFA_ACT2SYMB(ed->d,a) : cs2string(cs_range(a,a+1),NULL);
+  printf("%d -> %d [ label = \"%s\" ];\n",s,t,act);
+}
+
+// prints to standard error.
+void dfa_dot(DFA::edfa_t ed) {
+  printf("digraph g {\n");
+  printf("%d [ shape = \"doublecircle\" ];\n", DFA_GET_START(ed->d));
+  Hashtable::iter_c(dot_trans_iter,ed->trans_exts,ed);
+  printf("}\n");
+}
+
+static st_t pat2dfa0(rule_pat_t p, ext_edfa_t ed, EB_NAMESPACE::DFA::grammar_edfa_t gd, st_t final) {
+  switch (p) {
+  case &SymbPat(x):
+    fallthru(x);
+  case &BinderPat(x):
+    // TODO: mk_call will need to somehow ensure that if this is executed, the data is bound.
+    // This will need t o be done in a crawl because of ambiguity issues (e.g. you can start a
+    // path which doesn't complete, so don't want to bind until you know that path completed).
+    return mk_call(ed, gd, x, final);
+  case &LitPat(x):
+    return mk_lit(ed, x, final);
+  case &CharPat(c):
+    return mk_char(ed, c, final);
+  case &SeqPat(p1, p2):
+    let s2 = pat2dfa0(p2, ed, gd, final);
+    return pat2dfa0(p1, ed, gd, s2);
+  }
+}
+
+DFA::edfa_t pat2dfa(rule_pat_t p, EB_NAMESPACE::DFA::grammar_edfa_t grm_dfa) {
+  let ed = create_ext_edfa(grm_dfa);
+  let final_state = fresh_state(ed);
+  let start_state = pat2dfa0(p, ed, grm_dfa, final_state);
+  return new DFA::edfa(ed->trans_exts, ed->number_of_states, GRM_DFA_GET_DFA(grm_dfa,start_state), final_state);
+}
+
+DEFINE_MK_ANY_EB(EB_EXT_NAMESPACE)

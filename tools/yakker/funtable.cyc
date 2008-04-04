@@ -24,16 +24,16 @@
 
 namespace Funtable {
 
-table_t create(int sz){
+table_t create(int sz) {
   return Hashtable::create(sz,strptrcmp,Hashtable::hash_stringptr);
 }
 
-void insert(table_t ft, const char ?`H name, parse_fun f){
+void insert(table_t ft, const char ?`H name, parse_fun f) {
   Hashtable::insert(ft, new name, f<>);
 }
 
-parse_fun lookup(table_t ft, const char ?`H name){
-// The following (useless) code trips a cyclone bug.
+parse_fun lookup(table_t ft, const char ?`H name) {
+  /* The following (useless) code trips a cyclone bug. */
   //  int foo(int x){return x+1;}
   //  let y = foo(2);
   return (Hashtable::lookup(ft, new name))<>;
