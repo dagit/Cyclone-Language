@@ -12,7 +12,7 @@ $(GrammarPrefix)_FILES = $(GrammarName)-flat-dfa $(GrammarName)crawl
 $(GrammarPrefix)_OBJS:=$(foreach yfile,$($(GrammarPrefix)_FILES),$(yfile).o)
 
 $(GrammarName)-earley: $($(GrammarPrefix)_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $($(GrammarPrefix)_OBJS)  -lssl -lm $(LIB_YAKKER)
+	$(CYCLONE) -o $@ $($(GrammarPrefix)_OBJS)  -lssl -lm $(LIB_YAKKER) -lcrypto
 
 $(GrammarName)-flat-dfa.cyc: examples/$(GrammarName).bnf yakker
 	./yakker -flatten-full -earley-gen-cyc $(GrammarStart) $< > $@

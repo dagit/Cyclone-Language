@@ -30,6 +30,8 @@ extern void report_right_recursion(grammar_t grm);
 extern void report_white_edges(grammar_t grm);
 extern void report_first_follow(grammar_t grm);
 extern void report_conflicts(grammar_t<`H> grm);
+// Report conflicts for only the specified symbol in the given grammar.
+extern void report_conflicts_sym(string_t sym, grammar_t<`H> grm);
 extern void report_glush(grammar_t<`H> grm);
 extern void report_whitespace(grammar_t<`H> grm);
 extern void first(cs_t result, rule_t r);

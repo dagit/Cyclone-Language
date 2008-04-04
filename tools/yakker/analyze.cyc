@@ -1062,29 +1062,32 @@ void init_arityt(grammar_t ds) {
 
 /**************************** CONFLICTS ****************************/
 static
-void conflicts0(rule_t,rule_t);
+void conflicts0(string_t,rule_t,rule_t);
+
 static
-void conflicts_alt(rule_t r,rule_t right_ctxt) {
+void conflicts_alt(string_t nonterm, rule_t r,rule_t right_ctxt) {
   /* Same as conflicts0, but don't report Alt conflicts; only called
      by conflicts0 when the Alt conflicts have already been reported */
   switch (r->r) {
   case &Alt(r2,r3):
-    conflicts_alt(r2,right_ctxt);
-    conflicts_alt(r3,right_ctxt);
+    conflicts_alt(nonterm, r2,right_ctxt);
+    conflicts_alt(nonterm, r3,right_ctxt);
     return;
   default:
-    conflicts0(r,right_ctxt);
+    conflicts0(nonterm, r,right_ctxt);
     return;
   }
 }
 
 static grammar_t checking_conflicts_grammar;
+
+// argument nonterm is the name of the nonterminal currently being processed.
 static
-void conflicts0(rule_t r,rule_t right_ctxt) {
+void conflicts0(string_t nonterm, rule_t r,rule_t right_ctxt) {
   switch (r->r) {
   case &Seq(r2,r3):
-    conflicts0(r2,SEQ(r3,right_ctxt));
-    conflicts0(r3,right_ctxt);
+    conflicts0(nonterm,r2,SEQ(r3,right_ctxt));
+    conflicts0(nonterm,r3,right_ctxt);
     return;
   case &Alt(r2,r3):
     let rng_all = cs_empty();
@@ -1103,7 +1106,7 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
       /* an LL(1) conflict */
       eprintf("************************************************************************\n");
       num_conflicts_ll++;
-      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("Conflict %u in symbol definition %s.\n",num_conflicts_ll,nonterm);
       eprintf("LL(1) conflict on character(s) ");
       cs_print(stderr,rng_conflict);
       eprintf(" in Alt\n  ");
@@ -1118,8 +1121,8 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
       eprintf("\n");
       lookahead_dfa(checking_conflicts_grammar,alts,right_ctxt);
     }
-    conflicts_alt(r2,right_ctxt);
-    conflicts_alt(r3,right_ctxt);
+    conflicts_alt(nonterm,r2,right_ctxt);
+    conflicts_alt(nonterm,r3,right_ctxt);
     return;
   case &Opt(r2):
     let rng2 = cs_empty();
@@ -1131,7 +1134,7 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
       /* an LL(1) conflict */
       eprintf("************************************************************************\n");
       num_conflicts_ll++;
-      eprintf("Conflict %u\n",num_conflicts_ll);
+      eprintf("Conflict %u in symbol definition %s.\n",num_conflicts_ll,nonterm);
       eprintf("LL(1) conflict on character(s) ");
       cs_print(stderr,rng2);
       eprintf(" in Opt\n  ");
@@ -1148,7 +1151,7 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
 		    List::list(r2,LIT("")), // r2 first because greedy says try r2, only if fail assume ""
 		    right_ctxt);
     }
-    conflicts0(r2,right_ctxt);
+    conflicts0(nonterm,r2,right_ctxt);
     return;
   case &Rcount(_,r2):
     // FIX: we are assuming here a greedy parse
@@ -1157,15 +1160,15 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
   case &Star(m,&Num(n),r2):
     if (m > n) return;
     if (m == n) return; /* No choice involved */
-    conflicts0(OPT(r2),right_ctxt);
+    conflicts0(nonterm,OPT(r2),right_ctxt);
     return;
   case &Star(m,&Infinity,r2):
-    conflicts0(OPT(r2),right_ctxt);
+    conflicts0(nonterm,OPT(r2),right_ctxt);
     return;
   case &Hash(m,N,r2):
     // FIX: not right.  r2 must be preceeded by comma...
     if (repeat_zero(N)) return;
-    conflicts0(OPT(r2),right_ctxt);
+    conflicts0(nonterm,OPT(r2),right_ctxt);
     return;
   case &Symb(_,_):
   case &Prose(_):
@@ -1174,6 +1177,50 @@ void conflicts0(rule_t r,rule_t right_ctxt) {
   case &Lit(_):
     return;
   }
+}
+
+void report_conflicts_sym(string_t sym, grammar_t<`H> grm){
+  reset_globals();
+  //  checking_conflicts_grammar = grm;
+  grammar_t followgrm = follow_grammar(grm);
+  grammar_t combinedgrm = List::append(grm,followgrm);
+  checking_conflicts_grammar = combinedgrm;
+  init_recursive(combinedgrm);
+  init_firstt(combinedgrm);
+  init_mayt(combinedgrm);
+  init_mustt(combinedgrm);
+  init_maybe_empty(combinedgrm);
+  for (let x = grm; x; x = x->tl) {
+    let &$(n,r,_) = x->hd;
+    if (!strcmp(n,sym)) {
+      let fn = follow_symbol(n);
+      conflicts0(n, r,SYMB(fn));
+    }
+  }
+  if (num_conflicts_ll == 1)
+    printf("There was 1 LL(1) conflict\n");
+  else
+    printf("There were %u LL(1) conflicts\n", num_conflicts_ll);
+  if (num_conflicts_dfa == 1)
+    printf("There was 1 conflict in the dfas\n");
+  else if (num_conflicts_dfa > 1)
+    printf("There were %u conflicts in the dfas\n", num_conflicts_dfa);
+  if (num_conflicts_resolved == 1)
+    printf("  1 was resolved\n");
+  else
+    printf("  %u were resolved\n",num_conflicts_resolved);
+  if (num_conflicts_unresolved == 1)
+    printf("  1 was unresolved\n");
+  else
+    printf("  %u were unresolved\n",num_conflicts_unresolved);
+  if (num_conflicts_unbounded == 1)
+    printf("  1 conflicts might require unbounded lookahead\n");
+  else
+    printf("  %u conflicts might require unbounded lookahead\n",num_conflicts_unbounded);
+  if (num_conflicts_change_order == 1)
+    printf("  1 conflict was out of order\n");
+  else if (num_conflicts_change_order)
+    printf("  %u conflicts were out of order\n",num_conflicts_change_order);
 }
 
 void report_conflicts(grammar_t<`H> grm) {
@@ -1190,7 +1237,7 @@ void report_conflicts(grammar_t<`H> grm) {
   for (let x = grm; x; x = x->tl) {
     let &$(n,r,_) = x->hd;
     let fn = follow_symbol(n);
-    conflicts0(r,SYMB(fn));
+    conflicts0(n, r,SYMB(fn));
   }
   if (num_conflicts_ll == 1)
     printf("There was 1 LL(1) conflict\n");

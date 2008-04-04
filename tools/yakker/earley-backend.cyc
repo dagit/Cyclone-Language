@@ -374,118 +374,139 @@ push_closure(rstate_t rs,
 
 using EarleyParsetree;
 
-shared_parse_tree_t
-mk_parse_forest(rstate_t rs,
-     string_t input,
-     earley_node_t en,
-     act_t resp_act);
-
-// List::List_t<parse_forest_t> prefix_all(parse_tree_t,List::List_t<parse_forest_t>);
-// imperative update of fs.
-void prefix_all_imp(shared_parse_tree_t t,List::list_t<shared_parse_forest_t> fs){
-  for (;fs;fs = fs->tl){
-    fs->hd = new List::List(t,fs->hd);
-  }
-}
-
-//List::list_t<$(parse_forest_t,Semiring::weight_t) @>
-List::list_t<shared_parse_forest_t>
-mk_parse_branches(rstate_t rs,
-          string_t input,
-          earley_node_t en){
-  let derivations = NULL;
-  let maybe_links = Hashtable::lookup_opt(rs->links,en);
-  if (maybe_links != NULL) {
-
-    // Compute all derivations.
-    for (let xs = *maybe_links; xs; xs = xs->tl) {
-      let &elink(pred_link,w,retn_link,resp_act) = xs->hd;
-
-      let pred_derivations = mk_parse_branches(rs, input, pred_link);
-      if (retn_link) {
-        let child_tree = mk_parse_forest(rs, input, retn_link, resp_act);
-        // prefix all forests of pred_derivations with child_tree.
-        prefix_all_imp(child_tree, pred_derivations);
-      }
-
-      derivations = List::append(derivations, pred_derivations);
-    }
-
-  }else
-    // A single, empty derivation.
-    derivations = List::list(NULL);
-
-
-  //////////// Debug Code ///////////
-//   if (derivations != NULL && derivations->tl != NULL) {
-//     // More than one derivation, so ambiguous.
-//     fprintf(stderr,"Ambiguous parse, (%d,%d,%d) has multiple derivations\n",
-//       en->f0,en->f1,en->f2);
-//     fflush(stderr);
-//   }
-  //////////////////////////////////
-
-  return derivations;
-}
-
 /**
  * INVARIANT: state of en must be final.
  * */
-shared_parse_tree_t
+spf_t
 mk_parse_forest(rstate_t rs,
-     string_t input,
+     string_t<`H> top_level_name,
      earley_node_t en,
      act_t resp_act) {
+  // map: early_node_t -> parse_tree_t
+  let trees = Hashtable::create(11,earley_node_cmp,earley_node_hash);
   
   let &$(x,i,j) = en;
 
-  // Sanity check
-  if (debug){
-    if (!DFA_IN_FINAL(rs->dfa,resp_act,x)){
-      fprintf(stderr,"Action %s is not an attribute of state %d.\n",DFA_ACT2SYMB(rs->dfa,resp_act),x);
-    }
-  }
-  
-  string_t name = DFA_ACT2SYMB(rs->dfa,resp_act);
-
   // Handle case of top-level call, for which there will be no responsible action.
   let completed = DFA_FINAL_ATTRS(rs->dfa,x);
-  // Sanity check
-  if (!completed){
+  if (!completed){ // Sanity check
     throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
   }
-  if (numelts(completed) == 0) {
-    name = "TOP";
-  }
-
-  shared_parse_tree_t tree;
-
-  let h_derivations = mk_parse_branches(rs,input,en);
-  let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
-  // distinguish ambiguous from unamb. parses.
-  if (h_derivations == NULL){
-    // YHM: can len == 0 ? If so, how did entry ever get created?
-    // Yes, because it can be a string of terminals.
-    //fprintf(stderr,"No derivations returned.\n");
-    tree = new NonTerm(name,i,j,w_forward,NULL);
-  } else if(h_derivations->tl == NULL){
-    // Unambiguous
-    tree = new NonTerm(name,i,j,w_forward,h_derivations->hd);
-  } else {
-     // Ambiguous
-    tree = new SharedNonTerm(name,i,j,w_forward,h_derivations);
-  }
-
-  return tree;
   
+  string_t name;
+  if (numelts(completed) == 0) {
+    // We're in a top-level call ...
+    if (top_level_name == NULL)
+      throw new Core::Failure(aprintf("Final DFA state encountered unexpectedly in (%d,%d,%d).",x,i,j));
+    name = top_level_name;
+  }else{
+    name = DFA_ACT2SYMB(rs->dfa,resp_act);
 
+    // Sanity check to make sure that responsible action claimed by the
+    // caller is indeed an attribute of this state.
+    if (debug){
+      if (!DFA_IN_FINAL(rs->dfa,resp_act,x)){
+        fprintf(stderr,"Symbol %s is not an attribute of state %d.\n",name,x);
+      }
+    }
+  }
+
+  if (debug){
+    fprintf(stderr, "Building forest for %s[%d,%d].\n",name,i,j);
+  }
+  
+  /**
+   * A list of RHSs-under-construction, which are themselves lists, paired with 
+   * the (optional) Earley link that indicates the head of the path (or NULL if the path is complete).
+   * So, its a list of of pairs of Earley link and lists. It tracks all the possible 
+   * alternative parses of the original nonterminal.
+   */
+  let live_paths = List::list(new $(Hashtable::lookup_opt(rs->links,en), NULL));
+
+  /**
+   * Completed child forests.
+   */
+  List::list_t<List::list_t<spf_t>> forests = NULL;
+
+  while (live_paths != NULL) {
+    // pop first live path;
+    let &$(maybe_links, partial_rhs) = live_paths->hd;
+    live_paths = live_paths->tl;
+    
+    if (!maybe_links){
+      // The path is complete. Add a forest to forests.
+      // let spfs = List::to_array( partial_rhs );
+      forests = new List::List(partial_rhs, forests);
+    } else {
+      // Advance the current live path by one link (possibly resulting in more paths).
+      for (let xs = *maybe_links; xs; xs = xs->tl) {
+        let &elink(pred_link,w,retn_link,resp_act) = xs->hd;
+
+        // Each link can potentially extend the RHS taken from live_paths above.
+        // So, each time around the tloop we use reinitialize it to the original partial_rhs.
+        let ext_partial_rhs = partial_rhs;
+        if (retn_link) {
+          let retn_tree_opt = Hashtable::lookup_opt(trees,retn_link);
+          let retn_tree;
+          if (!retn_tree_opt){
+            retn_tree = mk_parse_forest(rs, NULL, retn_link, resp_act);
+            Hashtable::insert(trees,retn_link,retn_tree);
+          } else
+            retn_tree = *retn_tree_opt;
+
+          // we can build the list backwards because we are starting at the end of 
+          // the RHS and traversing pred links towards the beginning.
+          ext_partial_rhs = new List::List(retn_tree,
+              partial_rhs);
+        }
+        
+        let maybe_links = Hashtable::lookup_opt(rs->links,pred_link);
+        live_paths = new List::List( new $(maybe_links, ext_partial_rhs), live_paths );
+      }   
+    }
+  }
+
+  // Invariant: live_paths is NULL, and forests contains all completed RHSs.
+  
+  // Used later when completing a forest.
+  let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+  return new shared_parse_forest(name,i,j,w_forward, List::to_array( forests ));
 }
 
 ////////////////////////
 
-#define RESOLVE_AMBS
+/*
+ * What different ambiguity resolutions schemes do we want to support and how? Can we support  a mix
+ * of static and dynamic schemes? If so, how?
+ */
+// Next step:
+// See how to make choice based on weights.
 
-// Reconstruct a parse tree. Throws Invalid_argument if earley graph is ambiguous 
+// Check for ambiguities and resolve as necessary.
+static
+elink_t resolve_ambs(rstate_t rs, string_t<`H> name, int start, int end, 
+      List::list_t<struct elink @`H,`H> links){
+  // Check for ambiguities.
+  if (links->tl == NULL) 
+    // no ambiguities
+    return links->hd;
+  
+//   throw new Core::Invalid_argument(aprintf("Earley graph is ambiguous for symbol <%s> at substring [%d,%d).",name,i,j));
+  if (debug){
+    fprintf(stderr,
+        "Earley graph is ambiguous for symbol %s at substring [%d,%d). "
+        "Choosing first derivation.\nPath weights:\n", name,start,end);
+    for (let xs = links; xs; xs = xs->tl){
+      fprintf(stderr,
+          "   %s: %s\n", DFA_ACT2SYMB(rs->dfa,xs->hd->resp_act), Semiring::print_weight(xs->hd->p_weight));      
+    }
+    fprintf(stderr,"\n");      
+  }
+  
+  return links->hd;
+}
+
+// Reconstruct a parse tree. 
 parse_tree_t
 mk_parse_tree(rstate_t rs,
      string_t<`H> top_level_name,
@@ -496,23 +517,28 @@ mk_parse_tree(rstate_t rs,
   
   let &$(x,i,j) = en;
   
-  // Sanity check
-  if (debug){
-    if (!DFA_IN_FINAL(rs->dfa,resp_act,x)){
-      fprintf(stderr,"Action %s is not an attribute of state %d.\n",DFA_ACT2SYMB(rs->dfa,resp_act),x);
-    }
-  }
-
-  string_t name = DFA_ACT2SYMB(rs->dfa,resp_act);
   // Handle case of top-level call, for which there will be no responsible action.
   let completed = DFA_FINAL_ATTRS(rs->dfa,x);
   if (!completed){ // Sanity check
     throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
   }
+  
+  string_t name;
   if (numelts(completed) == 0) {
+    // We're in a top-level call ...
     if (top_level_name == NULL)
       throw new Core::Failure(aprintf("Final DFA state encountered unexpectedly in (%d,%d,%d).",x,i,j));
     name = top_level_name;
+  }else{
+    name = DFA_ACT2SYMB(rs->dfa,resp_act);
+
+    // Sanity check to make sure that responsible action claimed by the
+    // caller is indeed an attribute of this state.
+    if (debug){
+      if (!DFA_IN_FINAL(rs->dfa,resp_act,x)){
+        fprintf(stderr,"Symbol %s is not an attribute of state %d.\n",name,x);
+      }
+    }
   }
 
   // reconstruct trees of children (i.e. RHS).
@@ -520,17 +546,7 @@ mk_parse_tree(rstate_t rs,
   let maybe_links = Hashtable::lookup_opt(rs->links,en);
   while (maybe_links != NULL) {
     let links = *maybe_links;
-    // Check for ambiguity.
-    if (links->tl != NULL){
-#ifndef RESOLVE_AMBS     
-      throw new Core::Invalid_argument(aprintf("Earley graph is ambiguous for symbol %s at substring [%d,%d).",name,i,j));
-#else
-      if (debug)
-        fprintf(stderr,"Earley graph is ambiguous for symbol %s at substring [%d,%d). Choosing first derivation.\n",name,i,j);
-#endif
-      //links=links->tl;
-    }
-    let &elink(pred_link, w, retn_link, resp_act) = links->hd;
+    let &elink(pred_link, w, retn_link, resp_act) = resolve_ambs(rs, name, i, j, links);
 
     if (retn_link) {
       let retn_tree_opt = Hashtable::lookup_opt(trees,retn_link);
@@ -540,6 +556,7 @@ mk_parse_tree(rstate_t rs,
         Hashtable::insert(trees,retn_link,retn_tree);
       } else
         retn_tree = *retn_tree_opt;
+
       // we can build the list backwards because we are starting at the end of 
       // the RHS and traversing pred links towards the beginning.
       children_trees = new List::List(retn_tree,
@@ -756,8 +773,11 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
         if (do_reconstruct) {
           let en = new $(state,parent /*== 0*/,i);
           try{
-            let derivation_tree = mk_parse_tree(rs,"TOP LEVEL",en, /* bogus action: */ 0);
+            if (debug){
+              print_forest(mk_parse_forest(rs,"TOP LEVEL",en, /* bogus action: */ 0),"");
+            }
             let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+            let derivation_tree = mk_parse_tree(rs,"TOP LEVEL",en, /* bogus action: */ 0);
             trees = new List::List(new $(derivation_tree,w_forward),trees);
           } catch {
             case &Core::Invalid_argument(msg):

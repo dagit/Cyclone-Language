@@ -627,10 +627,13 @@ $(rule_t,$(const char ?,rule_t)*) mk_bnfgen_binder (const char ?`H symb_name){
   r_binder_nonterm->v = fresh_name();
   r_binder_nonterm->a = aprintf("return %s;",r_binder_nonterm->v);
 
-  return (include_anon_binder && include_named_binder) ? 
-       $(ALT(r_anon_binder, r_binder_nonterm), new $(binder_nonterm_name,r_named_binder)) 
-     : (include_anon_binder ? $(r_anon_binder,NULL) 
-                            : $(r_binder_nonterm,new $(binder_nonterm_name,r_named_binder)));
+  if (include_anon_binder && include_named_binder) 
+       return $(ALT(r_anon_binder, r_binder_nonterm), 
+                new $(binder_nonterm_name,r_named_binder));
+  else if (include_anon_binder) 
+    return $(r_anon_binder,NULL);
+  else
+    return $(r_binder_nonterm,new $(binder_nonterm_name,r_named_binder)); 
 }
 
 grammar_t grammar2bindgrammar(grammar_t<`H> g) {
@@ -870,7 +873,8 @@ bool is_dep_seq(rule_t r){
 
 bool is_seq(rule_t r){
   switch(r->r){
-  case &Seq(_,_): return !is_dep_seq(r); // make sure not a dep. sequence.
+//  case &Seq(_,_): return !is_dep_seq(r); // make sure not a dep. sequence.
+  case &Seq(_,_): return true;
   default: return false;
   }
 }
@@ -886,6 +890,7 @@ grammar_t grammar2termgrammar_bnf(grammar_t g) {
     let &$(n,r,a) = ds->hd;
     let n_is_arg = arity_rule(SYMB(n));
     if (n_is_arg && is_seq(r) && !is_regexp(n)){
+      debugprint(1,"Terming nonterminal %s.\n",n);
       let term_body = seq2term_bnf(r);
       let a_tb = term_body->a;
       term_body->a = NULL;
@@ -895,6 +900,9 @@ grammar_t grammar2termgrammar_bnf(grammar_t g) {
       let r_both = ALT(r,r2);
       res = new List(new $(n,r_both,a),res);
     }else {
+      debugprint(1, "Not terming nonterminal %s because: isn't arg: "
+                    "%d\tisn't seq: %d\tis_regexp: %d.\n",
+                 n, !n_is_arg, !is_seq(r), is_regexp(n));
       if (!n_is_arg) Hashtable::insert(symb_semacts, new n, new get_bnfgen(r));
       res = new List(new $(n,r,a), res);
     }
