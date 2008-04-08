@@ -74,8 +74,22 @@ extern aset_t dfa_final_attrs(dfa_t dfa,st_t s);
 extern Semiring::weight_t dfa_final_weight(dfa_t dfa,st_t s);
 extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
 extern st_t ?dfa_spantree(dfa_t dfa);
+
+/* Print an input that reaches state s. 
+ * Use arg special to print values >= 256 with special string. 
+ * Argument print_literal is a flag, indicating whether to 
+ * print literal version of example (in addition to readable version).
+ */
 extern void dfa_example(FILE @f, dfa_t dfa, st_t ?spantree, st_t s, 
     string_t (*esc_special)(act_t, `a), `a env);
+
+/* Like dfa_example, but argument print_literal is a flag, indicating whether to 
+ * print literal version of example (in addition to readable version), and
+ * argument print_as_rule is a flag indicating whether to escape readable version
+ * like a C string, or to print like a grammar rule.
+ */
+extern void slr_dfa_example(FILE @f, dfa_t dfa, st_t ?spantree, st_t s, 
+    string_t (*esc_special)(act_t, `a), `a env, int print_literal, int print_as_rule);
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa, int lazyfill);
 

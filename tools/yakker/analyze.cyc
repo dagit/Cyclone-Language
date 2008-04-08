@@ -1112,13 +1112,12 @@ void SLR_analyze_final_state(string_t nonterm, grammar_t grm, dfa_t dfa,
       if (!is_cs_empty(cs_shift_reduce)){
         eprintf("************************************************************************\n");
         num_conflicts_slr++;
-        eprintf("Shift-reduce conflict %u in symbol use %s in definition %s.\n",num_conflicts_slr,symb,nonterm);
+        eprintf("Shift-reduce conflict %u in symbol-use %s in definition %s. State = %d.\n",num_conflicts_slr,symb,nonterm, f);
         eprintf("SLR conflict on character(s) ");
         cs_print(stderr,cs_shift_reduce);
         eprintf("\n");
         eprintf("Example: ");
-        dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table);
-        eprintf("\n");
+        slr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
       }
     }
     
@@ -1127,10 +1126,11 @@ void SLR_analyze_final_state(string_t nonterm, grammar_t grm, dfa_t dfa,
     if (!is_cs_empty(cs_reduce_reduce)){
       eprintf("************************************************************************\n");
       num_conflicts_slr++;
-      eprintf("Reduce-reduce conflict %u in symbol use %s in definition %s.\n",num_conflicts_slr,symb,nonterm);
+      eprintf("Reduce-reduce conflict %u in symbol-use %s in definition %s. State = %d.\n",num_conflicts_slr,symb,nonterm,f);
       eprintf("SLR conflict on character(s) ");
       cs_print(stderr,cs_reduce_reduce);
       eprintf("\n");        
+      slr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
     }
     
     cs_union(cs_all_follow, cs_follow);

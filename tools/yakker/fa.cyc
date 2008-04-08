@@ -933,11 +933,14 @@ st_t ?dfa_spantree(dfa_t dfa) {
   }
   return pred;
 }
+
 /* Print an input that reaches state s. 
  * Use arg special to print values >= 256 with special string. 
+ * Argument print_literal is a flag, indicating whether to 
+ * print literal version of example (in addition to readable version).
  */
-void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s, 
-    string_t (*esc_special)(act_t, `a), `a env) {
+void slr_dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s, 
+    string_t (*esc_special)(act_t, `a), `a env, int print_literal, int print_as_rule) {
   if (s == 1) {
     fprintf(f,"<the empty string>\n");
     return;
@@ -972,31 +975,73 @@ void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s,
     }
     current = pred;
   }
-  /* Print the example using C string escapes, except that DQUOTE is not escaped */
-  for (; result; result = result->tl) {
-    switch (result->hd) {
-    case '\a': fprintf(f,"\\a"); break;
-    case '\b': fprintf(f,"\\b"); break;
-    case '\f': fprintf(f,"\\f"); break;
-    case '\n': fprintf(f,"\\n"); break;
-    case '\r': fprintf(f,"\\r"); break;
-    case '\t': fprintf(f,"\\t"); break;
-    case '\v': fprintf(f,"\\v"); break;
-    case '\\': fprintf(f,"\\\\"); break;
-    case c:
+  
+  if (print_as_rule){
+    int printing_lit = 0;
+    for (let res = result; res; res = res->tl) {
+      let c = res->hd;
       const char ?`H s = NULL;
-      if (c>=' ' && c<='~') fprintf(f,"%c",c);
-      else if (c >= 256 && esc_special && (s = esc_special(c,env)))
-        fprintf(f,"\\{%s}",s);
-      else fprintf(f,"\\%d%d%d",((c>>6)&7),((c>>3)&7),(c&7));
-      break;
+      if (c>=' ' && c<='~') {
+        if (!printing_lit){
+          printing_lit = 1;
+          fprintf(f,"\"%c",c);
+        }else
+          fprintf(f,"%c",c);
+      }
+      else {
+        if (printing_lit){
+          printing_lit = 0;
+          fprintf(f,"\" ");
+        }
+        if (c >= 256 && esc_special && (s = esc_special(c,env)))
+          fprintf(f,"%s ",s);
+        else fprintf(f,"%%%d ",c);
+      }
+    }
+    if (printing_lit){
+      fprintf(f,"\"");
+    }
+  } else {
+    /* Print the example using C string escapes, except that DQUOTE is not escaped */
+    for (let res = result; res; res = res->tl) {
+      switch (res->hd) {
+      case '\a': fprintf(f,"\\a"); break;
+      case '\b': fprintf(f,"\\b"); break;
+      case '\f': fprintf(f,"\\f"); break;
+      case '\n': fprintf(f,"\\n"); break;
+      case '\r': fprintf(f,"\\r"); break;
+      case '\t': fprintf(f,"\\t"); break;
+      case '\v': fprintf(f,"\\v"); break;
+      case '\\': fprintf(f,"\\\\"); break;
+      case c:
+        const char ?`H s = NULL;
+        if (c>=' ' && c<='~') fprintf(f,"%c",c);
+        else if (c >= 256 && esc_special && (s = esc_special(c,env)))
+          fprintf(f,"\\{%s}",s);
+        else fprintf(f,"\\%d%d%d",((c>>6)&7),((c>>3)&7),(c&7));
+        break;
+      }
     }
   }
   fprintf(f,"\n");
+  
+  if (print_literal){
+    fprintf(f,"<literal>\n)");
+    // print the example literally.
+    for (let res = result; res; res = res->tl) {
+      fprintf(f,"%c",res->hd);
+    }
+    fprintf(f,"\n</literal>\n");
+  }
   return;
  DFA_EXAMPLE_BAD:
   fprintf(f,"Internal error: dfa_example\n");
   return;
+}
+
+void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s, 
+    string_t (*esc_special)(act_t, `a), `a env) {
+  slr_dfa_example(f,dfa,spantree,s,esc_special,env,0,0);
 }
 
 /* Warn if a final state for alternative A can reach a final state
