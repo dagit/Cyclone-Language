@@ -42,7 +42,8 @@
 
 #include <time.h>
 
-int use_lazy_nfa = 1;
+// default is to use the eager NFA construction.
+int use_lazy_nfa = 0;
 
 void nfa_init(grammar_t grm) {
   if (use_lazy_nfa)
@@ -909,7 +910,7 @@ stgraph_t dfa_reachable(dfa_t dfa) {
 /* Build a spanning tree with state 1 as the root using a dumb BFS.
    Return the tree as a predecessor array: pred[s] is the parent of s
    in the tree.  pred[s] == 0 iff s is 0, 1, or not reachable from 1. */
-static st_t ?dfa_spantree(dfa_t dfa) {
+st_t ?dfa_spantree(dfa_t dfa) {
   let onestep = dfa_onestep(dfa);
   let pred = new { for i < dfa->number_of_states : (st_t)0 };
   let working = Set::singleton(st_cmp,1);
@@ -932,8 +933,11 @@ static st_t ?dfa_spantree(dfa_t dfa) {
   }
   return pred;
 }
-/* Print an input that reaches state s */
-void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s) {
+/* Print an input that reaches state s. 
+ * Use arg special to print values >= 256 with special string. 
+ */
+void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s, 
+    string_t (*esc_special)(act_t, `a), `a env) {
   if (s == 1) {
     fprintf(f,"<the empty string>\n");
     return;
@@ -980,7 +984,10 @@ void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s) {
     case '\v': fprintf(f,"\\v"); break;
     case '\\': fprintf(f,"\\\\"); break;
     case c:
+      const char ?`H s = NULL;
       if (c>=' ' && c<='~') fprintf(f,"%c",c);
+      else if (c >= 256 && esc_special && (s = esc_special(c,env)))
+        fprintf(f,"\\{%s}",s);
       else fprintf(f,"\\%d%d%d",((c>>6)&7),((c>>3)&7),(c&7));
       break;
     }
@@ -1056,7 +1063,7 @@ int dfa_tiebreak(dfa_t dfa) {
     eprintf("Some input matches these alternatives simultaneously:");
     fprint_uintset(stderr,f_attrs);
     eprintf("Example: ");
-    dfa_example(stderr,dfa,spantree,f);
+    dfa_example(stderr,dfa,spantree,f, NULL, NULL);
 
     let attrs = f_attrs;
     st_t g;
@@ -1467,7 +1474,7 @@ dfa_t nfa_distinguish(Set::set_t<st_t,`H> start_states,
       eprintf("Gave up trying to distinguish alternatives");
       fprint_uintset(stderr,ivals);
       eprintf(" on the following input: ");
-      dfa_example(stderr,dfa,spantree,d);
+      dfa_example(stderr,dfa,spantree,d,NULL,NULL);
     }
   }
   let delta = time(NULL) - start_time;

@@ -117,7 +117,8 @@ const char ?USAGE =
   "         -extract               extract EBNF from the input, assumed to be in RFC format\n"
   "           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"
   "         -list-defs             print the names of the definitions defined in the BNF\n"
-  "         -check                 perform all sanity checks on the input grammar\n"
+  "         -check-def <sym>       perform all sanity checks on the specified symbol definition from the input grammar\n"
+    "         -check                 perform all sanity checks on the input grammar\n"
   "           -check-undefined       check for undefined symbols\n"
   "           -check-multiple        check for multiply defined symbols\n"
   "           -check-empty           check for symbols that might be empty\n"
@@ -125,7 +126,8 @@ const char ?USAGE =
   "           -check-firstfollow     check the FIRST and FOLLOW sets\n"
   "           -check-conflicts       check for conflicts\n"
   "           -check-whitespace      check whitespace\n"
-  "         -check-def <sym>       perform all sanity checks on the specified symbol definition from the input grammar\n"
+  "           -check-slr             check for SLR conflicts.\n"
+  "           -no-check-ll           do not check for LL conflicts (default is to check).\n"
   "         -cyc-namespace <sym>   use <sym> as the cyclone namespace for the generated cyclone code\n"
   "         -namespace <sym>       use <sym> as the namespace for the grammar\n"
   "         -unnamespace           remove any namespaces from the grammar\n"
@@ -159,7 +161,8 @@ const char ?USAGE =
   "         -no-globals            don't output assorted globals\n"
   "         -no-close-defs         don't fill in definitions of missing core symbols\n"
   "         -lazyfill              use lazy filling (for interactive connections)\n"
-  "         -eagernfa              use eager nfa construction (default is lazy)\n"
+  "         -eagernfa              use eager nfa construction (default is eager)\n"
+  "         -lazynfa               use lazy nfa construction (default is eager)\n"
   "         -depend                produce a dependency graph of symbols in DOT format\n"
   "         -earley <regexp>       Earley parse stdin according to regexp and grammar\n"
   "         -earley-gen-dot <regexp>   generate a dot-encoded DFA of the regexp\n"
@@ -293,6 +296,7 @@ int main(int argc, const char ?`H?argv) {
   int mode = FILE_MODE;
   const char ?escape_chars = NULL;
   const char ?earley_regexp = NULL;
+  unsigned int grm_classp = LL_GRM_CLASS;
 
   earley_grm_gen_t earley_grmp = EARLEY_GEN_GRM_NONE;
 
@@ -414,6 +418,7 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-no-close-defs",argv[i]) == 0) closedefsp = 0;
     else if (strcmp("-lazyfill",argv[i]) == 0) lazyfill = 1;
     else if (strcmp("-eagernfa",argv[i]) == 0) use_lazy_nfa = 0;
+    else if (strcmp("-lazynfa",argv[i]) == 0) use_lazy_nfa = 1;
     else if (strcmp("-ws-on",argv[i]) == 0) ws_on = 1;
     else if (strcmp("-re-on",argv[i]) == 0) re_on = 1;
     else if (strcmp("-extract",argv[i]) == 0) extractp = 1;
@@ -434,6 +439,8 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-check-conflicts",argv[i]) == 0) check_conflicts = 1;
     else if (strcmp("-check-glush",argv[i]) == 0) check_glush = 1;
     else if (strcmp("-check-whitespace",argv[i]) == 0) check_whitespace = 1;
+    else if (strcmp("-check-slr",argv[i]) == 0) grm_classp |= SLR_GRM_CLASS;
+    else if (strcmp("-no-check-ll",argv[i]) == 0) grm_classp &= ~LL_GRM_CLASS;
     else if (strcmp("-check-def",argv[i]) == 0) {
       if (i+1 >= argc) die();
       check_sym = argv[i+1];
@@ -894,9 +901,9 @@ int main(int argc, const char ?`H?argv) {
     if (minus_elimp) minus_elim(ds);
     if (check_white_edges) report_white_edges(ds);
     if (check_firstfollow) report_first_follow(ds);
-    if (check_conflicts) report_conflicts(ds);
+    if (check_conflicts) report_conflicts(ds, grm_classp);
     if (check_glush) report_glush(ds);
-    if (check_sym) report_conflicts_sym(check_sym, ds);
+    if (check_sym) report_conflicts_sym(check_sym, ds, grm_classp);
   }
   else if (pads) {
     if (minus_elimp)

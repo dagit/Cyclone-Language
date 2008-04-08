@@ -85,6 +85,9 @@ namespace Earley {
 
   extern void dfa2dot(dfa_t dfa, symb_info_t symb_info, const char ?dot_file);
   
+  // Convert a rule to an LR state machine.
+  extern $(dfa_t,Set::set_t<st_t>,symb_info_t) rule2LR(grammar_t grm, rule_t r);
+
   extern const char ?yk_inputs;
 }
 

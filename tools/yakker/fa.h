@@ -44,6 +44,7 @@ extern st_t nfa_number_of_states;
 extern int use_lazy_nfa;
 
 extern unsigned int num_conflicts_ll;
+extern unsigned int num_conflicts_slr;
 extern unsigned int num_conflicts_dfa;
 extern unsigned int num_conflicts_change_order;
 extern unsigned int num_conflicts_resolved;
@@ -72,6 +73,9 @@ extern aset_t dfa_final_attrs(dfa_t dfa,st_t s);
 // dfa_final_weight will throw exception if s is not a final state.
 extern Semiring::weight_t dfa_final_weight(dfa_t dfa,st_t s);
 extern dfa_t lookahead_dfa(grammar_t grm,List::list_t<rule_t> rules, rule_t right_ctxt);
+extern st_t ?dfa_spantree(dfa_t dfa);
+extern void dfa_example(FILE @f, dfa_t dfa, st_t ?spantree, st_t s, 
+    string_t (*esc_special)(act_t, `a), `a env);
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa, int lazyfill);
 

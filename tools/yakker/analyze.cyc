@@ -22,6 +22,9 @@
 #include "cs.h"
 #include "pr.h"
 #include "fa.h"
+#include "axarray.h"
+#include "dfa-core.h"
+#include "earley.h"
 #include <hashtable.h>
 #include <string.h>
 
@@ -1061,6 +1064,89 @@ void init_arityt(grammar_t ds) {
 }
 
 /**************************** CONFLICTS ****************************/
+/*
+ * SLR conflict analysis:
+ * Create earley-like NFA, but with only epsilons, no calls.
+ * Determinize NFA.
+ * foreach final state in DFA
+ *    compare outgoing transitions with FOLLOW of the symbols for which
+ *    the state is final, and intersect FOLLOWS. In non-zero intersection
+ *    in former, then shift-reduce, in latter reduce-reduce, else none.
+ * 
+ */
+
+void SLR_analyze_final_state(string_t nonterm, grammar_t grm, dfa_t dfa, 
+                             Earley::symb_info_t symb_info, st_t f)
+{
+  let transitions = Axarray::get(dfa->states,f);
+  cs_t cs_trans = cs_empty();
+  if (transitions){ 
+    // Build cs of transitions.
+    let lb = transitions->lb;
+    for (let spans = transitions->spans; spans; spans = spans->tl) {
+      let ub = spans->hd->ub;
+      let target = spans->hd->target;
+      if (target) { /* Don't print transitions to dead state 0 */
+        cs_union(cs_trans,cs_range(lb,ub));
+      }
+      lb = ub;
+    } 
+  }
+  
+  let spantree = dfa_spantree(dfa);
+
+  // Get set of attributes. Convert to list.
+  let attr_set = Hashtable::lookup(dfa->final_attrs, f);
+  let attrs = Set::to_list(attr_set);
+  cs_opt_t cs_all_follow = cs_empty();
+  // Foreach attribute, lookup FOLLOW set and intersect.
+  for (; attrs; attrs = attrs->tl){
+    let symb = Earley::act2symb(attrs->hd, symb_info->action_symb_table);
+    let follow_symb = follow_symbol(symb);
+    let cs_follow = cs_empty();
+    first(cs_follow, SYMB(follow_symb));
+
+    if (transitions) { // shift-reduce conflict possible
+      let cs_shift_reduce = cs_dup(cs_follow);
+      cs_intersect(cs_shift_reduce, cs_trans);
+      if (!is_cs_empty(cs_shift_reduce)){
+        eprintf("************************************************************************\n");
+        num_conflicts_slr++;
+        eprintf("Shift-reduce conflict %u in symbol use %s in definition %s.\n",num_conflicts_slr,symb,nonterm);
+        eprintf("SLR conflict on character(s) ");
+        cs_print(stderr,cs_shift_reduce);
+        eprintf("\n");
+        eprintf("Example: ");
+        dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table);
+        eprintf("\n");
+      }
+    }
+    
+    let cs_reduce_reduce = cs_dup(cs_follow); 
+    cs_intersect(cs_reduce_reduce, cs_all_follow);
+    if (!is_cs_empty(cs_reduce_reduce)){
+      eprintf("************************************************************************\n");
+      num_conflicts_slr++;
+      eprintf("Reduce-reduce conflict %u in symbol use %s in definition %s.\n",num_conflicts_slr,symb,nonterm);
+      eprintf("SLR conflict on character(s) ");
+      cs_print(stderr,cs_reduce_reduce);
+      eprintf("\n");        
+    }
+    
+    cs_union(cs_all_follow, cs_follow);
+  }
+}
+
+void report_SLR_conflicts_sym0(string_t sym, grammar_t<`H> grm, rule_t r){
+  eprintf("Converting rule to LR machine:\n");
+  let $(slr_dfa, final_states, symb_info) = Earley::rule2LR(grm, r);
+  eprintf("Analyzing DFA for SLR conflicts:\n");
+  let fs = Set::to_list(slr_dfa->final_states);
+  for (; fs; fs = fs->tl){
+    SLR_analyze_final_state(sym, grm, slr_dfa, symb_info, fs->hd);
+  }
+}
+
 static
 void conflicts0(string_t,rule_t,rule_t);
 
@@ -1179,7 +1265,7 @@ void conflicts0(string_t nonterm, rule_t r,rule_t right_ctxt) {
   }
 }
 
-void report_conflicts_sym(string_t sym, grammar_t<`H> grm){
+void report_conflicts_sym(string_t sym, grammar_t<`H> grm, unsigned int grm_class){
   reset_globals();
   //  checking_conflicts_grammar = grm;
   grammar_t followgrm = follow_grammar(grm);
@@ -1190,11 +1276,26 @@ void report_conflicts_sym(string_t sym, grammar_t<`H> grm){
   init_mayt(combinedgrm);
   init_mustt(combinedgrm);
   init_maybe_empty(combinedgrm);
-  for (let x = grm; x; x = x->tl) {
-    let &$(n,r,_) = x->hd;
-    if (!strcmp(n,sym)) {
+  if (sym){
+    for (let x = grm; x; x = x->tl) {
+      let &$(n,r,_) = x->hd;
+      if (!strcmp(n,sym)) {
+        let fn = follow_symbol(n);
+        if (grm_class & LL_GRM_CLASS)
+          conflicts0(n, r,SYMB(fn));
+        if (grm_class & SLR_GRM_CLASS)
+          report_SLR_conflicts_sym0(sym, grm, r);
+        break;
+      }
+    }
+  }else {
+    for (let x = grm; x; x = x->tl) {
+      let &$(n,r,_) = x->hd;
       let fn = follow_symbol(n);
-      conflicts0(n, r,SYMB(fn));
+      if (grm_class & LL_GRM_CLASS)
+        conflicts0(n, r,SYMB(fn));
+      if (grm_class & SLR_GRM_CLASS)
+        report_SLR_conflicts_sym0(n, grm, r);
     }
   }
   if (num_conflicts_ll == 1)
@@ -1221,48 +1322,15 @@ void report_conflicts_sym(string_t sym, grammar_t<`H> grm){
     printf("  1 conflict was out of order\n");
   else if (num_conflicts_change_order)
     printf("  %u conflicts were out of order\n",num_conflicts_change_order);
+  
+  if (num_conflicts_slr == 1)
+    printf("\nThere was 1 SLR conflict\n");
+  else
+    printf("\nThere were %u SLR conflicts\n", num_conflicts_slr);
 }
 
-void report_conflicts(grammar_t<`H> grm) {
-  reset_globals();
-  //  checking_conflicts_grammar = grm;
-  grammar_t followgrm = follow_grammar(grm);
-  grammar_t combinedgrm = List::append(grm,followgrm);
-  checking_conflicts_grammar = combinedgrm;
-  init_recursive(combinedgrm);
-  init_firstt(combinedgrm);
-  init_mayt(combinedgrm);
-  init_mustt(combinedgrm);
-  init_maybe_empty(combinedgrm);
-  for (let x = grm; x; x = x->tl) {
-    let &$(n,r,_) = x->hd;
-    let fn = follow_symbol(n);
-    conflicts0(n, r,SYMB(fn));
-  }
-  if (num_conflicts_ll == 1)
-    printf("There was 1 LL(1) conflict\n");
-  else
-    printf("There were %u LL(1) conflicts\n", num_conflicts_ll);
-  if (num_conflicts_dfa == 1)
-    printf("There was 1 conflict in the dfas\n");
-  else if (num_conflicts_dfa > 1)
-    printf("There were %u conflicts in the dfas\n", num_conflicts_dfa);
-  if (num_conflicts_resolved == 1)
-    printf("  1 was resolved\n");
-  else
-    printf("  %u were resolved\n",num_conflicts_resolved);
-  if (num_conflicts_unresolved == 1)
-    printf("  1 was unresolved\n");
-  else
-    printf("  %u were unresolved\n",num_conflicts_unresolved);
-  if (num_conflicts_unbounded == 1)
-    printf("  1 conflicts might require unbounded lookahead\n");
-  else
-    printf("  %u conflicts might require unbounded lookahead\n",num_conflicts_unbounded);
-  if (num_conflicts_change_order == 1)
-    printf("  1 conflict was out of order\n");
-  else if (num_conflicts_change_order)
-    printf("  %u conflicts were out of order\n",num_conflicts_change_order);
+void report_conflicts(grammar_t<`H> grm, unsigned int grm_class) {
+  report_conflicts_sym(NULL, grm, grm_class);
 }
 
 void report_whitespace(grammar_t<`H> grm) {

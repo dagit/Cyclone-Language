@@ -32,12 +32,14 @@ typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;
 /* Predicates on character sets -- NULL is all false, NULL return is false */
 typedef const char ? (*cs_pred_t)(unsigned int);
 
+// In the following functions, cs_t a is modified.
 extern void cs_intersect(cs_t a,cs_t b);
 extern void cs_union(cs_t a,cs_t b);
 extern void cs_xor(cs_t a,cs_t b);
 extern void cs_insert(cs_t a,unsigned int x);
 extern void cs_difference(cs_t a,cs_t b);
 extern void cs_complement(cs_t a);
+
 extern cs_t cs_dup(cs_t a);
 extern cs_t cs_empty();
 extern cs_t cs_full();

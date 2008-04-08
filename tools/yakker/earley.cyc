@@ -22,8 +22,12 @@ using Semiring;
 
 namespace Earley;
 
-static cs_t callout_cs() {
-  return cs_singleton(callout_action());
+// flag that indicated whether to identify call with epsilon, which
+// would have the effect of collapsing an Earley automata into an LR one.
+static int call_is_epsilon = 0;
+
+static cs_opt_t callout_cs() {
+  return call_is_epsilon ? EPSILON : cs_singleton(callout_action());
 }
 static cs_t repeat_cs() {
   return cs_singleton(repeat_action());
@@ -1085,6 +1089,14 @@ $(dfa_t,Set::set_t<st_t>,symb_info_t) rule2earley(grammar_t grm, rule_t r) {
     dfa_set_final(dfa,s,action_attrs);
   }
   return $(dfa,dfa_final,symb_info);
+}
+
+$(dfa_t,Set::set_t<st_t>,symb_info_t) rule2LR(grammar_t grm, rule_t r) {
+  let t = call_is_epsilon;
+  call_is_epsilon = 1;
+  let x = rule2earley(grm,r);
+  call_is_epsilon = t; 
+  return x;
 }
 
 const char ?yk_inputs =

@@ -53,6 +53,7 @@ int act_cmp(act_t a,act_t b) {
 }
 
 unsigned int num_conflicts_ll = 0;
+unsigned int num_conflicts_slr = 0;
 unsigned int num_conflicts_dfa = 0;
 unsigned int num_conflicts_change_order = 0;
 unsigned int num_conflicts_resolved = 0;
