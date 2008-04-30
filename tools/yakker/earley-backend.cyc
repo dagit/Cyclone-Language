@@ -1158,6 +1158,15 @@ mk_parse_tree(rstate_t rs,
 // Print the earley graph in dot format
 ///////////////////////////////////////////
 
+int print_earley_graph = 0;
+// parameters controlling filtering of earley graph during printing.
+int eg_filt_lb = 0;
+int eg_filt_ub = 0;
+  
+static int rstate_filter(earley_node_t s){
+  return (s->f2 > eg_filt_lb) && (s->f2 < eg_filt_ub);
+}
+  
 static void dot_pred_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts, 
                           $(rstate_t, int (@filter)(earley_node_t))@ env) {
   let &$(rs,filter) = env;
@@ -1221,9 +1230,11 @@ static void rstate_dot(rstate_t rs, Axarray::xarray_t<Set::set_t<earley_item_t>>
   // print axis
   printf("{\n"
          "node [shape=plaintext, fontsize=16];\n");
-  for (int j = index; j > 0; j --)
+  let ub = index < rs_filt_ub ? index : rs_filt_ub;
+  let lb = rs_filt_lb ? rs_filt_lb : 0;
+  for (int j = ub; j > lb; j--)
     printf("%d -> ",j);
-  printf("0;\n");
+  printf("%d;\n", lb);
   printf("}\n");
   
   for (int i=0; i <= index; i++){
@@ -1241,15 +1252,6 @@ static void rstate_dot(rstate_t rs, Axarray::xarray_t<Set::set_t<earley_item_t>>
 
 /////////////////////////////////////////////////
 
-// filter used for debugging. Should be generalized to allow for control 
-// by flag.
-int rs_filt_lb = 0;
-int rs_filt_ub = 0;
-  
-static int rstate_filter(earley_node_t s){
-  return (s->f2 > rs_filt_lb) && (s->f2 < rs_filt_ub);
-}
-  
 $(List::list_t<$(spf_t, Semiring::weight_t)@>,int,int)
 ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
   /* Keep track of parse trees */
@@ -1389,7 +1391,7 @@ ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
     }
   }
 
-  if (debug > 3)
+  if (debug > 3 || print_earley_graph)
     rstate_dot(rs, estates, i, rstate_filter);
 
   if (no_error){
