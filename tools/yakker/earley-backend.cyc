@@ -1204,12 +1204,17 @@ static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts,
   }
 }
   
+static void dot_label_earley_item(int i, earley_item_t s){
+  let &$(state,source) = s;
+  printf("\"(%d,%d,%d)\" [ label = \"%d:%d\" ];\n",state,source,i, state, source);
+}
+
 static void dot_earley_item(int i, earley_item_t s){
   let &$(state,source) = s;
   printf("\"(%d,%d,%d)\"; ",state,source,i);
 }
-
-/* comparison of earley nodes, with "current position" element (third field) most significant,
+  
+  /* comparison of earley nodes, with "current position" element (third field) most significant,
  second field next and finally first field. */
 static int earley_node_rev_cmp(earley_node_t a,earley_node_t b) {
   let $(ai,aj,ak) = *a;
@@ -1230,19 +1235,19 @@ static void rstate_dot(rstate_t rs, Axarray::xarray_t<Set::set_t<earley_item_t>>
   // print axis
   printf("{\n"
          "node [shape=plaintext, fontsize=16];\n");
-  let ub = index < rs_filt_ub ? index : rs_filt_ub;
-  let lb = rs_filt_lb ? rs_filt_lb : 0;
+  let ub = index < eg_filt_ub ? index : eg_filt_ub;
+  let lb = eg_filt_lb ? eg_filt_lb : 0;
   for (int j = ub; j > lb; j--)
     printf("%d -> ",j);
   printf("%d;\n", lb);
   printf("}\n");
   
   for (int i=0; i <= index; i++){
-    printf("{rank=same; ");
-    Set::iter_c(dot_earley_item, i, Axarray::get(estates,i));
+    printf("{rank=same;\n");
+    Set::iter_c(dot_label_earley_item, i, Axarray::get(estates,i));
     printf("}\n");
   }
-  
+
   printf("edge [style=dotted]\n");
   Hashtable::iter_c(dot_pred_iter,rs->links, new $(rs, filter) );
   printf("edge [style=bold]\n");
