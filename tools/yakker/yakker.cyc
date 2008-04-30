@@ -172,6 +172,7 @@ const char ?USAGE =
   "         -earley-gen-grm-fsm    generate an FSM-encoded DFA of the grammar\n"
   "         -earley-gen-grm-cyc    generate a Cyclone-encoded DFA of the grammar\n"
   "         -earley-gen-grm-dot    generate a dot-encoded DFA of the grammar\n"
+  "         -d                     increase debug level by one\n"
   "         -help                  print this message\n"
   "         --help                 print this message\n";
 

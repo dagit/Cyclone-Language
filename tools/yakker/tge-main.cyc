@@ -21,8 +21,6 @@ namespace CYC_GRM_DFA_NS{
 "Usage:%s [OPTIONS] <input-file>\n"\
 "Options: -depth <n>           print parse tree to depth of n.\n"\
 "         -num-args <n>        allocate space for n arguments to scan.\n"\
-"         -cyc                 use cyclone backend when parsing format string.\n"\
-"         -fsm                 use fsm backend when parsing format string.\n"\
 "         -fmt <format-string> use the given format string instead of reading from stdin.\n"\
 "         -help                print this message\n"
 
@@ -35,18 +33,12 @@ static void die(const char ?prog_name) {
 int main(int argc, const char ?`H?argv) {
   int print_depth = 0;
   int do_print = 0;
-  int backend = -1;
-  int grm_backend = -1;
   string_t input_file = NULL;
   string_t format_string = NULL;
   int num_args = 0;
 
   for (int argi = 1; argi < argc; argi++) {
     if (     ! strcmp(argv[argi], "-help")) die(argv[0]);
-    else if (! strcmp(argv[argi], "-cyc")) backend = 0;
-    else if (! strcmp(argv[argi], "-fsm")) backend = 1;
-    else if (! strcmp(argv[argi], "-grm-cyc")) grm_backend = 0;
-    else if (! strcmp(argv[argi], "-grm-fsm")) grm_backend = 1;
     else if (! strcmp(argv[argi], "-fmt")) {
       if (argi+1 >= argc) die(argv[0]);
       format_string = argv[argi+1];
@@ -82,16 +74,6 @@ int main(int argc, const char ?`H?argv) {
     return 1;
   }
     
-  if (backend == -1) {     
-    fprintf(stderr,"No backend specified. Defaulting to cyclone backend.\n");
-    backend = 0;
-  }
-  
-  if (grm_backend == -1) {     
-    fprintf(stderr,"No grammar backend specified. Defaulting to cyclone backend.\n");
-    grm_backend = 0;
-  }
-  
   // TODO: allow these to be specified independently on command line.
   int do_print_input = do_print;
   int input_print_depth = print_depth;
@@ -105,17 +87,7 @@ int main(int argc, const char ?`H?argv) {
     format_string = Buffer::contents(b);
   }
 
-//  let $(trees, valid, valid_prefix) = 
-//  (backend == 0) ? ({
-//    let dfa_obj = &CYC_TG_DFA_NS::dfa_obj;
-//    EarleyAnyBackend::parse(dfa_obj,format_string);
-//  }) : ({
-//    let dfa_rep = EarleyFsmBackend::init_dfa();
-//    EarleyFsmBackend::parse(dfa_rep,format_string);
-//  });
-//  
-  let dfa_obj =  (backend == 0) ? &CYC_TG_DFA_NS::dfa_obj
-                                : FsmDFA::init_dfa();
+  let dfa_obj =  &CYC_TG_DFA_NS::dfa_obj;
     
   let $(trees, valid, valid_prefix) = EarleyAnyBackend::parse(dfa_obj,format_string);       
   if (!trees) {
@@ -171,9 +143,7 @@ int main(int argc, const char ?`H?argv) {
   //      EarleyExtFsmBackend::parse(ext_edfa,input);
   //    });
  
-  let gr_edfa = (grm_backend == 0) ? &CYC_GRM_DFA_NS::grm_dfa_obj
-      : ({ fprintf(stderr, "Loading grammar dfa from grammar_dfa.txt.\n");
-           FsmDFA::fsm2grm_edfa("grammar_dfa.txt");});
+  let gr_edfa = &CYC_GRM_DFA_NS::grm_dfa_obj;
   
   let ext_edfa = ExtAnyDFA::pat2dfa(rule_pat, gr_edfa);
   ExtAnyDFA::dfa_dot(ext_edfa);

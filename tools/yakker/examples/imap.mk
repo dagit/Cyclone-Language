@@ -8,25 +8,20 @@ GrammarStart = command
 ################################
 ## Earley version
 ################################
-$(GrammarPrefix)_FILES = $(GrammarName)-flat-dfa $(GrammarName)crawl
+$(GrammarPrefix)_FILES = $(GrammarName)-flat-dfa cs
 $(GrammarPrefix)_OBJS:=$(foreach yfile,$($(GrammarPrefix)_FILES),$(yfile).o)
 
 $(GrammarName)-earley: $($(GrammarPrefix)_OBJS) $(LIB_YAKKER)
 	$(CYCLONE) -o $@ $($(GrammarPrefix)_OBJS) -lssl -lm $(LIB_YAKKER) -lcrypto
 
 $(GrammarName)-flat-dfa.cyc: examples/$(GrammarName).bnf yakker
-	./yakker -flatten-full -earley-gen-cyc $(GrammarStart) $< > $@
+	./yakker -flatten-full -cyc-namespace $(GrammarNSPrefix)CycDFA -earley-gen-cyc $(GrammarStart) $< > $@
 
-$(GrammarName)crawl.cyc: examples/$(GrammarName).bnf yakker crawl-main.cyc
+$(GrammarName)crawl.cyc: examples/$(GrammarName).bnf yakker
 	./yakker -flatten-full -gen-crawl $(GrammarStart) $< > $@
-	echo '#define CRAWLFUN p_'$(GrammarStart) >> $@
-	echo '#define CYC_DFA_NS CycDFA' >> $@
-	echo '#include "crawl-main.cyc"' >> $@
-
-$(GrammarName)crawl.o: crawl-main.cyc
 
 #########
-$(GrammarPrefix)_TG_FILES = $(GrammarName)-tg-dfa $(GrammarName)-tg-crawl parse_tab
+$(GrammarPrefix)_TG_FILES = $(GrammarName)-tg-dfa parse_tab
 $(GrammarPrefix)_TG_OBJS:=$(foreach yfile,$($(GrammarPrefix)_TG_FILES),$(yfile).o)
 
 $(GrammarName)-tg-earley: $($(GrammarPrefix)_TG_OBJS) $(LIB_YAKKER)
@@ -35,8 +30,8 @@ $(GrammarName)-tg-earley: $($(GrammarPrefix)_TG_OBJS) $(LIB_YAKKER)
 $(GrammarPrefix)_TG_RUN_FILES = $(GrammarName)-tg-dfa $(GrammarName)-grm-dfa $(GrammarName)-tg-run parse_tab
 $(GrammarPrefix)_TG_RUN_OBJS:=$(foreach yfile,$($(GrammarPrefix)_TG_RUN_FILES),$(yfile).o)
 
-$(GrammarName)-tg-run: $($(GrammarPrefix)_TG_RUN_OBJS) $(LIB_YAKKER)
-	$(CYCLONE) -o $@ $($(GrammarPrefix)_TG_RUN_OBJS) -lssl -lm $(LIB_YAKKER) -lcrypto
+#$(GrammarName)-tg-run: $($(GrammarPrefix)_TG_RUN_OBJS) $(LIB_YAKKER)
+#	$(CYCLONE) -o $@ $($(GrammarPrefix)_TG_RUN_OBJS) -lssl -lm $(LIB_YAKKER) -lcrypto
 
 $(GrammarName)-tg-dfa.cyc: gen/$(GrammarName)-tg.bnf yakker
 	./yakker -flatten-full -flatten-prefix TG000 -no-minus-elim -cyc-namespace $(GrammarNSPrefix)TGCycDFA -earley-gen-cyc $(GrammarStart) -no-main $< > $@
@@ -44,27 +39,25 @@ $(GrammarName)-tg-dfa.cyc: gen/$(GrammarName)-tg.bnf yakker
 $(GrammarName)-grm-dfa.cyc: examples/$(GrammarName).bnf yakker
 	./yakker -flatten-full -cyc-namespace $(GrammarNSPrefix)CycDFA -earley-gen-grm-cyc examples/$(GrammarName).bnf > $@
 
-$(GrammarName)-tg-crawl.cyc: gen/$(GrammarName)-tg.bnf yakker crawl-main.cyc
+$(GrammarName)-tg-crawl.cyc: gen/$(GrammarName)-tg.bnf yakker
 	./yakker $(YAKFLAGS) -gen-crawl $(GrammarStart) \
                              -flatten-full -flatten-prefix TG000 \
                              -no-minus-elim \
                              -no-globals \
                              $< > $@
-	echo '#define CRAWLFUN p_'$(GrammarStart) >> $@
-	echo '#include "crawl-main.cyc"' >> $@
 
 # Reflatten, b/c termgrammar creation introduces new elements 
 # that need to be flattened.
-$(GrammarName)-tg-run.cyc: gen/$(GrammarName)-tg.bnf yakker tge-main.cyc
-	./yakker $(YAKFLAGS) -gen-crawl $(GrammarStart) \
-                             -flatten-full -flatten-prefix TG000 \
-                             -no-minus-elim \
-                             -no-globals \
-                             $< > $@
-	echo '#define TGFUN p_'$(GrammarStart) >> $@
-	echo '#define CYC_TG_DFA_NS '$(GrammarNSPrefix)'TGCycDFA' >> $@
-	echo '#define CYC_GRM_DFA_NS '$(GrammarNSPrefix)'CycDFA' >> $@
-	echo '#include "tge-main.cyc"' >> $@
+#$(GrammarName)-tg-run.cyc: gen/$(GrammarName)-tg.bnf yakker tge-main.cyc
+#	./yakker $(YAKFLAGS) -gen-crawl $(GrammarStart) \
+#                             -flatten-full -flatten-prefix TG000 \
+#                             -no-minus-elim \
+#                             -no-globals -no-main \
+#                             $< > $@
+#	echo '#define TGFUN p_'$(GrammarStart) >> $@
+#	echo '#define CYC_TG_DFA_NS '$(GrammarNSPrefix)'TGCycDFA' >> $@
+#	echo '#define CYC_GRM_DFA_NS '$(GrammarNSPrefix)'CycDFA' >> $@
+#	echo '#include "tge-main.cyc"' >> $@
 
 gen/$(GrammarName)-tg.bnf: examples/$(GrammarName).bnf yakker
 	./yakker -escape "\\%()" -flatten-full -bindgrammar -no-named-bind -termgrammar_bnf $< > $@

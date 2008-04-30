@@ -565,7 +565,7 @@ static st_t add_symb_nfa_wfsm(FILE@f_fsm,
     let s2 = nfa_fresh_state();
     action_fsm(f_fsm, s,EPSILON,s2, Semiring::from_inv_prob(2));
     etrans_fsm(f_fsm, s,s_body,Semiring::from_inv_prob(2));
-    final_w_fsm(f_fsm, s, s2,symb);
+    final_fsm(f_fsm, s, s2,symb);
 #endif
   }
   etrans_fsm(f_fsm, s, s_body, Semiring::one_weight);

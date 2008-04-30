@@ -45,6 +45,15 @@ namespace EarleyParsetree {
   extern void print_tree(parse_tree_t pt, int depth);
   extern int print_first_ambiguity(spf_t spf);
   extern void print_forest(spf_t spf, string_t indent);
+
+  // Print the forest as XML, with each path in its own XML element.
+  // Shared nodes are expanded, resulting in potentially large prints.
+  extern void print_forest_xml(spf_t spf, string_t indent);
+
+  /*
+   * Derive a single parse tree from parse forest. Uses left-most derivation if ambiguous. 
+   */
+  extern parse_tree_t forest2tree(spf_t spf);
 }
 
 #endif /*EARLEYPARSETREE_H*/

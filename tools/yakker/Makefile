@@ -19,7 +19,7 @@ include ../../Makefile.inc
 # *and*, at beginning of DFA and at calls,
 # check whether call target is a final state and, if so, do an immediate return.
 # Use -DNULL_PLAN_C
-CYCFLAGS=--novcgen -DNULL_PLAN_B
+CYCFLAGS=--novcgen -DNULL_PLAN_C
 #CYCFLAGS=-g -save-c -pp
 YAKFLAGS=
 
@@ -196,9 +196,13 @@ echop.o: examples/echop.cyc
 echop: echop.o ykbuf.o ssl.o
 	$(CYCLONE) $^ -o $@ -lssl -lcrypto
 
-
+# If LIBSQLITE isn't set in the environment, set it here.
+# Useful to set in env. if running on OS X, in which
+# case you need to link directly to the library.
+ifndef LIBSQLITE
 LIBSQLITE=-lsqlite3
-#LIBSQLITE=/Users/yitzhakm/projects/cyclone/otherlibs/sqlite3/libsqlite3.a
+endif
+
 imapserver.o: $(EXDIR)/imapserver.cyc
 	$(CYCLONE) -c $^ -o $@ -I.
 

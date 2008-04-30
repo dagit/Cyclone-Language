@@ -11,8 +11,13 @@ namespace EarleyAnyBackend {
 extern $(List::list_t<$(EarleyParsetree::parse_tree_t,Semiring::weight_t)@>,int,int)
 parse(EarleyAnyBackend::DFA::edfa_t dfa_rep, const char? input);
 
+// If parse_until_eof is not enabled, this function will perform shortest-match.
 extern $(List::list_t<$(EarleyParsetree::parse_tree_t,Semiring::weight_t)@>,int,int)
 ykb_parse(EarleyAnyBackend::DFA::edfa_t dfa_rep, ykbuf_t@ ykb, int parse_until_eof);
+
+extern List::list_t<$(EarleyParsetree::spf_t, Semiring::weight_t) @> 
+ykb_parse_spf(EarleyAnyBackend::DFA::edfa_t dfa_rep, 
+              ykbuf_t@ ykb, int parse_until_eof);
 }
 
 #endif /*EARLEYBACKEND_H_*/

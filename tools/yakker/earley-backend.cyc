@@ -78,7 +78,7 @@ void print_tree(parse_tree_t pt, int depth) {
 }
 
 /**
- * returns whether ambiguity was found.
+ * Print (ad hoc) text version of forest.
  */
 void print_forest(spf_t spf, string_t indent) {
   let &shared_parse_forest(name,l,r,w,trees) = spf;
@@ -98,6 +98,46 @@ void print_forest(spf_t spf, string_t indent) {
       print_forest(xs->hd, aprintf("%s  ",indent));
     }
   }
+}
+
+/**
+ * Print XML version of forest.
+ */
+void print_forest_xml(spf_t spf, string_t indent) {
+  let &shared_parse_forest(name,l,r,w,trees) = spf;
+  
+  printf("%s<%s l=\"%d\" r=\"%d\" w=\"%s\">\n",indent,name,l,r,Semiring::print_weight(w));
+
+  let n = numelts(trees);
+  if (n) {
+    if (n > 1) {
+      let child_indent = aprintf("%s    ",indent);
+      for (let i=0; i<n; i++) {
+        printf("%s  <Path>\n",indent);
+        for (let xs = trees[i]; xs; xs = xs->tl) {
+          print_forest_xml(xs->hd, child_indent);
+        }
+        printf("%s  </Path>\n",indent);
+      }
+    } else {
+      let child_indent = aprintf("%s  ",indent);
+      for (let xs = trees[0]; xs; xs = xs->tl) {
+        print_forest_xml(xs->hd, child_indent);
+      }
+    }
+  }
+  
+  printf("%s</%s>\n",indent, name);
+}
+  
+/*
+ * Derive a single parse tree from parse forest. Uses left-most derivation if ambiguous. 
+ */
+parse_tree_t forest2tree(spf_t spf) {
+  let &shared_parse_forest(name,l,r,w,trees) = spf;
+  
+  let children = (numelts(trees) == 0) ? NULL : List::to_array( List::map(forest2tree, trees[0]) );
+  return new parse_tree(name,l,r,w, children);
 }
 
 /**
@@ -713,8 +753,9 @@ push_closure(rstate_t rs,
   let &$(s,backptr) = ei;
   let node = new $(s,backptr,i);
   add_weights(rs,node,forward,inner); //PROB
+
   if (back != NULL) {
-    point_to(rs->links,node,new elink(back,inner,up, resp_act));
+    point_to ( rs->links, node, new elink(back, inner, up, resp_act) );
   }
 
   let es = Axarray::get(rs->estates,i);
@@ -760,7 +801,7 @@ push_closure(rstate_t rs,
           let &$(node_forward,node_inner) = Hashtable::lookup(rs->weights,node); //PROB
           let w_m = mult(inner, final_w);
           push_closure(rs,input,i,new $(ttarget,i),
-              node, causal_node, symb_act
+              causal_node, causal_node, symb_act
               ,mult( w_m, node_forward), //PROB
               mult( w_m, node_inner) //PROB
           );
@@ -880,17 +921,30 @@ push_closure(rstate_t rs,
 }
 
 using EarleyParsetree;
-
+  
+  static int retn_cmp($(earley_node_t, act_t)@ a, $(earley_node_t, act_t)@ b){
+    let c = earley_node_cmp(a->f0,b->f0);
+    if (c) return c;
+    return act_cmp(a->f1,b->f1);
+  }
+  
+  static int retn_hash($(earley_node_t, act_t)@ x){
+    return earley_node_hash(x->f0) ^ act_hash(x->f1);
+  }
+  
 /**
- * INVARIANT: state of en must be final.
+ * REQUIRED: state of en must be final.
+ *
+ * mpf_forests is a cache that memoizes results of previous invocations of mk_parse_forest0.
  * */
-spf_t
-mk_parse_forest(rstate_t rs,
-     string_t<`H> top_level_name,
-     earley_node_t en,
-     act_t resp_act) {
-  // map: early_node_t -> parse_tree_t
-  let trees = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+static spf_t
+mk_parse_forest0(Hashtable::table_t<$(earley_node_t, act_t)@`H, spf_t> mpf_forests, 
+                 rstate_t rs,
+                 string_t<`H> top_level_name,
+                 earley_node_t en,
+                 act_t resp_act) {
+//  let spf_opt = Hashtable::lookup_opt( mpf_forests, new $(en, resp_act) );
+//  if (spf_opt) return *spf_opt;
 
   let &$(x,i,j) = en;
 
@@ -906,7 +960,7 @@ mk_parse_forest(rstate_t rs,
     if (top_level_name == NULL)
       throw new Core::Failure(aprintf("Final DFA state encountered unexpectedly in (%d,%d,%d).",x,i,j));
     name = top_level_name;
-  }else{
+  } else {
     name = DFA_ACT2SYMB(rs->dfa,resp_act);
 
     // Sanity check to make sure that responsible action claimed by the
@@ -923,12 +977,12 @@ mk_parse_forest(rstate_t rs,
   }
 
   /**
-   * A list of RHSs-under-construction, which are themselves lists, paired with
+   * A list of RHSs under construction, which are themselves lists, paired with
    * the (optional) Earley link that indicates the head of the path (or NULL if the path is complete).
    * So, its a list of of pairs of Earley link and lists. It tracks all the possible
    * alternative parses of the original nonterminal.
    */
-  let live_paths = List::list(new $(Hashtable::lookup_opt(rs->links,en), NULL));
+  let live_paths = List::list( new $(Hashtable::lookup_opt(rs->links,en), NULL) );
 
   /**
    * Completed child forests.
@@ -941,33 +995,48 @@ mk_parse_forest(rstate_t rs,
     live_paths = live_paths->tl;
 
     if (!maybe_links){
-      // The path is complete. Add a forest to forests.
-      // let spfs = List::to_array( partial_rhs );
-      forests = new List::List(partial_rhs, forests);
+      // The path (i.e. RHS) is complete. Add a forest to forests (if non-empty).
+      if (partial_rhs)
+        forests = new List::List(partial_rhs, forests);
     } else {
       // Advance the current live path by one link (possibly resulting in more paths).
       for (let xs = *maybe_links; xs; xs = xs->tl) {
         let &elink(pred_link,w,retn_link,resp_act) = xs->hd;
 
-        // Each link can potentially extend the RHS taken from live_paths above.
-        // So, each time around the tloop we use reinitialize it to the original partial_rhs.
-        let ext_partial_rhs = partial_rhs;
+        /*
+         * A potentially extended partial_rhs, the RHS taken from live_paths above.
+         * If there is no retn_link, this will just be partial_rhs. 
+         */
+        let ext_partial_rhs;
+        
         if (retn_link) {
-          let retn_tree_opt = Hashtable::lookup_opt(trees,retn_link);
           let retn_tree;
+          let retn_tree_opt = Hashtable::lookup_opt( mpf_forests, new $(retn_link, resp_act) );
           if (!retn_tree_opt){
-            retn_tree = mk_parse_forest(rs, NULL, retn_link, resp_act);
-            Hashtable::insert(trees,retn_link,retn_tree);
-          } else
+            retn_tree = mk_parse_forest0(mpf_forests, rs, NULL, retn_link, resp_act);
+            Hashtable::insert(mpf_forests,new $(retn_link, resp_act) ,retn_tree);
+            if (debug > 3) {
+              fprintf(stderr, "Forest inserted into cache: (%s,l=%d,r=%d) in building (%s,l=%d,r=%d).\n",
+                      retn_tree->nonterminal, retn_tree->left, retn_tree->right,
+                      name,i,j);
+            }
+          } else {
             retn_tree = *retn_tree_opt;
+            if (debug > 3) {
+              fprintf(stderr, "Forest retrieved from cache: (%s,l=%d,r=%d) in building (%s,l=%d,r=%d).\n",
+                      retn_tree->nonterminal, retn_tree->left, retn_tree->right,
+                      name,i,j);
+            }
+          }
 
-          // we can build the list backwards because we are starting at the end of
-          // the RHS and traversing pred links towards the beginning.
-          ext_partial_rhs = new List::List(retn_tree,
-              partial_rhs);
-        }
+          ext_partial_rhs = 
+            // we can build the list backwards because we are starting at the end of
+            // the RHS and traversing pred links towards the beginning.
+            new List::List(retn_tree, partial_rhs);
+        } else
+          ext_partial_rhs = partial_rhs;
 
-        let maybe_links = Hashtable::lookup_opt(rs->links,pred_link);
+        let maybe_links = Hashtable::lookup_opt(rs->links, pred_link);
         live_paths = new List::List( new $(maybe_links, ext_partial_rhs), live_paths );
       }
     }
@@ -980,6 +1049,15 @@ mk_parse_forest(rstate_t rs,
   return new shared_parse_forest(name,i,j,w_forward, List::to_array( forests ));
 }
 
+spf_t
+mk_parse_forest(rstate_t rs,
+                string_t<`H> top_level_name,
+                earley_node_t en,
+                act_t resp_act) {
+  // hashtable used to memoize results of calls to mk_parse_forest0.
+  let mpf_forests = Hashtable::create(101,retn_cmp,retn_hash);  
+  return mk_parse_forest0(mpf_forests, rs, top_level_name, en, resp_act);
+}    
 ////////////////////////
 
 /*
@@ -1012,7 +1090,7 @@ elink_t resolve_ambs(rstate_t rs, string_t<`H> name, int start, int end,
 
   return links->hd;
 }
-
+  
 // Reconstruct a parse tree.
 parse_tree_t
 mk_parse_tree(rstate_t rs,
@@ -1020,7 +1098,7 @@ mk_parse_tree(rstate_t rs,
      earley_node_t en,
      act_t resp_act) {
   // map: early_node_t -> parse_tree_t
-  let trees = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let trees = Hashtable::create( 11, retn_cmp, retn_hash );
 
   let &$(x,i,j) = en;
 
@@ -1056,11 +1134,11 @@ mk_parse_tree(rstate_t rs,
     let &elink(pred_link, w, retn_link, resp_act) = resolve_ambs(rs, name, i, j, links);
 
     if (retn_link) {
-      let retn_tree_opt = Hashtable::lookup_opt(trees,retn_link);
+      let retn_tree_opt = Hashtable::lookup_opt(trees, new $(retn_link, resp_act) );
       let retn_tree;
       if (!retn_tree_opt){
         retn_tree = mk_parse_tree(rs, NULL, retn_link, resp_act);
-        Hashtable::insert(trees,retn_link,retn_tree);
+        Hashtable::insert( trees, new $(retn_link, resp_act), retn_tree );
       } else
         retn_tree = *retn_tree_opt;
 
@@ -1080,17 +1158,28 @@ mk_parse_tree(rstate_t rs,
 // Print the earley graph in dot format
 ///////////////////////////////////////////
 
-static void dot_pred_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts, rstate_t rs) {
+static void dot_pred_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts, 
+                          $(rstate_t, int (@filter)(earley_node_t))@ env) {
+  let &$(rs,filter) = env;
+  if (!filter(s)) return;
+
   let &$(si,sj,sk) = s;
   for (; ts; ts = ts->tl) {
     let &$(ti,tj,tk) = ts->hd->pred;
     printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
     printf("\"(%d,%d,%d)\"",ti,tj,tk);
-    printf(" [ label = \"%s\" ];\n",DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
+    if (ts->hd->resp_act < 256 )
+      printf(" [ label = \"\\%d\" ];\n", ts->hd->resp_act);
+    else
+      printf(" [ label = \"%s\" ];\n", DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
   }
 }
 
-static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts, rstate_t rs) {
+static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts, 
+                          $(rstate_t, int (@filter)(earley_node_t))@ env) {
+  let &$(rs,filter) = env;
+  if (!filter(s)) return;
+
   let &$(si,sj,sk) = s;
   for (; ts; ts = ts->tl) {
     let r = ts->hd->retn;
@@ -1098,25 +1187,71 @@ static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts,
       let $(ti,tj,tk) = *r;
       printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
       printf("\"(%d,%d,%d)\"",ti,tj,tk);
-      printf(" [ label = \"%s\" ];\n",DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
+      if (ts->hd->resp_act < 256 )
+        printf(" [ label = \"\\%d\" ];\n", ts->hd->resp_act);
+      else
+        printf(" [ label = \"%s\" ];\n", DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
     }
   }
 }
+  
+static void dot_earley_item(int i, earley_item_t s){
+  let &$(state,source) = s;
+  printf("\"(%d,%d,%d)\"; ",state,source,i);
+}
 
-static void rstate_dot(rstate_t rs) {
-  printf("digraph g {\n");
+/* comparison of earley nodes, with "current position" element (third field) most significant,
+ second field next and finally first field. */
+static int earley_node_rev_cmp(earley_node_t a,earley_node_t b) {
+  let $(ai,aj,ak) = *a;
+  let $(bi,bj,bk) = *b;
+  let c = Core::intcmp(ak,bk);
+  if (c) return c;
+  c = Core::intcmp(aj,bj);
+  if (c) return c;
+  return Core::intcmp(ai,bi);
+}
+  
+  
+static void rstate_dot(rstate_t rs, Axarray::xarray_t<Set::set_t<earley_item_t>> estates, 
+                       int index, int (@filter)(earley_node_t) ) {
+  printf("digraph g {\n"
+         "rankdir=RL;\n");
+  
+  // print axis
+  printf("{\n"
+         "node [shape=plaintext, fontsize=16];\n");
+  for (int j = index; j > 0; j --)
+    printf("%d -> ",j);
+  printf("0;\n");
+  printf("}\n");
+  
+  for (int i=0; i <= index; i++){
+    printf("{rank=same; ");
+    Set::iter_c(dot_earley_item, i, Axarray::get(estates,i));
+    printf("}\n");
+  }
+  
   printf("edge [style=dotted]\n");
-  Hashtable::iter_c(dot_pred_iter,rs->links,rs);
+  Hashtable::iter_c(dot_pred_iter,rs->links, new $(rs, filter) );
   printf("edge [style=bold]\n");
-  Hashtable::iter_c(dot_retn_iter,rs->links,rs);
-//  Hashtable::iter(dot_iter,rs->call);
+  Hashtable::iter_c(dot_retn_iter,rs->links, new $(rs, filter) );
   printf("}\n");
 }
 
 /////////////////////////////////////////////////
 
-$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int)
-ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
+// filter used for debugging. Should be generalized to allow for control 
+// by flag.
+int rs_filt_lb = 0;
+int rs_filt_ub = 0;
+  
+static int rstate_filter(earley_node_t s){
+  return (s->f2 > rs_filt_lb) && (s->f2 < rs_filt_ub);
+}
+  
+$(List::list_t<$(spf_t, Semiring::weight_t)@>,int,int)
+ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
   /* Keep track of parse trees */
   let
   links = Hashtable::create(11,earley_node_cmp,earley_node_hash);
@@ -1254,10 +1389,12 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
     }
   }
 
+  if (debug > 3)
+    rstate_dot(rs, estates, i, rstate_filter);
+
   if (no_error){
     if (debug)
       fprintf(stderr, "No parse errors detected. Searching for final states at position %d.\n", i);
-    //rstate_dot(rs);
   } else {
     if (debug)
       fprintf(stderr, "Parse error at input character %d.\n",i-1);
@@ -1268,37 +1405,51 @@ ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
   /* See if we ended up in a final state */
   let partial_parses = 0;
   let complete_parses = 0;
-  let trees = NULL;
+  let forests = NULL;
   for (let slast_list = Set::to_list(Axarray::get(estates,i));
       slast_list != NULL;
       slast_list = slast_list->tl) {
     partial_parses++;
     let &$(state,parent) = slast_list->hd;
     if (DFA_IS_DFA_FINAL(dfa,state) && parent == 0) {
-      complete_parses++;
-
-        if (do_reconstruct) {
-          let en = new $(state,parent /*== 0*/,i);
-          try{
-            if (debug){
-              print_forest(mk_parse_forest(rs,"TOP LEVEL",en, /* bogus action: */ 0),"");
-            }
-            let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
-            let derivation_tree = mk_parse_tree(rs,"TOP LEVEL",en, /* bogus action: */ 0);
-            trees = new List::List(new $(derivation_tree,w_forward),trees);
-          } catch {
-            case &Core::Invalid_argument(msg):
-              fprintf(stderr,"Ambiguous tree at early node (%d,0,%d):\n\t%s\n",state,i,msg);
-            break;
-          }
-        }
+       complete_parses++;
+        
+      if (do_reconstruct) {
+        let en = new $(state,parent /*== 0*/,i);
+        let spf = mk_parse_forest(rs,"TOP LEVEL",en, /* bogus action: */ 0);
+        let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+        forests = new List::List(new $(spf,w_forward),forests);
+      }
     }
   }
 
   YKRESTORE(input_save); // commit: don't set YKCURSOR, because we don't want to rewind the input.
                          // the purpose of the save was only to prevent discarding.
 
-  return $(trees,complete_parses,partial_parses);
+  return $( forests, complete_parses, partial_parses );
+}
+
+static
+  $(parse_tree_t,Semiring::weight_t)@ 
+  cnv_forest($(spf_t,Semiring::weight_t)@ x){
+    return new $(EarleyParsetree::forest2tree(x->f0), x->f1);
+  }
+  
+
+$(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int)
+ykb_parse(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
+
+  let $( xs, cp, pp ) = ykb_parse0(dfa, ykb, parse_until_eof);
+  
+  return $( List::map(cnv_forest, xs), cp, pp );
+}  
+  
+List::list_t<$(spf_t, Semiring::weight_t) @> 
+ykb_parse_spf(EarleyAnyBackend::DFA::edfa_t dfa_rep, 
+              ykbuf_t@ ykb, int parse_until_eof)
+{
+  let r = ykb_parse0(dfa_rep, ykb, parse_until_eof);
+  return r.f0;
 }
 
 $(List::list_t<$(parse_tree_t,Semiring::weight_t)@>,int,int)
