@@ -54,6 +54,7 @@ int act_cmp(act_t a,act_t b) {
 
 unsigned int num_conflicts_ll = 0;
 unsigned int num_conflicts_slr = 0;
+unsigned int num_conflicts_lr1 = 0;
 unsigned int num_conflicts_dfa = 0;
 unsigned int num_conflicts_change_order = 0;
 unsigned int num_conflicts_resolved = 0;
@@ -456,16 +457,16 @@ $(dfa_t,Set::set_t<st_t>) *fsm_dfa(const char ?filename,
     let s = states->hd;
     let t = target(dfa,s,final_st_action);
     if (t==0) {
-			dfa_final = Set::insert(dfa_final,s);
-		} else {
-			for (let s_txs = Set::to_list(dfa_get_transitions(dfa,t));
-					s_txs != NULL; s_txs = s_txs->tl) {
-				action_attrs = Set::insert(action_attrs,s_txs->hd);
-			}
-		}
+      dfa_final = Set::insert(dfa_final,s);
+    } else {
+      for (let s_txs = Set::to_list(dfa_get_transitions(dfa,t));
+           s_txs != NULL; s_txs = s_txs->tl) {
+        action_attrs = Set::insert(action_attrs,s_txs->hd);
+      }
+    }
     dfa_set_final(dfa,s,action_attrs);
   }
-
+  
   return new $(dfa,dfa_final);
 }
 

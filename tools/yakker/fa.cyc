@@ -939,7 +939,7 @@ st_t ?dfa_spantree(dfa_t dfa) {
  * Argument print_literal is a flag, indicating whether to 
  * print literal version of example (in addition to readable version).
  */
-void slr_dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s, 
+void lr_dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s, 
     string_t (*esc_special)(act_t, `a), `a env, int print_literal, int print_as_rule) {
   if (s == 1) {
     fprintf(f,"<the empty string>\n");
@@ -1041,7 +1041,7 @@ void slr_dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s,
 
 void dfa_example(FILE @f,dfa_t dfa, st_t ?spantree, st_t s, 
     string_t (*esc_special)(act_t, `a), `a env) {
-  slr_dfa_example(f,dfa,spantree,s,esc_special,env,0,0);
+  lr_dfa_example(f,dfa,spantree,s,esc_special,env,0,0);
 }
 
 /* Warn if a final state for alternative A can reach a final state

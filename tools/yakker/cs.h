@@ -32,6 +32,9 @@ typedef unsigned char *{BUCKETS}@nozeroterm cs_opt_t;
 /* Predicates on character sets -- NULL is all false, NULL return is false */
 typedef const char ? (*cs_pred_t)(unsigned int);
 
+extern int cs_cmp(cs_t a,cs_t b);
+extern int cs_hash(cs_t c);
+
 // In the following functions, cs_t a is modified.
 extern void cs_intersect(cs_t a,cs_t b);
 extern void cs_union(cs_t a,cs_t b);

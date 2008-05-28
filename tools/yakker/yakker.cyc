@@ -74,6 +74,7 @@ static int check_firstfollow = 0;
 static int check_conflicts = 0;
 static int check_whitespace = 0;
 static int check_glush = 0;
+static int inline_cs = 0;
 static string_t check_sym = NULL;
 
 static void check_all() { /* except conflicts1, glush */
@@ -118,7 +119,7 @@ const char ?USAGE =
   "           -externals <bnfs>      use symbols from bnf files if needed in extraction\n"
   "         -list-defs             print the names of the definitions defined in the BNF\n"
   "         -check-def <sym>       perform all sanity checks on the specified symbol definition from the input grammar\n"
-    "         -check                 perform all sanity checks on the input grammar\n"
+  "         -check                 perform all sanity checks on the input grammar\n"
   "           -check-undefined       check for undefined symbols\n"
   "           -check-multiple        check for multiply defined symbols\n"
   "           -check-empty           check for symbols that might be empty\n"
@@ -127,6 +128,8 @@ const char ?USAGE =
   "           -check-conflicts       check for conflicts\n"
   "           -check-whitespace      check whitespace\n"
   "           -check-slr             check for SLR conflicts.\n"
+  "           -check-lr1             check for LR1 conflicts.\n"
+  "           -check-inline-cs       inline symbols which are only character sets.\n"
   "           -no-check-ll           do not check for LL conflicts (default is to check).\n"
   "         -cyc-namespace <sym>   use <sym> as the cyclone namespace for the generated cyclone code\n"
   "         -namespace <sym>       use <sym> as the namespace for the grammar\n"
@@ -441,7 +444,9 @@ int main(int argc, const char ?`H?argv) {
     else if (strcmp("-check-glush",argv[i]) == 0) check_glush = 1;
     else if (strcmp("-check-whitespace",argv[i]) == 0) check_whitespace = 1;
     else if (strcmp("-check-slr",argv[i]) == 0) grm_classp |= SLR_GRM_CLASS;
+    else if (strcmp("-check-lr1",argv[i]) == 0) grm_classp |= LR1_GRM_CLASS;
     else if (strcmp("-no-check-ll",argv[i]) == 0) grm_classp &= ~LL_GRM_CLASS;
+    else if (strcmp("-check-inline-cs",argv[i]) == 0) inline_cs = 1;
     else if (strcmp("-check-def",argv[i]) == 0) {
       if (i+1 >= argc) die();
       check_sym = argv[i+1];
@@ -902,9 +907,9 @@ int main(int argc, const char ?`H?argv) {
     if (minus_elimp) minus_elim(ds);
     if (check_white_edges) report_white_edges(ds);
     if (check_firstfollow) report_first_follow(ds);
-    if (check_conflicts) report_conflicts(ds, grm_classp);
+    if (check_conflicts) report_conflicts(ds, grm_classp, inline_cs);
     if (check_glush) report_glush(ds);
-    if (check_sym) report_conflicts_sym(check_sym, ds, grm_classp);
+    if (check_sym) report_conflicts_sym(check_sym, ds, grm_classp, inline_cs);
   }
   else if (pads) {
     if (minus_elimp)

@@ -45,6 +45,7 @@ extern int use_lazy_nfa;
 
 extern unsigned int num_conflicts_ll;
 extern unsigned int num_conflicts_slr;
+extern unsigned int num_conflicts_lr1;
 extern unsigned int num_conflicts_dfa;
 extern unsigned int num_conflicts_change_order;
 extern unsigned int num_conflicts_resolved;
@@ -88,7 +89,7 @@ extern void dfa_example(FILE @f, dfa_t dfa, st_t ?spantree, st_t s,
  * argument print_as_rule is a flag indicating whether to escape readable version
  * like a C string, or to print like a grammar rule.
  */
-extern void slr_dfa_example(FILE @f, dfa_t dfa, st_t ?spantree, st_t s, 
+extern void lr_dfa_example(FILE @f, dfa_t dfa, st_t ?spantree, st_t s, 
     string_t (*esc_special)(act_t, `a), `a env, int print_literal, int print_as_rule);
 extern void dfa_generate1(dfa_t dfa);
 extern void dfa_generate2(dfa_t dfa, int lazyfill);

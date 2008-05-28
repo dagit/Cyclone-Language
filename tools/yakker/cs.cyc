@@ -57,6 +57,25 @@ int first_of_cs(cs_t a) {
   }
   return -1;
 }
+
+int cs_cmp(cs_t a,cs_t b) {
+  for (let i = 0; i < BUCKETS; i++){
+    let d = a[i] - b[i];
+    if (d) return d;
+  }
+  
+  return 0;
+}
+
+int cs_hash(cs_t c) {
+  let h = 0;
+  for (let i = 0; i < BUCKETS; i++){
+    h ^= c[i];
+  }
+  
+  return h;
+}
+
 void cs_intersect(cs_t a,cs_t b) {
   for (let i = 0; i < BUCKETS; i++)
     a[i] &= b[i];

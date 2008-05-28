@@ -1175,11 +1175,12 @@ static void dot_pred_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts,
   let &$(si,sj,sk) = s;
   for (; ts; ts = ts->tl) {
     let &$(ti,tj,tk) = ts->hd->pred;
-    printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
-    printf("\"(%d,%d,%d)\"",ti,tj,tk);
-    if (ts->hd->resp_act < 256 )
-      printf(" [ label = \"\\%d\" ];\n", ts->hd->resp_act);
-    else
+    // Print the link in reverse for readability.
+    printf("\"(%d,%d,%d)\" -> ",ti,tj,tk);
+    printf("\"(%d,%d,%d)\"",si,sj,sk);
+    if (ts->hd->resp_act < 256 ) {
+      printf(" [ label = \"%s\" ];\n",cs_char_escape(ts->hd->resp_act));
+    } else
       printf(" [ label = \"%s\" ];\n", DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
   }
 }
@@ -1194,12 +1195,10 @@ static void dot_retn_iter(earley_node_t s, List::list_t<struct elink @`H,`H> ts,
     let r = ts->hd->retn;
     if (r != NULL){
       let $(ti,tj,tk) = *r;
-      printf("\"(%d,%d,%d)\" -> ",si,sj,sk);
-      printf("\"(%d,%d,%d)\"",ti,tj,tk);
-      if (ts->hd->resp_act < 256 )
-        printf(" [ label = \"\\%d\" ];\n", ts->hd->resp_act);
-      else
-        printf(" [ label = \"%s\" ];\n", DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
+      // Print the link in reverse for readability.
+     printf("\"(%d,%d,%d)\" -> ",ti,tj,tk);
+      printf("\"(%d,%d,%d)\"",si,sj,sk);
+      printf(" [ label = \"%s\" ];\n", DFA_ACT2SYMB(rs->dfa,ts->hd->resp_act));
     }
   }
 }
@@ -1230,24 +1229,28 @@ static int earley_node_rev_cmp(earley_node_t a,earley_node_t b) {
 static void rstate_dot(rstate_t rs, Axarray::xarray_t<Set::set_t<earley_item_t>> estates, 
                        int index, int (@filter)(earley_node_t) ) {
   printf("digraph g {\n"
-         "rankdir=RL;\n");
-  
+         "rankdir=TB;\n");
+
+  /* Unfortunately, the following code results in graphs that dot doesn't handle correctly.
+     In particular, edge labels can be drawn quite far from edges and duplicate edges are drawn
+     atop each other. */
+   
   // print axis
   printf("{\n"
          "node [shape=plaintext, fontsize=16];\n");
   let ub = index < eg_filt_ub ? index : eg_filt_ub;
   let lb = eg_filt_lb ? eg_filt_lb : 0;
-  for (int j = ub; j > lb; j--)
+  for (int j = lb; j < ub; j++)
     printf("%d -> ",j);
-  printf("%d;\n", lb);
+  printf("%d;\n", ub);
   printf("}\n");
   
   for (int i=0; i <= index; i++){
-    printf("{rank=same;\n");
+    printf("subgraph cluster%d {rank=same;\n", i);
     Set::iter_c(dot_label_earley_item, i, Axarray::get(estates,i));
     printf("}\n");
   }
-
+   
   printf("edge [style=dotted]\n");
   Hashtable::iter_c(dot_pred_iter,rs->links, new $(rs, filter) );
   printf("edge [style=bold]\n");

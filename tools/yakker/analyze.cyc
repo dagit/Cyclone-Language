@@ -1105,7 +1105,11 @@ void SLR_analyze_final_state(string_t nonterm, grammar_t grm, dfa_t dfa,
     let follow_symb = follow_symbol(symb);
     let cs_follow = cs_empty();
     first(cs_follow, SYMB(follow_symb));
-
+    // arg: follows_table
+    //let cs_follow_list = Hashtable::lookup(follows_table, attrs->hd);
+    
+    // for each cs_follow in cs_follow_list, run the following checks:
+    // for (....)
     if (transitions) { // shift-reduce conflict possible
       let cs_shift_reduce = cs_dup(cs_follow);
       cs_intersect(cs_shift_reduce, cs_trans);
@@ -1117,7 +1121,7 @@ void SLR_analyze_final_state(string_t nonterm, grammar_t grm, dfa_t dfa,
         cs_print(stderr,cs_shift_reduce);
         eprintf("\n");
         eprintf("Example: ");
-        slr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
+        lr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
       }
     }
     
@@ -1130,20 +1134,110 @@ void SLR_analyze_final_state(string_t nonterm, grammar_t grm, dfa_t dfa,
       eprintf("SLR conflict on character(s) ");
       cs_print(stderr,cs_reduce_reduce);
       eprintf("\n");        
-      slr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
+      lr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
     }
     
     cs_union(cs_all_follow, cs_follow);
   }
 }
 
-void report_SLR_conflicts_sym0(string_t sym, grammar_t<`H> grm, rule_t r){
+
+void LR1_analyze_final_state(string_t nonterm, grammar_t grm, dfa_t dfa, 
+                             Earley::symb_info_t symb_info, st_t f,
+                             /***/ Hashtable::table_t<act_t, List::list_t<cs_t>> follows_table)
+{
+  let transitions = Axarray::get(dfa->states,f);
+  cs_t cs_trans = cs_empty();
+  if (transitions){ 
+    // Build cs of transitions.
+    let lb = transitions->lb;
+    for (let spans = transitions->spans; spans; spans = spans->tl) {
+      let ub = spans->hd->ub;
+      let target = spans->hd->target;
+      if (target) { /* Don't print transitions to dead state 0 */
+        cs_union(cs_trans,cs_range(lb,ub));
+      }
+      lb = ub;
+    } 
+  }
+  
+  let spantree = dfa_spantree(dfa);
+  
+  // Get set of attributes. Convert to list.
+  let attr_set = Hashtable::lookup(dfa->final_attrs, f);
+  let attrs = Set::to_list(attr_set);
+  let cs_all_follow = cs_empty();
+  // Foreach attribute, lookup FOLLOW set and intersect.
+  for (; attrs; attrs = attrs->tl){
+    let symb = Earley::act2symb(attrs->hd, symb_info->action_symb_table);
+    let cs_follow_list = Hashtable::lookup(follows_table, attrs->hd);
+
+    // Each follow set represents a different occurence of the symb at the same position.
+    // So, we treat them semi-independently. For shift-reduce conflicts, we analyze them independently,
+    // rather than merging them together into one CS.
+    // However, for the purpose of reduce-reduce conflicts, they are not independent. In particular,
+    // they don't reduce-reduce conflict with each other. So, for r-r conflicts, we compare the union of all the follows
+    // with cs_all_follow.
+    
+    /** The union of all follow sets for symb. */
+    let cs_symb_follow = cs_empty();
+    for (; cs_follow_list; cs_follow_list = cs_follow_list->tl){
+      let cs_follow = cs_follow_list->hd;
+      
+      if (transitions) { // shift-reduce conflict possible
+        let cs_shift_reduce = cs_dup(cs_follow);
+        cs_intersect(cs_shift_reduce, cs_trans);
+        if (!is_cs_empty(cs_shift_reduce)){
+          eprintf("************************************************************************\n");
+          /***/
+          num_conflicts_lr1++;
+          eprintf("Shift-reduce conflict %u in symbol-use %s in definition %s. State = %d.\n",num_conflicts_lr1,symb,nonterm, f);
+          eprintf("LR(1) conflict on character(s) ");
+          cs_print(stderr,cs_shift_reduce);
+          eprintf("\n");
+          eprintf("Example: ");
+          lr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
+        }
+      }
+
+      cs_union(cs_symb_follow, cs_follow);      
+    }
+    let cs_reduce_reduce = cs_dup(cs_symb_follow); 
+    cs_intersect(cs_reduce_reduce, cs_all_follow);
+    if (!is_cs_empty(cs_reduce_reduce)){
+      eprintf("************************************************************************\n");
+      /***/
+      num_conflicts_lr1++;
+      eprintf("Reduce-reduce conflict %u in symbol-use %s in definition %s. State = %d.\n",num_conflicts_lr1,symb,nonterm,f);
+      eprintf("LR(1) conflict on character(s) ");
+      cs_print(stderr,cs_reduce_reduce);
+      eprintf("\n");        
+      lr_dfa_example(stderr,dfa,spantree,f, Earley::act2symb, symb_info->action_symb_table, 0,1);
+    }
+    
+    cs_union(cs_all_follow, cs_symb_follow);
+  }
+}
+
+void report_SLR_conflicts_sym0(string_t sym, grammar_t<`H> grm, rule_t r, int inline_cs){
   eprintf("Converting rule to LR machine:\n");
-  let $(slr_dfa, final_states, symb_info) = Earley::rule2LR(grm, r);
+  let $(slr_dfa, final_states, final_follows, symb_info) = Earley::rule2LR(grm, r, LIT(""), 1, inline_cs);
   eprintf("Analyzing DFA for SLR conflicts:\n");
   let fs = Set::to_list(slr_dfa->final_states);
   for (; fs; fs = fs->tl){
     SLR_analyze_final_state(sym, grm, slr_dfa, symb_info, fs->hd);
+  }
+}
+
+void report_LR1_conflicts_sym0(string_t sym, grammar_t<`H> grm, rule_t r, rule_t right_context, int inline_cs){
+  eprintf("Converting rule to LR machine:\n");
+  let $(slr_dfa, final_states, final_follows, symb_info) = 
+    Earley::rule2LR(grm, r, right_context, 0, inline_cs);  // tell it not to minimize the DFA so as not to merge final states w/ different follow sets.
+  eprintf("Analyzing DFA for LR(1) conflicts:\n");
+  let fs = Set::to_list(slr_dfa->final_states);
+  for (; fs; fs = fs->tl){
+    let follows = Hashtable::lookup(final_follows, fs->hd);
+    LR1_analyze_final_state(sym, grm, slr_dfa, symb_info, fs->hd, follows);
   }
 }
 
@@ -1265,8 +1359,12 @@ void conflicts0(string_t nonterm, rule_t r,rule_t right_ctxt) {
   }
 }
 
-void report_conflicts_sym(string_t sym, grammar_t<`H> grm, unsigned int grm_class){
+void report_conflicts_sym(string_t sym, grammar_t<`H> grm, unsigned int grm_class, int inline_cs){
   reset_globals();
+
+  if (inline_cs)
+    cs_optimize(grm);
+  
   //  checking_conflicts_grammar = grm;
   grammar_t followgrm = follow_grammar(grm);
   grammar_t combinedgrm = List::append(grm,followgrm);
@@ -1284,7 +1382,9 @@ void report_conflicts_sym(string_t sym, grammar_t<`H> grm, unsigned int grm_clas
         if (grm_class & LL_GRM_CLASS)
           conflicts0(n, r,SYMB(fn));
         if (grm_class & SLR_GRM_CLASS)
-          report_SLR_conflicts_sym0(sym, grm, r);
+          report_SLR_conflicts_sym0(sym, grm, r, inline_cs);
+        if (grm_class & LR1_GRM_CLASS)
+          report_LR1_conflicts_sym0(sym, grm, r, SYMB(fn), inline_cs);
         break;
       }
     }
@@ -1295,7 +1395,9 @@ void report_conflicts_sym(string_t sym, grammar_t<`H> grm, unsigned int grm_clas
       if (grm_class & LL_GRM_CLASS)
         conflicts0(n, r,SYMB(fn));
       if (grm_class & SLR_GRM_CLASS)
-        report_SLR_conflicts_sym0(n, grm, r);
+        report_SLR_conflicts_sym0(n, grm, r, inline_cs);
+      if (grm_class & LR1_GRM_CLASS)
+        report_LR1_conflicts_sym0(n, grm, r, SYMB(fn), inline_cs);
     }
   }
   if (num_conflicts_ll == 1)
@@ -1327,10 +1429,15 @@ void report_conflicts_sym(string_t sym, grammar_t<`H> grm, unsigned int grm_clas
     printf("\nThere was 1 SLR conflict\n");
   else
     printf("\nThere were %u SLR conflicts\n", num_conflicts_slr);
+
+  if (num_conflicts_lr1 == 1)
+    printf("\nThere was 1 LR1 conflict\n");
+  else
+    printf("\nThere were %u LR1 conflicts\n", num_conflicts_lr1);
 }
 
-void report_conflicts(grammar_t<`H> grm, unsigned int grm_class) {
-  report_conflicts_sym(NULL, grm, grm_class);
+void report_conflicts(grammar_t<`H> grm, unsigned int grm_class, int inline_cs) {
+  report_conflicts_sym(NULL, grm, grm_class, inline_cs);
 }
 
 void report_whitespace(grammar_t<`H> grm) {
