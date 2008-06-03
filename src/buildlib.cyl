@@ -479,6 +479,8 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 { fputs("const",(FILE @)slurp_out); return 1; }
 | "__const" /* Used in cygwin in unistd.h; an undocumented gcc extension?? */
 { fputs("const",(FILE @)slurp_out); return 1; }
+| "__signed__" /* Used in Fedora 9 gcc-4.3 glibc-2.8-3; an undocumented gcc extension?? */
+{ fputs("signed",(FILE @)slurp_out); return 1; }
 | "__signed" /* Used in Mac OS in netdb.h, stdint.h; an undocumented gcc extension?? */
 { fputs("signed",(FILE @)slurp_out); return 1; }
 | "signed__" /* Used in Fedora 9 gcc-4.3 glibc-2.8-3; an undocumented gcc extension?? */
