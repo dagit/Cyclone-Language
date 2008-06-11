@@ -110,8 +110,6 @@ static const char ?add_namespace = NULL;
 const char ?USAGE =
   "Usage: yakker [OPTIONS] [FILES]\n"					
   "Options: -gen <sym>             generate a parser using <sym> as the start symbol\n"	
-  "           -local                 use only local lookahead (without FOLLOW)\n"
-  "           -no-expand             don't expand recursive symbols, share them instead\n"
   "         -gen-header          generate a header file for the parsing functions\n"
   "         -gen-crawl <sym>     generate a parse-tree crawler using <sym> as the start symbol\n"
   "         -gen-crawl-header    generate a header file for the crawling functions\n"
@@ -131,6 +129,8 @@ const char ?USAGE =
   "           -check-lr1             check for LR1 conflicts.\n"
   "           -check-inline-cs       inline symbols which are only character sets.\n"
   "           -no-check-ll           do not check for LL conflicts (default is to check).\n"
+  "         -local                 use only local lookahead (without FOLLOW); relevant for -gen or -check options\n"
+  "         -no-expand             don't expand non-recursive symbols; share them instead; relevant for -gen or -check options\n"
   "         -cyc-namespace <sym>   use <sym> as the cyclone namespace for the generated cyclone code\n"
   "         -namespace <sym>       use <sym> as the namespace for the grammar\n"
   "         -unnamespace           remove any namespaces from the grammar\n"

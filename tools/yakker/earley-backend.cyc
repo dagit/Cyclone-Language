@@ -381,14 +381,6 @@ rule_pat_t unescape_pat(rule_pat_t p, char esc_char) {
 // Taken from generated code.
 //////////////////////////////////////////////////////////////////////
 
-#define YKLIMIT ykb->lim
-#define YKCURSOR ykb->cur
-#define YKFILL(n) (ykfill(ykb,(n)))
-#define YKPOSN ((ykb->cur-ykb->bot)+ykb->discarded)
-#define YKMARKER ykb->mark
-#define YKSAVE ({ let x = 0; ykb->save_count++; if (ykb->save) x = ykb->cur-ykb->save; else ykb->save = ykb->cur; x; })
-#define YKRESTORE(x) ({ let p = ykb->save+x; if (--ykb->save_count == 0) ykb->save=NULL; p; })
-
 extern datatype exn {extern Parse_error };
 extern datatype exn.Parse_error Parse_error_val;
 
@@ -595,9 +587,11 @@ static int earley_item_cmp(earley_item_t a,earley_item_t b) {
   return Core::intcmp(aj,bj);
 }
 
-typedef $(st_t,unsigned int,unsigned int) @earley_node_t;
+typedef $(st_t,unsigned int,
+          unsigned int) @earley_node_t;
 typedef $(st_t,unsigned int,unsigned int) *earley_node_opt_t;
 typedef  Hashtable::table_t<earley_item_t,List::list_t<earley_node_t,`r>,`r> earley_graph_t<`r>;
+
 static int earley_node_cmp(earley_node_t a,earley_node_t b) {
   let $(ai,aj,ak) = *a;
   let $(bi,bj,bk) = *b;
@@ -608,6 +602,10 @@ static int earley_node_cmp(earley_node_t a,earley_node_t b) {
   return Core::intcmp(ak,bk);
 }
 
+static bool earley_node_eq(earley_node_t a,earley_node_t b){
+  return earley_node_cmp(a,b) == 0;
+}
+  
 static int earley_node_hash(earley_node_t a) {
   let $(ai,aj,ak) = *a;
   /* All ai, aj, and ak are ints starting at 0, ai maxes out at the
@@ -628,11 +626,48 @@ struct elink {
 };
 typedef struct elink @`H elink_t;
 
+/**
+ An earley-node map. A map from earley nodes to 'a's.
+ */
+typedef Hashtable::table_t<earley_node_t, `a,`H> enode_map_t<`a>;
+
+/**
+ An earley node "multi"-map. A map from earley nodes to lists of 'a.
+ */
+typedef Hashtable::table_t<earley_node_t, List::list_t<`a,`H>,`H> enode_mmap_t<`a>;
+  
+/**
+ State maintained by backend during recognition and parsing.
+ */
 struct rstate {
   DFA::edfa_t dfa;
+
+  /**
+   Earley states, indexed by positions in input string.
+   */
   Axarray::xarray_t<earley_state_t> estates;
-  Hashtable::table_t<earley_node_t,List::list_t<struct elink @`H,`H>,`H> links;
-  Hashtable::table_t<earley_node_t,$(Semiring::weight_t,Semiring::weight_t)@> weights; //PROB
+
+  /** 
+   Map from earley nodes to predecessor-and-return-link lists.
+   */
+  enode_mmap_t<struct elink @`H> links;
+  
+  /** 
+   Map from earley nodes to earley nodes. Each entry in the map defines a call link. 
+   Note: The targets could be items (instead of nodes) b/c we know that they are the 
+   target is in the same Earley state as the source. However, doing so complicates later
+   code.
+   */
+  enode_mmap_t<earley_node_t> call_links;
+  
+  /**
+   Map from earley nodes to inner and outer weights.
+   */
+  enode_map_t<$(Semiring::weight_t,Semiring::weight_t)@> weights; //PROB
+  
+  /**
+   Map from states to counts of remaining repititions.
+   */
   Hashtable::table_t<st_t,int @,`H> repeat_counts;
 };
 typedef struct rstate @rstate_t;
@@ -680,7 +715,7 @@ void point_to(Hashtable::table_t<earley_node_t,List::list_t<`a,`H>,`H> tbl,
   }
   else Hashtable::insert(tbl,source,List::list(target));
 }
-
+  
 // Retrieve bounds of previously-appearing non terminal within currently parsing RHS.
 // If appears multiple times, only returns one answer.
 // If can't be found, return NULL;
@@ -741,7 +776,7 @@ void
 push_closure(rstate_t rs,
     unsigned char ? @nozeroterm input,
     unsigned int i,
-    earley_item_t ei, // YHM: I think this should be an early node
+    earley_item_t ei, // TODO: YHM: I think this should be an early node
     // instead of an earley item for
     // efficiency sake (to save allocations).
     earley_node_opt_t back,
@@ -756,7 +791,7 @@ push_closure(rstate_t rs,
 
   if (back != NULL) {
     point_to ( rs->links, node, new elink(back, inner, up, resp_act) );
-  }
+  } 
 
   let es = Axarray::get(rs->estates,i);
   if (Set::member(es,ei)) {
@@ -769,6 +804,12 @@ push_closure(rstate_t rs,
   /* Close under CALLS. We don't use the weight here. */
   let t = DFA_TRANS(rs->dfa,s,callout_action());
   if (t != 0) {
+
+    point_to( rs->call_links, new $(t,i,i), node );
+    push_closure(rs,input,i,new $(t,i),NULL,NULL, /* bogus action: */ 0
+                 ,forward,Semiring::one_weight //PROB
+                 );
+    
 #if defined(NULL_PLAN_B) || defined(NULL_PLAN_C)
     // Check for RETURN of nullable symbols
     // TODO: do the same for REPEAT calls.
@@ -817,9 +858,6 @@ push_closure(rstate_t rs,
     }
 #endif
 
-    push_closure(rs,input,i,new $(t,i),NULL,NULL, /* bogus action: */ 0
-        ,forward,Semiring::one_weight //PROB
-    );
   } /* End, Close under CALLS. */
 
   /* Close under REPEAT-DECR (special type of CALL). */
@@ -881,7 +919,7 @@ push_closure(rstate_t rs,
       // nullable elements. It is inefficient -- we should look for another way to do
       // this.
 #if defined(NULL_PLAN_A) || defined(NULL_PLAN_C)
-       i != backptr && // we parsed the empty string, RETURN handled by dfa already
+       i != backptr && // we parsed the empty string, RETURN handled already
 #endif
        DFA_IS_FINAL(rs->dfa,s)) {
     /* Some symbol is completed.
@@ -922,15 +960,19 @@ push_closure(rstate_t rs,
 
 using EarleyParsetree;
   
-  static int retn_cmp($(earley_node_t, act_t)@ a, $(earley_node_t, act_t)@ b){
-    let c = earley_node_cmp(a->f0,b->f0);
-    if (c) return c;
-    return act_cmp(a->f1,b->f1);
-  }
+static int retn_cmp($(earley_node_t, earley_node_t, act_t)@ a, 
+                    $(earley_node_t, earley_node_t, act_t)@ b){
+  let c = earley_node_cmp(a->f0,b->f0);
+  if (c) return c;
+  let c = earley_node_cmp(a->f1,b->f1);
+  if (c) return c;
+  return act_cmp(a->f2,b->f2);
+}
   
-  static int retn_hash($(earley_node_t, act_t)@ x){
-    return earley_node_hash(x->f0) ^ act_hash(x->f1);
-  }
+static int retn_hash($(earley_node_t, earley_node_t, act_t)@ x){
+  return earley_node_hash(x->f0) ^ (earley_node_hash(x->f1) << 1) // shift 1 in case f0 and f1 are equal.
+         ^ act_hash(x->f2);
+}
   
 /**
  * REQUIRED: state of en must be final.
@@ -938,10 +980,11 @@ using EarleyParsetree;
  * mpf_forests is a cache that memoizes results of previous invocations of mk_parse_forest0.
  * */
 static spf_t
-mk_parse_forest0(Hashtable::table_t<$(earley_node_t, act_t)@`H, spf_t> mpf_forests, 
+mk_parse_forest0(Hashtable::table_t<$(earley_node_t, earley_node_t, act_t)@`H, spf_t> mpf_forests, 
                  rstate_t rs,
                  string_t<`H> top_level_name,
                  earley_node_t en,
+                 earley_node_t en_call_source,
                  act_t resp_act) {
 //  let spf_opt = Hashtable::lookup_opt( mpf_forests, new $(en, resp_act) );
 //  if (spf_opt) return *spf_opt;
@@ -978,11 +1021,11 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, act_t)@`H, spf_t> mpf_fores
 
   /**
    * A list of RHSs under construction, which are themselves lists, paired with
-   * the (optional) Earley link that indicates the head of the path (or NULL if the path is complete).
-   * So, its a list of of pairs of Earley link and lists. It tracks all the possible
+   * the earley node indicating the head of the path.
+   * So, its a list of of pairs of Earley node and lists. It tracks all the possible
    * alternative parses of the original nonterminal.
    */
-  let live_paths = List::list( new $(Hashtable::lookup_opt(rs->links,en), NULL) );
+  let live_paths = List::list( new $(en, NULL) );
 
   /**
    * Completed child forests.
@@ -991,12 +1034,17 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, act_t)@`H, spf_t> mpf_fores
 
   while (live_paths != NULL) {
     // pop first live path;
-    let &$(maybe_links, partial_rhs) = live_paths->hd;
+    let &$(en_head, partial_rhs) = live_paths->hd;
     live_paths = live_paths->tl;
 
+    let maybe_links = Hashtable::lookup_opt(rs->links, en_head);
+
     if (!maybe_links){
-      // The path (i.e. RHS) is complete. Add a forest to forests (if non-empty).
-      if (partial_rhs)
+      // The path (i.e. RHS) is complete. Check if it was started with a call to the given call-source and, 
+      // if so, add a forest to forests (if non-empty).
+      let head_call_links = Hashtable::lookup( rs->call_links, en_head);
+      if (List::exists_c(earley_node_eq, en_call_source, head_call_links) 
+          && partial_rhs)
         forests = new List::List(partial_rhs, forests);
     } else {
       // Advance the current live path by one link (possibly resulting in more paths).
@@ -1011,10 +1059,10 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, act_t)@`H, spf_t> mpf_fores
         
         if (retn_link) {
           let retn_tree;
-          let retn_tree_opt = Hashtable::lookup_opt( mpf_forests, new $(retn_link, resp_act) );
+          let retn_tree_opt = Hashtable::lookup_opt( mpf_forests, new $(retn_link, pred_link, resp_act) );
           if (!retn_tree_opt){
-            retn_tree = mk_parse_forest0(mpf_forests, rs, NULL, retn_link, resp_act);
-            Hashtable::insert(mpf_forests,new $(retn_link, resp_act) ,retn_tree);
+            retn_tree = mk_parse_forest0(mpf_forests, rs, NULL, retn_link, pred_link, resp_act);
+            Hashtable::insert(mpf_forests, new $(retn_link, pred_link, resp_act) ,retn_tree);
             if (debug > 3) {
               fprintf(stderr, "Forest inserted into cache: (%s,l=%d,r=%d) in building (%s,l=%d,r=%d).\n",
                       retn_tree->nonterminal, retn_tree->left, retn_tree->right,
@@ -1036,8 +1084,7 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, act_t)@`H, spf_t> mpf_fores
         } else
           ext_partial_rhs = partial_rhs;
 
-        let maybe_links = Hashtable::lookup_opt(rs->links, pred_link);
-        live_paths = new List::List( new $(maybe_links, ext_partial_rhs), live_paths );
+        live_paths = new List::List( new $(pred_link, ext_partial_rhs), live_paths );
       }
     }
   }
@@ -1049,14 +1096,19 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, act_t)@`H, spf_t> mpf_fores
   return new shared_parse_forest(name,i,j,w_forward, List::to_array( forests ));
 }
 
+/**
+ INVARIANT: All paths reconstructed from en must have *some* call link associated with their first
+ node. Exactly those paths whose call link is call_source will be returned as part of the parse forest.
+ */
 spf_t
 mk_parse_forest(rstate_t rs,
                 string_t<`H> top_level_name,
                 earley_node_t en,
+                earley_node_t en_call_source,
                 act_t resp_act) {
   // hashtable used to memoize results of calls to mk_parse_forest0.
   let mpf_forests = Hashtable::create(101,retn_cmp,retn_hash);  
-  return mk_parse_forest0(mpf_forests, rs, top_level_name, en, resp_act);
+  return mk_parse_forest0(mpf_forests, rs, top_level_name, en, en_call_source, resp_act);
 }    
 ////////////////////////
 
@@ -1090,7 +1142,11 @@ elink_t resolve_ambs(rstate_t rs, string_t<`H> name, int start, int end,
 
   return links->hd;
 }
-  
+
+/*  
+NOTE: Commented out b/c buggy. Only follows one path in parse forest, but
+ no guarantee that that path has the correct call source.
+ 
 // Reconstruct a parse tree.
 parse_tree_t
 mk_parse_tree(rstate_t rs,
@@ -1153,6 +1209,7 @@ mk_parse_tree(rstate_t rs,
   let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
   return new parse_tree(name,i,j,w_forward, List::to_array( children_trees ));
 }
+ */
 
 /////////////////////////////////////////
 // Print the earley graph in dot format
@@ -1264,19 +1321,27 @@ $(List::list_t<$(spf_t, Semiring::weight_t)@>,int,int)
 ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
   /* Keep track of parse trees */
   let
-  links = Hashtable::create(11,earley_node_cmp,earley_node_hash);
-  let //PROB
-  weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
+     links = Hashtable::create(11,earley_node_cmp,earley_node_hash);
   let
-  rcounts = Hashtable::create(11,st_cmp,st_hash);
+     call_links = Hashtable::create(11,earley_node_cmp,earley_node_hash);
+  let //PROB
+     weights = Hashtable::create(11,earley_node_cmp,earley_node_hash); //PROB
+  let
+     rcounts = Hashtable::create(11,st_cmp,st_hash);
 
   /* Initialize the sequence of Earley states with s0 */
   let estates = /* Earley states  s0, s1, s2, ... */
   Axarray::create(11,Set::empty(earley_item_cmp));
-  let earley_item_0 = new $(DFA_GET_START(dfa),0); //  0 is i in si
+  earley_item_t earley_item_0 = new $(DFA_GET_START(dfa),0); //  0 is i in si
+  earley_node_t earley_node_0 = new $(DFA_GET_START(dfa),0, 0); 
+  // Initialize earley_node_0 to point to itself as "sentinel" value. 
+  // Note: it is safe to have this loop in the call link graph b/c call links
+  // are never followed. They are only used for filtering reconstructed paths
+  // during parse-forest reconstruction.
+  Hashtable::insert(call_links, earley_node_0, List::list(earley_node_0));
   let rs = new rstate {
     dfa,
-    estates,links
+    estates,links, call_links
     ,weights //PROB
     ,rcounts
   };
@@ -1426,7 +1491,7 @@ ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
         
       if (do_reconstruct) {
         let en = new $(state,parent /*== 0*/,i);
-        let spf = mk_parse_forest(rs,"TOP LEVEL",en, /* bogus action: */ 0);
+        let spf = mk_parse_forest(rs,"TOP LEVEL",en, earley_node_0, /* bogus action: */ 0);
         let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
         forests = new List::List(new $(spf,w_forward),forests);
       }
