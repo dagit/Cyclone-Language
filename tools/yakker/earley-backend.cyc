@@ -1042,10 +1042,27 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, earley_node_t, act_t)@`H, s
     if (!maybe_links){
       // The path (i.e. RHS) is complete. Check if it was started with a call to the given call-source and, 
       // if so, add a forest to forests (if non-empty).
-      let head_call_links = Hashtable::lookup( rs->call_links, en_head);
-      if (List::exists_c(earley_node_eq, en_call_source, head_call_links) 
-          && partial_rhs)
-        forests = new List::List(partial_rhs, forests);
+      if (partial_rhs){
+        if (debug > 3) {
+          fprintf(stderr, "Considering forest for nonterminal %s (%d,%d).\n",
+                  name,i,j);
+        }
+        let head_call_links = Hashtable::lookup( rs->call_links, en_head);
+        if (earley_node_eq(en_call_source, en_head) /* in case of epsilon call */ || 
+            List::exists_c(earley_node_eq, en_call_source, head_call_links))
+          forests = new List::List(partial_rhs, forests);
+        else {
+          if (debug > 3) {
+            fprintf(stderr, "Rejected forest for nonterminal %s (%d,%d).\n",
+                    name,i,j);
+            fprintf(stderr, "Expected call link (%d,%d,%d)\n",en_call_source->f0,en_call_source->f1,en_call_source->f2);              
+            fprintf(stderr, "Number of call links: %d.\n",List::length(head_call_links));
+            for (let xs = head_call_links; xs; xs = xs->tl){
+              fprintf(stderr, "  Call link (%d,%d,%d)\n",xs->hd->f0,xs->hd->f1,xs->hd->f2);              
+            }
+          }       
+        }
+      }
     } else {
       // Advance the current live path by one link (possibly resulting in more paths).
       for (let xs = *maybe_links; xs; xs = xs->tl) {
