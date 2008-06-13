@@ -113,11 +113,15 @@ void print_forest_xml(spf_t spf, string_t indent) {
     if (n > 1) {
       let child_indent = aprintf("%s    ",indent);
       for (let i=0; i<n; i++) {
-        printf("%s  <Path>\n",indent);
-        for (let xs = trees[i]; xs; xs = xs->tl) {
-          print_forest_xml(xs->hd, child_indent);
+        if (!trees[i])
+          printf("%s  <Path/>\n",indent);
+        else {
+          printf("%s  <Path>\n",indent);
+          for (let xs = trees[i]; xs; xs = xs->tl) {
+            print_forest_xml(xs->hd, child_indent);
+          }
+          printf("%s  </Path>\n",indent);
         }
-        printf("%s  </Path>\n",indent);
       }
     } else {
       let child_indent = aprintf("%s  ",indent);
@@ -595,11 +599,14 @@ typedef  Hashtable::table_t<earley_item_t,List::list_t<earley_node_t,`r>,`r> ear
 static int earley_node_cmp(earley_node_t a,earley_node_t b) {
   let $(ai,aj,ak) = *a;
   let $(bi,bj,bk) = *b;
-  let c = Core::intcmp(ai,bi);
+  // Order first by position
+  let c = Core::intcmp(ak,bk);
   if (c) return c;
+  // ... next by their start position
   c = Core::intcmp(aj,bj);
   if (c) return c;
-  return Core::intcmp(ak,bk);
+  // ... finally, by their state.
+  return Core::intcmp(ai,bi);
 }
 
 static bool earley_node_eq(earley_node_t a,earley_node_t b){
@@ -625,7 +632,19 @@ struct elink {
   act_t              resp_act; // action responsible for link.
 };
 typedef struct elink @`H elink_t;
-
+  
+/**
+ Compare elinks based on the predecessor link and the resp_act.
+ */
+static int elink_cmp(elink_t a, elink_t b) {
+  // Compare index of predecessors. Earlier predecessors are ranked earlier in the list.
+  let c = earley_node_cmp(a->pred,b->pred);
+  if (c) return c;
+  // For predecessors with same index, sort by resp_act.
+  let c = act_cmp(a->resp_act, b->resp_act);
+  return c;
+}
+  
 /**
  An earley-node map. A map from earley nodes to 'a's.
  */
@@ -960,18 +979,56 @@ push_closure(rstate_t rs,
 
 using EarleyParsetree;
   
-static int retn_cmp($(earley_node_t, earley_node_t, act_t)@ a, 
-                    $(earley_node_t, earley_node_t, act_t)@ b){
-  let c = earley_node_cmp(a->f0,b->f0);
+static int retn_cmp($(List_t<earley_node_t>, earley_node_t, act_t)@ a, 
+                    $(List_t<earley_node_t>, earley_node_t, act_t)@ b){
+  let c = act_cmp(a->f2,b->f2);
   if (c) return c;
   let c = earley_node_cmp(a->f1,b->f1);
   if (c) return c;
-  return act_cmp(a->f2,b->f2);
+  return list_cmp(earley_node_cmp, a->f0,b->f0);
 }
   
-static int retn_hash($(earley_node_t, earley_node_t, act_t)@ x){
-  return earley_node_hash(x->f0) ^ (earley_node_hash(x->f1) << 1) // shift 1 in case f0 and f1 are equal.
+static int retn_hash($(List_t<earley_node_t>, earley_node_t, act_t)@ x){
+  return earley_node_hash(x->f0->hd) ^ (earley_node_hash(x->f1) << 1) // shift 1 in case f0 and f1 are equal.
          ^ act_hash(x->f2);
+}
+  
+/**
+ Group together elinks representing returns on the same symbol from the same position.
+ Form of split.
+ Returns: pred_link, summed weight, non-empty list of return links, resp. action, remaining elinks.
+ */
+static $(earley_node_t, weight_t, list_t<earley_node_t>, act_t, list_t<elink_t>)@ 
+group_elinks(List_t<elink_t,`H> elinks)
+{
+  let pred = elinks->hd->pred;
+  let weight = elinks->hd->p_weight;
+  let resp_act = elinks->hd->resp_act;
+
+  if (!elinks->hd->retn)
+    return new $(pred, weight, NULL, resp_act, elinks->tl);
+  else {
+    list_t<_> es = elinks;
+    let group = list((earley_node_t)es->hd->retn);
+    es = es->tl;
+    
+    let live = 1;
+    while(es && live){
+      let e = es->hd;
+      if (!earley_node_cmp(e->pred, pred) && e->resp_act == resp_act){
+        group = new List((earley_node_t)(e->retn), 
+                         // safe cast: since first elink had retn_link, resp_act must be a nonterminal symbol.
+                         // Hence, all elinks with this resp_act must have retn_link.
+                         group);
+        weight = Semiring::add(weight, e->p_weight);
+        es = es->tl;
+      }
+      else
+        live = 0;
+    }
+  
+    return new $(pred, weight, group, resp_act, es);
+  }
 }
   
 /**
@@ -980,42 +1037,43 @@ static int retn_hash($(earley_node_t, earley_node_t, act_t)@ x){
  * mpf_forests is a cache that memoizes results of previous invocations of mk_parse_forest0.
  * */
 static spf_t
-mk_parse_forest0(Hashtable::table_t<$(earley_node_t, earley_node_t, act_t)@`H, spf_t> mpf_forests, 
+mk_parse_forest0(Hashtable::table_t<$(List_t<earley_node_t,`H>, earley_node_t, act_t)@`H, spf_t> mpf_forests, 
                  rstate_t rs,
                  string_t<`H> top_level_name,
-                 earley_node_t en,
+                 List_t<earley_node_t> ens,  // All nodes in ens must share the same i and j.
                  earley_node_t en_call_source,
                  act_t resp_act) {
 //  let spf_opt = Hashtable::lookup_opt( mpf_forests, new $(en, resp_act) );
 //  if (spf_opt) return *spf_opt;
 
-  let &$(x,i,j) = en;
+  // we can look at only the first element of the list because i,j are
+  // same for all elements of ens.
+  let &$(_,i,j) = ens->hd; 
 
-  // Handle case of top-level call, for which there will be no responsible action.
-  let completed = DFA_FINAL_ATTRS(rs->dfa,x);
-  if (!completed){ // Sanity check
-    throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
-  }
-
-  string_t name;
-  if (numelts(completed) == 0) {
-    // We're in a top-level call ...
-    if (top_level_name == NULL)
-      throw new Core::Failure(aprintf("Final DFA state encountered unexpectedly in (%d,%d,%d).",x,i,j));
-    name = top_level_name;
-  } else {
-    name = DFA_ACT2SYMB(rs->dfa,resp_act);
-
-    // Sanity check to make sure that responsible action claimed by the
-    // caller is indeed an attribute of this state.
-    if (debug){
-      if (!DFA_IN_FINAL(rs->dfa,resp_act,x)){
-        fprintf(stderr,"Symbol %s is not an attribute of state %d.\n",name,x);
-      }
-    }
-  }
-
+  string_t name = top_level_name ? top_level_name : DFA_ACT2SYMB(rs->dfa,resp_act);
+  
+  // Sanity checks
   if (debug){
+    for (list_t<_> xs = ens; xs; xs = xs->tl){
+      let &$(x,k,l) = xs->hd; 
+      
+      if (! (i == k && j == l) )
+        throw new Core::Failure(aprintf("Inconsistent bounds in earley nodes (%d,%d and %d,%d).", i,j,k,l));
+        
+      // Handle case of top-level call, for which there will be no responsible action.
+      let completed = DFA_FINAL_ATTRS(rs->dfa,x);
+      if (!completed){
+        throw new Core::Invalid_argument(aprintf("State %d is not a final state.",x));
+      }
+      
+      if (numelts(completed) == 0) { // We're in a top-level call ...
+        if (top_level_name == NULL)
+          throw new Core::Failure(aprintf("Final DFA state encountered unexpectedly in (%d,%d,%d).",x,i,j));
+      }
+      else if (!DFA_IN_FINAL(rs->dfa,resp_act,x))
+        fprintf(stderr,"Symbol %s is not an attribute of state %d.\n",name,x);
+    }
+
     fprintf(stderr, "Building forest for %s[%d,%d].\n",name,i,j);
   }
 
@@ -1025,8 +1083,32 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, earley_node_t, act_t)@`H, s
    * So, its a list of of pairs of Earley node and lists. It tracks all the possible
    * alternative parses of the original nonterminal.
    */
-  let live_paths = List::list( new $(en, NULL) );
+#define REV_MAP(F,l)  \
+  ({ let __res = NULL; \
+  for (list_t<_> xs = l; xs; xs = xs->tl){ \
+    __res = new List(F(xs->hd), __res);\
+  };\
+  __res; })
 
+#define FOLD_LEFT(F,init,l)  \
+  ({ let __res = init; \
+  for (list_t<_> xs = l; xs; xs = xs->tl) \
+    __res = F(__res,(xs->hd));\
+  __res; })
+
+//#define MK_PATH(x) (new $(x,NULL))
+//  let live_paths = REV_MAP(MK_PATH, ens);
+//#undef MK_PATH
+  let live_paths = NULL;  
+  for (list_t<_> xs = ens; xs; xs = xs->tl){
+    live_paths = new List(new $(xs->hd, NULL), live_paths);
+  }
+  
+  if (debug) {
+    let n = List::length(live_paths);
+    if (n > 1) fprintf(stderr, "Starting with %d live paths for symbol %s.\n", n, name);
+  }
+  
   /**
    * Completed child forests.
    */
@@ -1041,45 +1123,65 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, earley_node_t, act_t)@`H, s
 
     if (!maybe_links){
       // The path (i.e. RHS) is complete. Check if it was started with a call to the given call-source and, 
-      // if so, add a forest to forests (if non-empty).
-      if (partial_rhs){
+      // if so, add a forest to forests.
+      if (debug > 3) {
+        fprintf(stderr, "Considering forest for nonterminal %s [%d,%d].\n",
+                name,i,j);
+      }
+      let head_call_links = Hashtable::lookup( rs->call_links, en_head);
+      if (earley_node_eq(en_call_source, en_head) /* in case of epsilon call */ || 
+          List::exists_c(earley_node_eq, en_call_source, head_call_links))
+        forests = new List::List(partial_rhs, forests);
+      else {
         if (debug > 3) {
-          fprintf(stderr, "Considering forest for nonterminal %s (%d,%d).\n",
+          fprintf(stderr, "Rejected forest for nonterminal %s [%d,%d].\n",
                   name,i,j);
-        }
-        let head_call_links = Hashtable::lookup( rs->call_links, en_head);
-        if (earley_node_eq(en_call_source, en_head) /* in case of epsilon call */ || 
-            List::exists_c(earley_node_eq, en_call_source, head_call_links))
-          forests = new List::List(partial_rhs, forests);
-        else {
-          if (debug > 3) {
-            fprintf(stderr, "Rejected forest for nonterminal %s (%d,%d).\n",
-                    name,i,j);
-            fprintf(stderr, "Expected call link (%d,%d,%d)\n",en_call_source->f0,en_call_source->f1,en_call_source->f2);              
-            fprintf(stderr, "Number of call links: %d.\n",List::length(head_call_links));
-            for (let xs = head_call_links; xs; xs = xs->tl){
-              fprintf(stderr, "  Call link (%d,%d,%d)\n",xs->hd->f0,xs->hd->f1,xs->hd->f2);              
-            }
-          }       
-        }
+          fprintf(stderr, "Expected call link (%d,%d,%d)\n",en_call_source->f0,en_call_source->f1,en_call_source->f2);              
+          fprintf(stderr, "Number of call links: %d.\n",List::length(head_call_links));
+          for (let xs = head_call_links; xs; xs = xs->tl){
+            fprintf(stderr, "  Call link (%d,%d,%d)\n",xs->hd->f0,xs->hd->f1,xs->hd->f2);              
+          }
+        }       
       }
     } else {
+      // First, try to merge links.  
+      // Sort by start index of predecessor then by symbol (resp_act).
+      let xs = List::merge_sort(elink_cmp,*maybe_links);
+      
       // Advance the current live path by one link (possibly resulting in more paths).
-      for (let xs = *maybe_links; xs; xs = xs->tl) {
-        let &elink(pred_link,w,retn_link,resp_act) = xs->hd;
-
+      // Group together symbols withs same start index and same symbol.
+      while (xs) {
+        let &$(pred_link, w, retn_links, resp_act, tl) = group_elinks(xs);
+        xs = tl;
+        if (debug) {
+          let n = List::length(retn_links);
+          if (n > 1) fprintf(stderr, "Grouped multiple elinks (%d) for symbol %s.\n", n, DFA_ACT2SYMB(rs->dfa,resp_act));
+        }
+        // WHAT NEXT?
+        // The key questions are 1) how to handle the collection of elinks and 
+        // 2) how to memoize calls to mk_parse_forest (if mk_parse_forest is used
+        // to handle the links.)
+        // 1) All of the retn links become predecessor links for a dummy earley node.
+        // then, we process the dummy node with mk_parse_forest. How do we choose the state for the dummy node?
+        // The goal is to choose it such that if we have some other invocation of mk_parse_forest which would 
+        // result in the construction of an identical parse forest, then that invocation would be on the same
+        // dummy node. That way, we can effectively memoize calls to mk_parse_forest.
+        // 
+        // I think the answer is to generalize mk_parse_forest so that it takes a *list* of retn links rather than just one. (list of retn,pred pairs,or do
+        // they all share same pred?).
+        
         /*
          * A potentially extended partial_rhs, the RHS taken from live_paths above.
          * If there is no retn_link, this will just be partial_rhs. 
          */
         let ext_partial_rhs;
         
-        if (retn_link) {
+        if (retn_links) {
           let retn_tree;
-          let retn_tree_opt = Hashtable::lookup_opt( mpf_forests, new $(retn_link, pred_link, resp_act) );
+          let retn_tree_opt = Hashtable::lookup_opt( mpf_forests, new $(retn_links, pred_link, resp_act) );
           if (!retn_tree_opt){
-            retn_tree = mk_parse_forest0(mpf_forests, rs, NULL, retn_link, pred_link, resp_act);
-            Hashtable::insert(mpf_forests, new $(retn_link, pred_link, resp_act) ,retn_tree);
+            retn_tree = mk_parse_forest0(mpf_forests, rs, NULL, retn_links, pred_link, resp_act);
+            Hashtable::insert(mpf_forests, new $(retn_links, pred_link, resp_act) ,retn_tree);
             if (debug > 3) {
               fprintf(stderr, "Forest inserted into cache: (%s,l=%d,r=%d) in building (%s,l=%d,r=%d).\n",
                       retn_tree->nonterminal, retn_tree->left, retn_tree->right,
@@ -1101,16 +1203,17 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, earley_node_t, act_t)@`H, s
         } else
           ext_partial_rhs = partial_rhs;
 
-        live_paths = new List::List( new $(pred_link, ext_partial_rhs), live_paths );
+        live_paths = new List( new $(pred_link, ext_partial_rhs), live_paths );
       }
     }
   }
 
   // Invariant: live_paths is NULL, and forests contains all completed RHSs.
 
-  // Used later when completing a forest.
-  let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
+#define W_ADD(w,en) Semiring::add(w,(Hashtable::lookup(rs->weights, en))->f0)   
+  let w_forward = FOLD_LEFT(W_ADD, zero_weight, ens);
   return new shared_parse_forest(name,i,j,w_forward, List::to_array( forests ));
+#undef W_ADD
 }
 
 /**
@@ -1120,12 +1223,12 @@ mk_parse_forest0(Hashtable::table_t<$(earley_node_t, earley_node_t, act_t)@`H, s
 spf_t
 mk_parse_forest(rstate_t rs,
                 string_t<`H> top_level_name,
-                earley_node_t en,
+                List_t<earley_node_t> ens,
                 earley_node_t en_call_source,
                 act_t resp_act) {
   // hashtable used to memoize results of calls to mk_parse_forest0.
   let mpf_forests = Hashtable::create(101,retn_cmp,retn_hash);  
-  return mk_parse_forest0(mpf_forests, rs, top_level_name, en, en_call_source, resp_act);
+  return mk_parse_forest0(mpf_forests, rs, top_level_name, ens, en_call_source, resp_act);
 }    
 ////////////////////////
 
@@ -1508,7 +1611,7 @@ ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
         
       if (do_reconstruct) {
         let en = new $(state,parent /*== 0*/,i);
-        let spf = mk_parse_forest(rs,"TOP LEVEL",en, earley_node_0, /* bogus action: */ 0);
+        let spf = mk_parse_forest(rs,"TOP LEVEL", new List(en, NULL), earley_node_0, /* bogus action: */ 0);
         let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
         forests = new List::List(new $(spf,w_forward),forests);
       }
