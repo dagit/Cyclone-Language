@@ -465,6 +465,9 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 | "__attribute__ ((__mode__ (__word__)))" /* Used in linux in sys/types.h */
 { log("Warning: use of mode word deleted\n");
   return 1; }
+| "__attribute__ ((deprecated))"
+{ log("Warning: use of __attribute__ ((deprecated)) deleted\n");
+  return 1; }
 | "__attribute__ ((__deprecated__))"
 { log("Warning: use of __attribute__ ((__deprecated__)) deleted\n");
   return 1; }
