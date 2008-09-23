@@ -37,6 +37,12 @@ clean:
 
 install: $(CYC_LIB_PATH)/libsqlite3.a $(CYC_LIB_PATH)/cyc-lib/$(build)/include/sqlite3.h
 
+.PHONY: clean install fixlib
+
+# To fix the library for use on Mac OS X:
+fixlib:
+	ranlib $(CYC_LIB_PATH)/libsqlite3.a
+
 $(CYC_LIB_PATH)/libsqlite3.a: libsqlite3.a
 	cp $< $@
 

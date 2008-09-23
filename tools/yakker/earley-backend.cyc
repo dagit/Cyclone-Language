@@ -28,6 +28,21 @@
 using List;
 using Semiring;
 
+// Some convenience macros for lists.
+#define REV_MAP(F,l)  \
+({ let __res = NULL; \
+for (list_t<_> xs = l; xs; xs = xs->tl){ \
+__res = new List(F(xs->hd), __res);\
+};\
+__res; })
+
+#define FOLD_LEFT(F,init,l)  \
+({ let __res = init; \
+for (list_t<_> xs = l; xs; xs = xs->tl){ \
+__res = F(__res,(xs->hd));\
+};\
+__res; })
+
 namespace EarleyParsetree {
 
 void print_LT_parse_forest(shared_parse_forest_t pf, int depth);
@@ -89,12 +104,12 @@ void print_forest(spf_t spf, string_t indent) {
 
   for (let i=0; i<n; i++) {
     printf("%sPath %d: ",indent, i+1);
-    for (let xs = trees[i]; xs; xs = xs->tl) {
+    for (let xs = trees[i]->f0; xs; xs = xs->tl) {
       let &shared_parse_forest(nt,l,r,_,_) = xs->hd;
       printf("%s[%d,%d] ",nt,l,r);
     }
     printf("\n");
-    for (let xs = trees[i]; xs; xs = xs->tl) {
+    for (let xs = trees[i]->f0; xs; xs = xs->tl) {
       print_forest(xs->hd, aprintf("%s  ",indent));
     }
   }
@@ -113,11 +128,11 @@ void print_forest_xml(spf_t spf, string_t indent) {
     if (n > 1) {
       let child_indent = aprintf("%s    ",indent);
       for (let i=0; i<n; i++) {
-        if (!trees[i])
-          printf("%s  <Path/>\n",indent);
+        if (!trees[i]->f0)
+          printf("%s  <Path/ w=\"%s\">\n",indent, Semiring::print_weight(trees[i]->f1));
         else {
-          printf("%s  <Path>\n",indent);
-          for (let xs = trees[i]; xs; xs = xs->tl) {
+          printf("%s  <Path w=\"%s\">\n",indent, Semiring::print_weight(trees[i]->f1));
+          for (let xs = trees[i]->f0; xs; xs = xs->tl) {
             print_forest_xml(xs->hd, child_indent);
           }
           printf("%s  </Path>\n",indent);
@@ -125,7 +140,7 @@ void print_forest_xml(spf_t spf, string_t indent) {
       }
     } else {
       let child_indent = aprintf("%s  ",indent);
-      for (let xs = trees[0]; xs; xs = xs->tl) {
+      for (let xs = trees[0]->f0; xs; xs = xs->tl) {
         print_forest_xml(xs->hd, child_indent);
       }
     }
@@ -140,7 +155,7 @@ void print_forest_xml(spf_t spf, string_t indent) {
 parse_tree_t forest2tree(spf_t spf) {
   let &shared_parse_forest(name,l,r,w,trees) = spf;
   
-  let children = (numelts(trees) == 0) ? NULL : List::to_array( List::map(forest2tree, trees[0]) );
+  let children = (numelts(trees) == 0) ? NULL : List::to_array( List::map(forest2tree, trees[0]->f0) );
   return new parse_tree(name,l,r,w, children);
 }
 
@@ -156,7 +171,7 @@ int print_first_ambiguity(spf_t spf) {
 
   if (n == 1) {
     // No ambiguities at this level of the parse forest, check next level.
-    for (let xs = trees[0]; xs; xs = xs->tl) {
+    for (let xs = trees[0]->f0; xs; xs = xs->tl) {
       if (print_first_ambiguity(xs->hd))
         return 1;
     }
@@ -166,7 +181,7 @@ int print_first_ambiguity(spf_t spf) {
 
   for (let i=0; i<n; i++) {
     printf("Path %d: ",i+1);
-    for (let xs = trees[i]; xs; xs = xs->tl) {
+    for (let xs = trees[i]->f0; xs; xs = xs->tl) {
       let &shared_parse_forest(nt,l,r,_,_) = xs->hd;
       printf("%s[%d,%d] ",nt,l,r);
     }
@@ -1051,7 +1066,7 @@ mk_parse_forest0(Hashtable::table_t<$(List_t<earley_node_t,`H>, earley_node_t, a
   let &$(_,i,j) = ens->hd; 
 
   string_t name = top_level_name ? top_level_name : DFA_ACT2SYMB(rs->dfa,resp_act);
-  
+
   // Sanity checks
   if (debug){
     for (list_t<_> xs = ens; xs; xs = xs->tl){
@@ -1082,41 +1097,30 @@ mk_parse_forest0(Hashtable::table_t<$(List_t<earley_node_t,`H>, earley_node_t, a
    * the earley node indicating the head of the path.
    * So, its a list of of pairs of Earley node and lists. It tracks all the possible
    * alternative parses of the original nonterminal.
+   */ 
+
+  /**
+   * Completed child forests.
    */
-#define REV_MAP(F,l)  \
-  ({ let __res = NULL; \
-  for (list_t<_> xs = l; xs; xs = xs->tl){ \
-    __res = new List(F(xs->hd), __res);\
-  };\
-  __res; })
-
-#define FOLD_LEFT(F,init,l)  \
-  ({ let __res = init; \
-  for (list_t<_> xs = l; xs; xs = xs->tl) \
-    __res = F(__res,(xs->hd));\
-  __res; })
-
-//#define MK_PATH(x) (new $(x,NULL))
-//  let live_paths = REV_MAP(MK_PATH, ens);
-//#undef MK_PATH
-  let live_paths = NULL;  
-  for (list_t<_> xs = ens; xs; xs = xs->tl){
-    live_paths = new List(new $(xs->hd, NULL), live_paths);
-  }
+  List::list_t<$(List::list_t<spf_t>, Semiring::weight_t)@`H> forests = NULL;
   
+#define MK_PATH(x) (new $(x,NULL,(Hashtable::lookup(rs->weights, x))->f0))
+  let live_paths = REV_MAP(MK_PATH, ens);
+#undef MK_PATH
+
+//  let live_paths = NULL;  
+//  for (list_t<_> xs = ens; xs; xs = xs->tl){
+//    live_paths = new List(new $(xs->hd, NULL,(Hashtable::lookup(rs->weights, xs->hd))->f0), live_paths);
+//  }
+
   if (debug) {
     let n = List::length(live_paths);
     if (n > 1) fprintf(stderr, "Starting with %d live paths for symbol %s.\n", n, name);
   }
   
-  /**
-   * Completed child forests.
-   */
-  List::list_t<List::list_t<spf_t>> forests = NULL;
-
   while (live_paths != NULL) {
     // pop first live path;
-    let &$(en_head, partial_rhs) = live_paths->hd;
+    let &$(en_head, partial_rhs, en_weight) = live_paths->hd;
     live_paths = live_paths->tl;
 
     let maybe_links = Hashtable::lookup_opt(rs->links, en_head);
@@ -1131,7 +1135,7 @@ mk_parse_forest0(Hashtable::table_t<$(List_t<earley_node_t,`H>, earley_node_t, a
       let head_call_links = Hashtable::lookup( rs->call_links, en_head);
       if (earley_node_eq(en_call_source, en_head) /* in case of epsilon call */ || 
           List::exists_c(earley_node_eq, en_call_source, head_call_links))
-        forests = new List::List(partial_rhs, forests);
+        forests = new List::List(new $(partial_rhs, en_weight), forests);
       else {
         if (debug > 3) {
           fprintf(stderr, "Rejected forest for nonterminal %s [%d,%d].\n",
@@ -1180,8 +1184,11 @@ mk_parse_forest0(Hashtable::table_t<$(List_t<earley_node_t,`H>, earley_node_t, a
           let retn_tree;
           let retn_tree_opt = Hashtable::lookup_opt( mpf_forests, new $(retn_links, pred_link, resp_act) );
           if (!retn_tree_opt){
-            retn_tree = mk_parse_forest0(mpf_forests, rs, NULL, retn_links, pred_link, resp_act);
+            // insert dummy info for the tree to avoid infinite loops in the case that the invocation of mk_parse_forest0 returns to this node.
+            retn_tree = new shared_parse_forest(NULL,0,0,Semiring::zero_weight, NULL);
             Hashtable::insert(mpf_forests, new $(retn_links, pred_link, resp_act) ,retn_tree);
+            let retn_tree_real = mk_parse_forest0(mpf_forests, rs, NULL, retn_links, pred_link, resp_act);
+            *retn_tree = *retn_tree_real;
             if (debug > 3) {
               fprintf(stderr, "Forest inserted into cache: (%s,l=%d,r=%d) in building (%s,l=%d,r=%d).\n",
                       retn_tree->nonterminal, retn_tree->left, retn_tree->right,
@@ -1203,17 +1210,17 @@ mk_parse_forest0(Hashtable::table_t<$(List_t<earley_node_t,`H>, earley_node_t, a
         } else
           ext_partial_rhs = partial_rhs;
 
-        live_paths = new List( new $(pred_link, ext_partial_rhs), live_paths );
+        live_paths = new List( new $(pred_link, ext_partial_rhs, en_weight), live_paths );
       }
     }
   }
 
   // Invariant: live_paths is NULL, and forests contains all completed RHSs.
-
 #define W_ADD(w,en) Semiring::add(w,(Hashtable::lookup(rs->weights, en))->f0)   
   let w_forward = FOLD_LEFT(W_ADD, zero_weight, ens);
-  return new shared_parse_forest(name,i,j,w_forward, List::to_array( forests ));
 #undef W_ADD
+ 
+  return new shared_parse_forest(name,i,j,w_forward, List::to_array( forests ));
 }
 
 /**
@@ -1593,6 +1600,7 @@ ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
   } else {
     if (debug)
       fprintf(stderr, "Parse error at input character %d.\n",i-1);
+    // TODO: return error location.
     YKCURSOR = YKRESTORE(input_save);
     return $(NULL,0,0);
   }
@@ -1611,7 +1619,7 @@ ykb_parse0(DFA::edfa_t dfa, ykbuf_t@ ykb, int parse_until_eof) {
         
       if (do_reconstruct) {
         let en = new $(state,parent /*== 0*/,i);
-        let spf = mk_parse_forest(rs,"TOP LEVEL", new List(en, NULL), earley_node_0, /* bogus action: */ 0);
+        let spf = mk_parse_forest(rs,"TOP-LEVEL", new List(en, NULL), earley_node_0, /* bogus action: */ 0);
         let &$(w_forward,w_inner) = Hashtable::lookup(rs->weights, en);
         forests = new List::List(new $(spf,w_forward),forests);
       }
@@ -1667,9 +1675,9 @@ parse(DFA::edfa_t dfa, const char? input) {
 #error "Missing parameters to ext-dfa-impl.cyc"
 #endif
 
-namespace EXT_DFA_NAMESPACE;
+namespace EXT_DFA_NAMESPACE {
 
-using EB_EXT_NAMESPACE;
+using EB_EXT_NAMESPACE {
 
 //////////////////////////////////
 // Internally-visible functions //
@@ -1875,3 +1883,6 @@ DFA::edfa_t pat2dfa(rule_pat_t p, EB_NAMESPACE::DFA::grammar_edfa_t grm_dfa) {
 }
 
 DEFINE_MK_ANY_EB(EB_EXT_NAMESPACE)
+  
+}
+}

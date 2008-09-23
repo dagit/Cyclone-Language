@@ -71,9 +71,9 @@ online-manual: main-screen.html
 # Format of version.tex should be a single line looking like
 # {\Large Version 0.8.2, August 29, 2004}\\[3ex]
 version.tex: ../configure
-	@(VERSION=`grep ^PACKAGE_VERSION ../configure | cut -c17- | sed -e "s/'//g"`; \
+	@(VERSION=`grep ^PACKAGE_VERSION ../configure | head -n 1 | cut -c17- | sed -e "s/'//g"`; \
 	DATE=`date "+%B %d, %G"`; \
-	echo "{\Large Version $$VERSION, $$DATE}\\\\[3ex]" > $@)
+	echo "{\Large Version $$VERSION, $$DATE}\\\\\\\\[3ex]" > $@)
 
 gen-libdoc.tex: \
   ../include/array.h \

@@ -308,8 +308,11 @@ st_t rule2LR0(symb_table_LR_t symb_st,
       
       // TODO: get the right context correct.  
   case &Rcount(var,r2):
-      /* Conservative approximation */
-      warn_repeat();
+      // TODO: get repeat right. Should probably approximate.
+      warn("Not approximating repeat in rule2LR0.\n");
+      //      /* Conservative approximation */
+      //      warn_repeat();
+
       // 1. check that r2 is valid -- only symbols allowed.
       // TODO
       
@@ -467,8 +470,6 @@ st_t rule2earley0(Hashtable::table_t<str_t,st_t> symb_st,
     let s2 = rule2earley0(symb_st,grm,r2,symb_info); let s3 = rule2earley0(symb_st,grm,r3,symb_info);
     return mkalt(s2,s3);
   case &Rcount(var,r2):
-    /* Conservative approximation */
-    warn_repeat();
     // 1. check that r2 is valid -- only symbols allowed.
     // TODO
 
@@ -654,12 +655,20 @@ $(st_t,st_t,st_t)
     etrans(e3,e);
     return $(s,f,e);
   case &Rcount(var,r2):
-    warn_repeat();
-    //  repeat should never show up in a merge, because that implies
-    // that it might be preceded by epsilon, in which case it will have
-    // no value on which to depend.
-    warn("@repeat appears, in a sequence, possibly preceded by epsilon.\n");
-    fallthru(r2);
+    // repeat should never show up in a merge, because that implies
+    // that it is reachable from the beginning of a state through a chain of 
+    // zero or more epsilons, in which case it will have no value on which to depend.
+    // However, merge is called conservatively, so this part of
+    // the nfa may never be reached. As a result, we can only warn on this condition, not 
+    // raise an actual error (during NFA construction).
+    // However, to be sure that actual use of the generated NFA is impossible, we return 
+    // unreachable final states e and f.
+    warn("@repeat appears, in a sequence, possibly preceded by epsilon.\n"
+         "Generating dead-end nfa fragment.\n");
+    let s = nfa_fresh_state();
+    let f = nfa_fresh_state();
+    let e = nfa_fresh_state();
+    return $(s,f,e);
   case &Star(0,&Infinity,r2):
     let s = nfa_fresh_state();
     let f = nfa_fresh_state();
@@ -834,8 +843,6 @@ st_t rule2wfsm0(FILE@f_fsm, Hashtable::table_t<str_t,st_t> symb_st,
 
     return s;
   case &Rcount(var,r2):
-    /* Conservative approximation */
-    warn_repeat();
     // 1. check that r2 is valid -- only symbols allowed.
     // TODO
 
@@ -1030,12 +1037,13 @@ $(st_t,st_t,st_t)
 
     return $(s,f,e);
   case &Rcount(var,r2):
-    warn_repeat();
-    //  repeat should never show up in a merge_wfsm, because that implies
-    // that it might be preceded by epsilon, in which case it will have
-    // no value on which to depend.
-    warn("@repeat appears, in a sequence, possibly preceded by epsilon.\n");
-    fallthru(r2);
+     // see explanation of case Rcount in merge(...) above.
+      warn("@repeat appears, in a sequence, possibly preceded by epsilon.\n"
+           "Generating dead-end nfa fragment.\n");
+      let s = nfa_fresh_state();
+      let f = nfa_fresh_state();
+      let e = nfa_fresh_state();
+      return $(s,f,e);
   case &Star(0,&Infinity,r2):
     let s = nfa_fresh_state();
     let f = nfa_fresh_state();

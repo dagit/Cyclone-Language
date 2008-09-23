@@ -39,7 +39,7 @@ namespace EarleyParsetree {
      * Each tree represents an alternative RHS.
      * each RHS is a list.
      */
-    List::list_t<spf_t> ? trees; 
+    $(List::list_t<spf_t>, Semiring::weight_t)@  ? trees; 
   };
 
   extern void print_tree(parse_tree_t pt, int depth);

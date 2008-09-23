@@ -45,6 +45,7 @@ There are 2 shift-reduce conflicts having to do with
 #define YYDEBUG 0 // 1 to debug, 0 otherwise
 #define YYPRINT yyprint
 #define YYERROR_VERBOSE
+#define YYMAXDEPTH 30000
 
 #if YYDEBUG==1
 extern @tagged union YYSTYPE<`yy::E>;
