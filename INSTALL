@@ -51,6 +51,21 @@ directories as a result of installation.
 
 POTENTIAL PROBLEMS
 
+(0) We have sometimes run into problems with gcc bugs.  This usually
+    turns up as a segmentation fault in the build process.  If you can
+    install another version of gcc you may be able to get things
+    working.
+
+    For example in Ubuntu Jaunty x86, gcc 4.3.3 is not working, but
+
+        sudo aptitude install gcc-4.1
+
+    will install an older version, and then
+
+        make CC=gcc-4.1
+
+    will build cyclone with it.
+
 (1) You won't be able to compile cyclone if are using cygwin and you
     have placed the source in a directory whose name contains a space.
     In particular, you can't compile under c:\Documents and Settings.
